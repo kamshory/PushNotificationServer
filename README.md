@@ -120,13 +120,92 @@ Now your database configuration is safe.
 4. Copy key file and certificate file to your destination directory
 5. Edit **KEYSTORE_PATH** on config.ini to point to the key file
 
-To create key file and certificate file, do commands as follow:
+The command to generate a Java keystore and keypair:
+
 ```
-C:
-cd C:\Program Files\Java\jre1.8.0_191\bin
-keytool -genkey -alias push.example.com -keyalg RSA -keystore d:\keystore.jks -keysize 2048
-keytool -certreq -alias push.example.com -keystore d:\keystore.jks -file d:\example.com.csr
+keytool -genkey -alias example.com -keyalg RSA -keystore keystore.jks -keysize 2048
 ```
 
+The command to generate a certificate signing request (CSR) for an existing Java keystore:
+
+```
+keytool -certreq -alias example.com -keystore keystore.jks -file example.com.csr
+```
+
+The command for importing a root or intermediate certificate to an existing Java keystore:
+
+```
+keytool -import -trustcacerts -alias root -file Thawte.crt -keystore keystore.jks
+```
+
+The command for importing a signed primary certificate to an existing Java keystore:
+
+```
+keytool -import -trustcacerts -alias example.com -file example.com.crt -keystore keystore.jks
+```
+
+The command to generate a keystore and a self-signed certificate:
+
+```
+keytool -genkey -keyalg RSA -alias selfsigned -keystore keystore.jks -storepass password -validity 360 -keysize 2048
+```
+
+The list of above commands will assist in generating a keypair and certificate signing request for a certificate.
+
+We also gathered the list of Java Keystore commands to validate the generation process for certificates and CSRs.
+
+The command for checking a standalone certificate:
+
+```
+keytool -printcert -v -file example.com.crt
+```
+
+The command for checking which certificates are in a Java keystore:
+
+```
+keytool -list -v -keystore keystore.jks
+```
+
+The command for checking a particular keystore entry using an alias:
+
+```
+keytool -list -v -keystore keystore.jks -alias example.com
+```
+
+Additionally, there are few crucial processes where you need Java Keytool commands. Let’s have those commands for further validation.
+
+The command for deleting a certificate from a Java Keytool keystore:
+
+```
+keytool -delete -alias example.com -keystore keystore.jks
+```
+
+The command for changing a Java keystore password:
+
+```
+keytool -storepasswd -new new_storepass -keystore keystore.jks
+```
+
+The command for exporting a certificate from a keystore:
+
+```
+keytool -export -alias example.com -file example.com.crt -keystore keystore.jks
+```
+
+The command to view a list of trusted CA certs:
+
+```
+keytool -list -v -keystore $JAVA_HOME/jre/lib/security/cacerts
+```
+
+The command for importing new CAs into your trusted certs:
+
+```
+keytool -import -trustcacerts -file /path/to/ca/ca.pem -alias CA_ALIAS -keystore $JAVA_HOME/jre/lib/security/cacerts
+```
+
+For more information, visit https://dzone.com/articles/understand-java-keytool-keystore-commands
+
+We are sure that this list of commands will definitely save developers' time while implementing a certificate for an existing application or a website.
 
 
