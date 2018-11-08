@@ -115,7 +115,7 @@ Now your database configuration is safe.
 2. Create key file
 3. Create certificate file
 4. Copy key file and certificate file to your destination directory
-5. Edit **KEYSTORE_PATH** on config.ini to pint to the key file
+5. Edit **KEYSTORE_PATH** on config.ini to point to the key file
 
 To create key file and certificate file, do commands as follow:
 ```
