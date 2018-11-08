@@ -1,5 +1,12 @@
 # PushNotificationServer
-Push notification server
+Push notification server for mobile application.
+
+## Features
+1. Socket communication
+2. HTTP communication for pusher and remover
+3. HTTPS communication for pusher and remover
+
+HTTP and HTTPS port is direfent. So pusher can choose one of them.
 
 Usage
 
