@@ -204,8 +204,7 @@ The command for importing new CAs into your trusted certs:
 keytool -import -trustcacerts -file /path/to/ca/ca.pem -alias CA_ALIAS -keystore $JAVA_HOME/jre/lib/security/cacerts
 ```
 
-For more information, visit https://dzone.com/articles/understand-java-keytool-keystore-commands
-
 We are sure that this list of commands will definitely save developers' time while implementing a certificate for an existing application or a website.
 
+For more information, visit https://dzone.com/articles/understand-java-keytool-keystore-commands
 
