@@ -8,6 +8,9 @@ Push notification server for mobile application.
 
 HTTP and HTTPS port is different. So pusher can choose one of them.
 
+If yo won't to use port 80 and 443 for any reason, you can user proxy to redirect the push. Source code to create proxy can be found at 
+https://github.com/kamshory/PHPProxyServer
+
 Usage
 
 ### Start Service
