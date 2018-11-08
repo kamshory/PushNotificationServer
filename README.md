@@ -108,3 +108,22 @@ CREATE_CONFIGURATION         = FALSE
 ```
 
 Now your database configuration is safe.
+
+### Create SSL Centificate
+
+1. Go to your JAVA home
+2. Create key file
+3. Create certificate file
+4. Copy key file and certificate file to your destination directory
+5. Edit **KEYSTORE_PATH** on config.ini to pint to the key file
+
+To create key file and certificate file, do commands as follow:
+```
+C:
+cd C:\Program Files\Java\jre1.8.0_191\bin
+keytool -genkey -alias push.example.com -keyalg RSA -keystore d:\keystore.jks -keysize 2048
+keytool -certreq -alias push.example.com -keystore d:\keystore.jks -file d:\example.com.csr
+```
+
+
+
