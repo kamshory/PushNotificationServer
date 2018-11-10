@@ -2,9 +2,16 @@
 Push notification server for mobile application.
 
 ## Features
-1. Socket communication
-2. HTTP communication for pusher and remover
-3. HTTPS communication for pusher and remover
+1. Unlimited Notification
+2. Notification Group
+3. Device Registration
+4. Push Source Filter
+5. Auto Reconnect Database
+6. HTTP and HTTPS Pusher
+7. HTTP and HTTPS Remover
+8. Production Mode
+9. Encrypted Database Configuration
+10. Encrypted Keystore Password
 
 HTTP and HTTPS port is different. So pusher can choose one of them.
 
@@ -16,6 +23,9 @@ https://github.com/kamshory/PHPProxyServer
 | Features                         	| Free 	| Premium 	|
 |----------------------------------	|:----:	|:-------:	|
 | Unlimited Notification           	|   ✔  	|    ✔    	|
+| Notification Group               	|   ✔  	|    ✔    	|
+| Device Registration              	|   ✔  	|    ✔    	|
+| Push Source Filter               	|   ✔  	|    ✔    	|
 | Auto Reconnect Database          	|   ✔  	|    ✔    	|
 | HTTP and HTTPS Pusher            	|   ✔  	|    ✔    	|
 | HTTP and HTTPS Remover           	|   ✔  	|    ✔    	|
