@@ -14,13 +14,15 @@ https://github.com/kamshory/PHPProxyServer
 
 ## Plan
 
-| Features                    | Free | Premium |
-|-----------------------------|------|---------|
-| Unlimited Notification      |   ✔  |    ✔    |
-| HTTP and HTTPS Pusher       |   ✔  |    ✔    |
-| HTTP and HTTPS Remover      |   ✔  |    ✔    |
-| Encrypted DB Config         |   ✘  |    ✔    |
-| Encrypted Keystore Password |   ✘  |    ✔    |
+| Features                    	| Free 	| Premium 	|
+|-----------------------------	|:----:	|:-------:	|
+| Unlimited Notification      	|   ✔  	|    ✔    	|
+| Auto Reconnect Database     	|   ✔  	|    ✔    	|
+| HTTP and HTTPS Pusher       	|   ✔  	|    ✔    	|
+| HTTP and HTTPS Remover      	|   ✔  	|    ✔    	|
+| Production Mode             	|   ✘  	|    ✔    	|
+| Encrypted DB Config         	|   ✘  	|    ✔    	|
+| Encrypted Keystore Password 	|   ✘  	|    ✔    	|
 
 
 ## Usage
