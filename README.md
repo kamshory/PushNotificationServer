@@ -73,7 +73,9 @@ DATABASE3_PORT_NUMBER        = {db-port}
 DATABASE3_USER_NAME          = {db-user}
 DATABASE3_USER_PASSWORD      = {db-pass}
 DATABASE3_NAME               = {db-name}
-DATABASE3_USED               = FALSE
+DATABASE3_USED               = TRUE
+
+KEYSTORE_PASSWORD            = {keystore-pass}
 ```
 
 2. Run Service in Console
@@ -82,7 +84,7 @@ DATABASE3_USED               = FALSE
 java -jar pushserver.jar config=config.ini
 ```
 
-3. Copy DATABASE1_CONFIGURATION, DATABASE2_CONFIGURATION and DATABASE3_CONFIGURATION to file config.ini
+3. Copy DATABASE1_CONFIGURATION, DATABASE2_CONFIGURATION DATABASE3_CONFIGURATION, and KEYSTORE_PASSWORD_ENCRYPTED to file config.ini
 
 4. Remove properties bellow
 
@@ -107,6 +109,9 @@ DATABASE3_PORT_NUMBER        = {db-port}
 DATABASE3_USER_NAME          = {db-user}
 DATABASE3_USER_PASSWORD      = {db-pass}
 DATABASE3_NAME               = {db-name}
+
+KEYSTORE_PASSWORD            = {keystore-pass}
+
 ```
 
 Please don't remove
