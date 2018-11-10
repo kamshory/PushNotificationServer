@@ -6,6 +6,16 @@ Push notification server for mobile application.
 2. HTTP communication for pusher and remover
 3. HTTPS communication for pusher and remover
 
+## Plan
+
+| Features                    | Free | Premium |
+|-----------------------------|------|---------|
+| Unlimited Notification      |   ✔  |    ✔    |
+| HTTP and HTTPS Pusher       |   ✔  |    ✔    |
+| HTTP and HTTPS Remover      |   ✔  |    ✔    |
+| Encrypted DB Config         |   ✘  |    ✔    |
+| Encrypted Keystore Password |   ✘  |    ✔    |
+
 HTTP and HTTPS port is different. So pusher can choose one of them.
 
 If yo won't to use port 80 and 443 for any reason, you can user proxy to redirect the push. Source code to create proxy can be found at 
