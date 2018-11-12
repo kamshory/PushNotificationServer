@@ -19,6 +19,8 @@ https://github.com/kamshory/PHPProxyServer
 
 To get notification sender, please visit https://github.com/kamshory/PushNotificationSender
 
+To get notification client, please visit https://github.com/kamshory/PushNotificationClient
+
 ## Plan
 
 | Features                         	| Free 	| Premium 	|
