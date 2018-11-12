@@ -36,6 +36,9 @@ To get notification client, please visit https://github.com/kamshory/PushNotific
 | Encrypted Database Configuration 	|   ✘  	|    ✔    	|
 | Encrypted Keystore Password      	|   ✘  	|    ✔    	|
 
+## Requirement
+Push Notification Server require MySQL database server or MariaDB database server
+
 ## Installation
 
 ### Database Preparation
