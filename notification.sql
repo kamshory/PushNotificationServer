@@ -1,4 +1,4 @@
-CREATE TABLE `api` (
+CREATE TABLE `push_api` (
  `api_id` bigint(20) NOT NULL AUTO_INCREMENT,
  `api_key` varchar(50) NOT NULL,
  `hash_password_client` varchar(100) DEFAULT NULL,
@@ -7,7 +7,7 @@ CREATE TABLE `api` (
  PRIMARY KEY (`api_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
-CREATE TABLE `client` (
+CREATE TABLE `push_client` (
  `client_id` bigint(20) NOT NULL AUTO_INCREMENT,
  `api_id` bigint(20) NOT NULL,
  `device_id` varchar(40) DEFAULT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE `client` (
  PRIMARY KEY (`client_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
-CREATE TABLE `client_group` (
+CREATE TABLE `push_client_group` (
  `client_group_id` bigint(20) NOT NULL AUTO_INCREMENT,
  `api_id` bigint(20) NOT NULL,
  `name` varchar(100) DEFAULT NULL,
@@ -41,7 +41,7 @@ CREATE TABLE `client_group` (
  PRIMARY KEY (`client_group_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
-CREATE TABLE `notification` (
+CREATE TABLE `push_notification` (
  `notification_id` bigint(20) NOT NULL AUTO_INCREMENT,
  `device_id` varchar(40) DEFAULT NULL,
  `api_id` bigint(20) NOT NULL,
@@ -71,7 +71,7 @@ CREATE TABLE `notification` (
  PRIMARY KEY (`notification_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
-CREATE TABLE `pusher_address` (
+CREATE TABLE `push_pusher_address` (
  `pusher_address_id` bigint(20) NOT NULL AUTO_INCREMENT,
  `api_id` bigint(20) DEFAULT NULL,
  `address` varchar(40) DEFAULT NULL,
@@ -83,7 +83,7 @@ CREATE TABLE `pusher_address` (
  PRIMARY KEY (`pusher_address_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
-CREATE TABLE `trash` (
+CREATE TABLE `push_trash` (
  `trash_id` bigint(20) NOT NULL AUTO_INCREMENT,
  `api_id` bigint(20) DEFAULT NULL,
  `device_id` varchar(40) DEFAULT NULL,
@@ -92,5 +92,3 @@ CREATE TABLE `trash` (
  `time_delete` datetime NOT NULL,
  PRIMARY KEY (`trash_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-
