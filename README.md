@@ -1,6 +1,5 @@
 # PushNotificationServer
 Push notification server for mobile application.
-
 ## Features
 1. Unlimited Notification
 2. Notification Group
@@ -33,22 +32,16 @@ https://github.com/kamshory/PHPProxyServer
 | Encrypted Database Configuration 	|   ✘  	|    ✔    	|
 | Encrypted Keystore Password      	|   ✘  	|    ✔    	|
 
+## Installation
 
-## Usage
+### Database Preparation
+1. Create MySQL or MariaDB database
+2. Import *notification.sql* database into your database
+3. Open *createapi.sql*, replace **passclient** with your client password and **passpusher** with your pusher password 
 
-### Start Service
+## Configuration
 
-```bash
-java -jar pushserver.jar config=config.ini
-```
-
-### Stop Service
-
-```bash
-java -jar pushserver.jar action=stop
-```
-
-### Modify Configuration
+### Basic Configuration
 
 To modify configuration, open **config.ini**, modify and save it.
 
@@ -140,7 +133,21 @@ CREATE_CONFIGURATION         = FALSE
 
 Now your database configuration is safe.
 
-### Create SSL Centificate
+## Usage
+
+### Start Service
+
+```bash
+java -jar pushserver.jar config=config.ini
+```
+
+### Stop Service
+
+```bash
+java -jar pushserver.jar action=stop
+```
+
+## Create SSL Centificate
 
 1. Go to your JAVA home
 2. Create key file
@@ -235,4 +242,6 @@ keytool -import -trustcacerts -file /path/to/ca/ca.pem -alias CA_ALIAS -keystore
 We are sure that this list of commands will definitely save developers' time while implementing a certificate for an existing application or a website.
 
 For more information, visit https://dzone.com/articles/understand-java-keytool-keystore-commands 
+
+
 
