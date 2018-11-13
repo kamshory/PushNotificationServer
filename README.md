@@ -30,6 +30,9 @@ To get notification client, please visit https://github.com/kamshory/PushNotific
 | Device Registration              	|   ✔  	|    ✔    	|
 | Push Source Filter               	|   ✔  	|    ✔    	|
 | Auto Reconnect Database          	|   ✔  	|    ✔    	|
+| MariaDB Database Support          |   ✔  	|    ✔    	|
+| MySQL Database Support          	|   ✔  	|    ✔    	|
+| PostgreSQL Database Support       |   ✔  	|    ✔    	|
 | HTTP and HTTPS Pusher            	|   ✔  	|    ✔    	|
 | HTTP and HTTPS Remover           	|   ✔  	|    ✔    	|
 | Production Mode                  	|   ✘  	|    ✔    	|
