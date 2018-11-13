@@ -58,7 +58,7 @@ To create encrypted database configuration, please do steps as follow:
 
 1. Modify Configuration
 
-```
+```ini
 DEVELOPMENT_MODE             = TRUE
 CREATE_CONFIGURATION         = TRUE
 
@@ -105,7 +105,7 @@ java -jar pushserver.jar config=config.ini
 
 4. Remove properties bellow
 
-```
+```ini
 DATABASE1_TYPE               = mysql
 DATABASE1_HOST_NAME          = {db-host}
 DATABASE1_PORT_NUMBER        = {db-port}
@@ -133,13 +133,13 @@ KEYSTORE_PASSWORD            = {keystore-pass}
 
 Please don't remove
 
-```
+```ini
 DATABASE1_USED               = TRUE
 DATABASE2_USED               = TRUE
 DATABASE3_USED               = TRUE
 ```
 5. Modify config.ini to
-```
+```ini
 DEVELOPMENT_MODE             = FALSE
 CREATE_CONFIGURATION         = FALSE
 ```
