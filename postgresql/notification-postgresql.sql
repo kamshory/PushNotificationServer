@@ -14,6 +14,12 @@ CREATE TABLE push_api
 	api_key character varying(50) DEFAULT NULL, 
 	hash_password_client character varying(100) DEFAULT NULL, 
 	hash_password_pusher character varying(100) DEFAULT NULL, 
+	time_create time without time zone NOT NULL,
+	time_edit time without time zone NOT NULL,
+	admin_create bigint NOT NULL,
+	admin_edit bigint NOT NULL,
+	ip_create character varying(40) NOT NULL,
+	ip_edit character varying(40) NOT NULL,
 	active smallint DEFAULT 1, 
 	CONSTRAINT api_id PRIMARY KEY (api_id)
 ) 
@@ -45,7 +51,7 @@ CREATE TABLE push_client_group (
 	api_id bigint NOT NULL,
 	name character varying(100) DEFAULT NULL,
 	group_key character varying(50) DEFAULT NULL,
-	description timestamp NULL DEFAULT NULL,
+	description text DEFAULT NULL,
 	time_create time without time zone NOT NULL,
 	time_edit time without time zone NOT NULL,
 	ip_create character varying(40) NOT NULL,
