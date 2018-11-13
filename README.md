@@ -37,7 +37,7 @@ To get notification client, please visit https://github.com/kamshory/PushNotific
 | Encrypted Keystore Password      	|   ✘  	|    ✔    	|
 
 ## Requirement
-Push Notification Server require MySQL database server or MariaDB database server
+Push Notification Server require MySQL database server, MariaDB database server or PostgreSQL database server
 
 ## Installation
 
@@ -62,6 +62,8 @@ To create encrypted database configuration, please do steps as follow:
 DEVELOPMENT_MODE             = TRUE
 CREATE_CONFIGURATION         = TRUE
 
+#mysql for MySQL and MariaDB database server
+#postgresql for PostgeSQL database server
 DATABASE1_TYPE               = mysql
 DATABASE1_HOST_NAME          = {db-host}
 DATABASE1_PORT_NUMBER        = {db-port}
@@ -70,6 +72,8 @@ DATABASE1_USER_PASSWORD      = {db-pass}
 DATABASE1_NAME               = {db-name}
 DATABASE1_USED               = TRUE
 
+#mysql for MySQL and MariaDB database server
+#postgresql for PostgeSQL database server
 DATABASE2_TYPE               = mysql
 DATABASE2_HOST_NAME          = {db-host}
 DATABASE2_PORT_NUMBER        = {db-port}
@@ -78,6 +82,8 @@ DATABASE2_USER_PASSWORD      = {db-pass}
 DATABASE2_NAME               = {db-name}
 DATABASE2_USED               = TRUE
 
+#mysql for MySQL and MariaDB database server
+#postgresql for PostgeSQL database server
 DATABASE3_TYPE               = mysql
 DATABASE3_HOST_NAME          = {db-host}
 DATABASE3_PORT_NUMBER        = {db-port}
