@@ -67,7 +67,7 @@ To get notification client, please visit https://github.com/kamshory/PushNotific
 
 ### Basic Configuration
 
-To modify configuration, open **config.ini**, modify and save it.
+To modify configuration, open *config.ini*, modify and save it.
 
 ### Encrypt Database Configuration
 
