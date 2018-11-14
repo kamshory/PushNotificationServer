@@ -130,7 +130,7 @@ So the TABLE_PREFIX  will be **push_**. You can change the TABLE_PREFIX accordin
 java -jar pushserver.jar config=config.ini
 ```
 
-3. Copy DATABASE1_CONFIGURATION, DATABASE2_CONFIGURATION DATABASE3_CONFIGURATION, and KEYSTORE_PASSWORD_ENCRYPTED to file config.ini
+3. Copy DATABASE1_CONFIGURATION, DATABASE2_CONFIGURATION DATABASE3_CONFIGURATION, and KEYSTORE_PASSWORD_ENCRYPTED to file *config.ini*
 
 4. Remove properties bellow
 
@@ -167,7 +167,7 @@ DATABASE1_USED               = TRUE
 DATABASE2_USED               = TRUE
 DATABASE3_USED               = TRUE
 ```
-5. Modify config.ini to
+5. Modify *config.ini* to
 ```ini
 DEVELOPMENT_MODE             = FALSE
 CREATE_CONFIGURATION         = FALSE
