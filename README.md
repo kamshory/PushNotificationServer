@@ -35,6 +35,7 @@ To get notification client, please visit https://github.com/kamshory/PushNotific
 | PostgreSQL Database Support       |   ✔  	|    ✔    	|
 | HTTP and HTTPS Pusher            	|   ✔  	|    ✔    	|
 | HTTP and HTTPS Remover           	|   ✔  	|    ✔    	|
+| Comercial Use                  	|   ✘  	|    ✔    	|
 | Production Mode                  	|   ✘  	|    ✔    	|
 | Encrypted Database Configuration 	|   ✘  	|    ✔    	|
 | Encrypted Keystore Password      	|   ✘  	|    ✔    	|
