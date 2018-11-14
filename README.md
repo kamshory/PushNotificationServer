@@ -40,7 +40,12 @@ To get notification client, please visit https://github.com/kamshory/PushNotific
 | Encrypted Keystore Password      	|   ✘  	|    ✔    	|
 
 ## Requirement
-Push Notification Server require MySQL database server, MariaDB database server or PostgreSQL database server
+1. Operating System
+   Supported operating system is Windows and Linux
+2. Environtment
+   Push Notification Server need Java Runtime Environtment (JRE) 1.8
+3. Database Management System
+   Push Notification Server require MySQL database server, MariaDB database server or PostgreSQL database server
 
 ## Installation
 
