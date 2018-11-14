@@ -55,13 +55,13 @@ To get notification client, please visit https://github.com/kamshory/PushNotific
 1. Create MySQL or MariaDB database
 2. Import *notification.sql* database into your database
 3. Open *createapi.sql*, replace **passclient** with your client password and **passpusher** with your pusher password 
-4. Execute createapi.sql on your database
+4. Execute *createapi.sql* on your database
 
 #### For PostgreSQL
 1. Create MySQL or MariaDB database
 2. Import *notification-postgresql.sql* database into your database
 3. Open *createapi-postgresql.sql*, replace **passclient** with your client password and **passpusher** with your pusher password 
-4. Execute createapi-postgresql.sql on your database
+4. Execute *createapi-postgresql.sql* on your database
 
 ## Configuration
 
