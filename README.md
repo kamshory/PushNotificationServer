@@ -104,15 +104,17 @@ DATABASE3_USED               = TRUE
 
 KEYSTORE_PASSWORD            = {keystore-pass}
 ```
-TABLE_PREFIX must be appropriate with the table name. For example, the table name listed bellow:
-1. push_api
-2. push_client
-3. push_client_group
-4. push_notification
-5. push_pusher_address
-6. push_trash
-So the TABLE_PREFIX  will be **push_**. You can change the TABLE_PREFIX according to your table name. With the TABLE_PREFIX, you can integrate the push notification server database with your own application.
 
+TABLE_PREFIX must be appropriate with the table name. For example, the table name listed bellow:
+
+- push_api
+- push_client
+- push_client_group
+- push_notification
+- push_pusher_address
+- push_trash
+
+So the TABLE_PREFIX  will be **push_**. You can change the TABLE_PREFIX according to your table name. With the TABLE_PREFIX, you can integrate the push notification server database with your own application.
 
 2. Run Service in Console
 
