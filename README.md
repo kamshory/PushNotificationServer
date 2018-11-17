@@ -11,6 +11,7 @@ Push notification server for mobile application.
 8. Production Mode
 9. Encrypted Database Configuration
 10. Encrypted Keystore Password
+11. End-to-End Encryption
 
 HTTP and HTTPS port is different. So pusher can choose one of them.
 
