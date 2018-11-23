@@ -192,9 +192,18 @@ Service is CLI application. User only can control application by using the comma
 
 ### Start Service
 
+**Normal Mode**
+
 ```bash
 java -jar pushserver.jar config=config.ini
 ```
+
+**Debug Mode**
+
+```bash
+java -jar pushserver.jar config=config.ini debug-mode=true
+```
+
 
 ### Stop Service
 
