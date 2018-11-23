@@ -1,5 +1,14 @@
 # PushNotificationServer
 Push notification server for mobile application.
+
+## Push Notification
+
+Push Notification is a notification that is forcibly sent by the server to the client so that the notification sent to the client without waiting for the client to request it. In order for the notification to be accepted by the client, the client and server must always be connected through socket communication.
+
+The notification server can be part of the application server and can also be provided by third parties.
+
+The application server must know the device ID of each user. When the application server sends notifications to users, the application server sends notifications to the notification server that is addressed to the user's device.
+
 ## Features
 1. Unlimited Notification
 2. Notification Group
