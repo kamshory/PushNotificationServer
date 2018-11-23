@@ -1,5 +1,4 @@
 # PushNotificationServer
-Push notification server for mobile application.
 
 ## Push Notification
 
