@@ -179,6 +179,17 @@ Now your database configuration is safe.
 
 ## Usage
 
+Service is CLI application. User only can control application by using the command line when start it. However, user can stop the service by using the command line too.
+
+| Argument             	| Meaning                   	|
+|----------------------	|---------------------------	|
+| -h                   	| Show Help                 	|
+| --help               	| Show Help                 	|
+| action=stop          	| Stop Service              	|
+| action=start         	| Start Service             	|
+| config={config-path} 	| Set Configuration Path    	|
+| debug-mode=true      	| Run Service in Debug Mode 	|
+
 ### Start Service
 
 ```bash
