@@ -97,4 +97,4 @@ CREATE TABLE `push_trash` (
  `notification_id` bigint(20) DEFAULT NULL,
  `time_delete` datetime(6) NOT NULL,
  PRIMARY KEY (`trash_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
