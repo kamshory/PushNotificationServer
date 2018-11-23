@@ -195,13 +195,13 @@ Service is CLI application. User only can control application by using the comma
 **Normal Mode**
 
 ```bash
-java -jar pushserver.jar config=config.ini
+java -jar pushserver.jar config=/etc/pushnotif/config.ini
 ```
 
 **Debug Mode**
 
 ```bash
-java -jar pushserver.jar config=config.ini debug-mode=true
+java -jar pushserver.jar config=/etc/pushnotif/config.ini debug-mode=true
 ```
 
 
