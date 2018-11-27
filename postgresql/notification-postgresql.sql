@@ -14,6 +14,7 @@ CREATE TABLE push_api
 	api_key character varying(50) DEFAULT NULL, 
 	hash_password_client character varying(100) DEFAULT NULL, 
 	hash_password_pusher character varying(100) DEFAULT NULL, 
+	blocked smallint DEFAULT 0, 
 	time_create time without time zone NOT NULL,
 	time_edit time without time zone NOT NULL,
 	admin_create bigint NOT NULL,
