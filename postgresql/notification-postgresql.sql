@@ -24,7 +24,8 @@ CREATE TABLE push_api
 	ip_create character varying(40) NOT NULL,
 	ip_edit character varying(40) NOT NULL,
 	active smallint DEFAULT 1, 
-	CONSTRAINT api_id PRIMARY KEY (api_id)
+	CONSTRAINT api_id PRIMARY KEY (api_id),
+	CONSTRAINT push_api_api_key_key UNIQUE (api_key)
 ) 
 WITH (
   OIDS = FALSE
