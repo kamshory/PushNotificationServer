@@ -120,10 +120,10 @@ CREATE TABLE `push_trash` (
  PRIMARY KEY (`trash_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
-CREATE TABLE `push_user` (
+ 	CREATE TABLE `push_user` (
  `user_id` bigint(20) NOT NULL AUTO_INCREMENT,
  `api_id` bigint(20) DEFAULT NULL,
- `username` varchar(100) NOT NULL,
+ `username` varchar(100) DEFAULT NULL,
  `name` varchar(100) DEFAULT NULL,
  `gender` enum('M','W') DEFAULT 'M',
  `birth_place` varchar(100) DEFAULT NULL,
@@ -134,9 +134,9 @@ CREATE TABLE `push_user` (
  `password_initial` varchar(45) DEFAULT NULL,
  `auth` varchar(45) DEFAULT NULL,
  `address` varchar(255) DEFAULT NULL,
- `country_id` bigint(20) NOT NULL,
- `state_id` bigint(20) NOT NULL,
- `city_id` bigint(20) NOT NULL,
+ `country_id` bigint(20) DEFAULT NULL,
+ `state_id` bigint(20) DEFAULT NULL,
+ `city_id` bigint(20) DEFAULT NULL,
  `religion_id` varchar(2) DEFAULT NULL,
  `time_create` datetime DEFAULT NULL,
  `time_edit` datetime DEFAULT NULL,
@@ -147,7 +147,7 @@ CREATE TABLE `push_user` (
  `ip_create` varchar(45) DEFAULT NULL,
  `ip_edit` varchar(45) DEFAULT NULL,
  `blocked` tinyint(1) DEFAULT '0',
- `active` tinyint(1) NOT NULL DEFAULT '1',
+ `active` tinyint(1) DEFAULT '1',
  PRIMARY KEY (`user_id`),
  UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1
