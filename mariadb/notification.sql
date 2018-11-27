@@ -3,6 +3,7 @@ CREATE TABLE `push_api` (
  `api_key` varchar(50) NOT NULL,
  `hash_password_client` varchar(100) DEFAULT NULL,
  `hash_password_pusher` varchar(100) DEFAULT NULL,
+ `blocked` tinyint(1) NOT NULL DEFAULT '0',
  `time_create` datetime(6) NOT NULL,
  `time_edit` datetime(6) NOT NULL,
  `admin_create` bigint(20) NOT NULL,
