@@ -34,6 +34,7 @@ CREATE TABLE `push_client_group` (
  `name` varchar(100) DEFAULT NULL,
  `group_key` varchar(50) DEFAULT NULL,
  `description` longtext NULL DEFAULT NULL,
+ `blocked` tinyint(1) NOT NULL DEFAULT '0',
  `time_create` datetime(6) NOT NULL,
  `time_edit` datetime(6) NOT NULL,
  `ip_create` varchar(40) NOT NULL,
