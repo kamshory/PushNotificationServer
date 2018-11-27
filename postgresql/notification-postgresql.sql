@@ -115,6 +115,7 @@ CREATE TABLE push_pusher_address (
 	address character varying(40) DEFAULT NULL,
 	first_access time without time zone DEFAULT NULL,
 	last_access time without time zone DEFAULT NULL,
+	auth character varying(100) NULL,
 	need_confirmation smallint DEFAULT 1,
 	blocked smallint DEFAULT 0,
 	active smallint DEFAULT 1,
