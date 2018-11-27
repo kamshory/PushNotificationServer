@@ -137,3 +137,41 @@ WITH (
   OIDS = FALSE
 )
 ;
+
+CREATE TABLE push_user
+(
+  user_id bigint NOT NULL DEFAULT nextval('push_user_user_id_seq'::regclass),
+  api_id bigint,
+  reg_number character varying(20) DEFAULT NULL::character varying,
+  reg_number_national character varying(20) DEFAULT NULL::character varying,
+  username character varying(100) NOT NULL,
+  name character varying(100) DEFAULT NULL::character varying,
+  gender character varying(2) DEFAULT 'M'::character varying,
+  birth_place character varying(100) DEFAULT NULL::character varying,
+  birth_day date,
+  phone character varying(30) DEFAULT NULL::character varying,
+  email character varying(100) DEFAULT NULL::character varying,
+  password character varying(45) DEFAULT NULL::character varying,
+  password_initial character varying(45) DEFAULT NULL::character varying,
+  auth character varying(45) DEFAULT NULL::character varying,
+  address character varying(255) DEFAULT NULL::character varying,
+  country_id bigint NOT NULL,
+  state_id bigint NOT NULL,
+  city_id bigint NOT NULL,
+  religion_id character varying(2) DEFAULT NULL::character varying,
+  time_create timestamp without time zone,
+  time_edit timestamp without time zone,
+  user_create bigint,
+  user_edit bigint,
+  admin_create bigint,
+  admin_edit bigint,
+  ip_create character varying(45) DEFAULT NULL::character varying,
+  ip_edit character varying(45) DEFAULT NULL::character varying,
+  blocked smallint DEFAULT '0'::smallint,
+  active smallint NOT NULL DEFAULT '1'::smallint,
+  CONSTRAINT user_id PRIMARY KEY (user_id),
+  CONSTRAINT push_user_email_key UNIQUE (email)
+)
+WITH (
+  OIDS=FALSE
+);
