@@ -122,12 +122,7 @@ CREATE TABLE `push_trash` (
 
 CREATE TABLE `push_user` (
  `user_id` bigint(20) NOT NULL AUTO_INCREMENT,
- `token_student` varchar(32) DEFAULT NULL,
  `api_id` bigint(20) DEFAULT NULL,
- `reg_number` varchar(20) DEFAULT NULL,
- `reg_number_national` varchar(20) DEFAULT NULL,
- `grade_id` int(11) DEFAULT NULL,
- `class_id` bigint(20) DEFAULT NULL,
  `username` varchar(100) NOT NULL,
  `name` varchar(100) DEFAULT NULL,
  `gender` enum('M','W') DEFAULT 'M',
@@ -143,8 +138,6 @@ CREATE TABLE `push_user` (
  `state_id` bigint(20) NOT NULL,
  `city_id` bigint(20) NOT NULL,
  `religion_id` varchar(2) DEFAULT NULL,
- `prevent_change_school` tinyint(1) NOT NULL DEFAULT '0',
- `prevent_resign` tinyint(1) NOT NULL DEFAULT '0',
  `time_create` datetime DEFAULT NULL,
  `time_edit` datetime DEFAULT NULL,
  `user_create` bigint(20) DEFAULT NULL,
