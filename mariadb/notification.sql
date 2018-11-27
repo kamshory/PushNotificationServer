@@ -104,6 +104,7 @@ CREATE TABLE `push_pusher_address` (
  `address` varchar(40) DEFAULT NULL,
  `first_access` datetime(6) DEFAULT NULL,
  `last_access` datetime(6) DEFAULT NULL,
+ `auth` varchar(100) DEFAULT NULL,
  `need_confirmation` tinyint(1) DEFAULT '1',
  `blocked` tinyint(1) DEFAULT '0',
  `active` tinyint(1) DEFAULT '1',
