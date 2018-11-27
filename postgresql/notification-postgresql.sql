@@ -53,6 +53,7 @@ CREATE TABLE push_client_group (
 	name character varying(100) DEFAULT NULL,
 	group_key character varying(50) DEFAULT NULL,
 	description text DEFAULT NULL,
+	blocked smallint DEFAULT 0, 
 	time_create time without time zone NOT NULL,
 	time_edit time without time zone NOT NULL,
 	ip_create character varying(40) NOT NULL,
