@@ -13,7 +13,8 @@ CREATE TABLE `push_api` (
  `ip_create` varchar(40) NULL,
  `ip_edit` varchar(40) NULL,
  `active` tinyint(1) NULL DEFAULT '1',
- PRIMARY KEY (`api_id`)
+ PRIMARY KEY (`api_id`),
+ UNIQUE KEY `api_key` (`api_key`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `push_api_user` (
@@ -118,3 +119,42 @@ CREATE TABLE `push_trash` (
  `time_delete` datetime(6) NULL,
  PRIMARY KEY (`trash_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+
+CREATE TABLE `push_user` (
+ `user_id` bigint(20) NOT NULL AUTO_INCREMENT,
+ `token_student` varchar(32) DEFAULT NULL,
+ `api_id` bigint(20) DEFAULT NULL,
+ `reg_number` varchar(20) DEFAULT NULL,
+ `reg_number_national` varchar(20) DEFAULT NULL,
+ `grade_id` int(11) DEFAULT NULL,
+ `class_id` bigint(20) DEFAULT NULL,
+ `username` varchar(100) NOT NULL,
+ `name` varchar(100) DEFAULT NULL,
+ `gender` enum('M','W') DEFAULT 'M',
+ `birth_place` varchar(100) DEFAULT NULL,
+ `birth_day` date DEFAULT NULL,
+ `phone` varchar(30) DEFAULT NULL,
+ `email` varchar(100) DEFAULT NULL,
+ `password` varchar(45) DEFAULT NULL,
+ `password_initial` varchar(45) DEFAULT NULL,
+ `auth` varchar(45) DEFAULT NULL,
+ `address` varchar(255) DEFAULT NULL,
+ `country_id` bigint(20) NOT NULL,
+ `state_id` bigint(20) NOT NULL,
+ `city_id` bigint(20) NOT NULL,
+ `religion_id` varchar(2) DEFAULT NULL,
+ `prevent_change_school` tinyint(1) NOT NULL DEFAULT '0',
+ `prevent_resign` tinyint(1) NOT NULL DEFAULT '0',
+ `time_create` datetime DEFAULT NULL,
+ `time_edit` datetime DEFAULT NULL,
+ `user_create` bigint(20) DEFAULT NULL,
+ `user_edit` bigint(20) DEFAULT NULL,
+ `admin_create` bigint(20) DEFAULT NULL,
+ `admin_edit` bigint(20) DEFAULT NULL,
+ `ip_create` varchar(45) DEFAULT NULL,
+ `ip_edit` varchar(45) DEFAULT NULL,
+ `blocked` tinyint(1) DEFAULT '0',
+ `active` tinyint(1) NOT NULL DEFAULT '1',
+ PRIMARY KEY (`user_id`),
+ UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=latin1;
