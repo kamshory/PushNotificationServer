@@ -61,9 +61,9 @@ To get notification client, please visit https://github.com/kamshory/PushNotific
 
 Supported operating system is Windows and Linux
 
-2. Environtment
+2. Environment
 
-Push Notification Server need Java Runtime Environtment (JRE) 1.8
+Push Notification Server need Java Runtime Environment (JRE) 1.8
 
 3. Database Management System
 
