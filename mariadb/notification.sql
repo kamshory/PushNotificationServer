@@ -1,20 +1,20 @@
 CREATE TABLE `push_api` (
  `api_id` bigint(20) NOT NULL AUTO_INCREMENT,
- `api_key` varchar(50) NOT NULL,
+ `api_key` varchar(50) DEFAULT NULL,
+ `name` varchar(100) DEFAULT NULL,
  `hash_password_client` varchar(100) DEFAULT NULL,
  `hash_password_pusher` varchar(100) DEFAULT NULL,
- `blocked` tinyint(1) NULL DEFAULT '0',
- `time_create` datetime(6) NULL,
- `time_edit` datetime(6) NULL,
- `user_create` bigint(20) NULL,
- `user_edit` bigint(20) NULL,
- `admin_create` bigint(20) NULL,
- `admin_edit` bigint(20) NULL,
- `ip_create` varchar(40) NULL,
- `ip_edit` varchar(40) NULL,
- `active` tinyint(1) NULL DEFAULT '1',
- PRIMARY KEY (`api_id`),
- UNIQUE KEY `api_key` (`api_key`)
+ `blocked` tinyint(1) DEFAULT '0',
+ `time_create` datetime DEFAULT NULL,
+ `time_edit` datetime DEFAULT NULL,
+ `user_create` bigint(20) DEFAULT NULL,
+ `user_edit` bigint(20) DEFAULT NULL,
+ `admin_create` bigint(20) DEFAULT NULL,
+ `admin_edit` bigint(20) DEFAULT NULL,
+ `ip_create` varchar(40) DEFAULT NULL,
+ `ip_edit` varchar(40) DEFAULT NULL,
+ `active` tinyint(1) DEFAULT '1',
+ PRIMARY KEY (`api_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `push_api_user` (
@@ -25,8 +25,8 @@ CREATE TABLE `push_api_user` (
  `time_edit` datetime DEFAULT NULL,
  `user_create` bigint(20) DEFAULT NULL,
  `user_edit` bigint(20) DEFAULT NULL,
- `admin_create` bigint(20) NULL,
- `admin_edit` bigint(20) NULL,
+ `admin_create` bigint(20) DEFAULT NULL,
+ `admin_edit` bigint(20) DEFAULT NULL,
  `ip_create` varchar(48) DEFAULT NULL,
  `ip_edit` varchar(48) DEFAULT NULL,
  `active` tinyint(1) DEFAULT '1',
@@ -35,17 +35,18 @@ CREATE TABLE `push_api_user` (
 
 CREATE TABLE `push_client` (
  `client_id` bigint(20) NOT NULL AUTO_INCREMENT,
- `api_id` bigint(20) NULL,
+ `api_id` bigint(20) DEFAULT NULL,
  `device_id` varchar(40) DEFAULT NULL,
  `last_token` varchar(40) DEFAULT NULL,
  `last_ip` varchar(40) DEFAULT NULL,
- `connection` int(11) NULL DEFAULT '0',
- `last_time` datetime(6) DEFAULT NULL,
- `time_create` datetime(6) NULL,
- `blocked` tinyint(1) NULL DEFAULT '0',
- `active` tinyint(1) NULL DEFAULT '1',
+ `connection` int(11) DEFAULT '0',
+ `last_time` datetime DEFAULT NULL,
+ `time_create` datetime DEFAULT NULL,
+ `blocked` tinyint(1) DEFAULT '0',
+ `active` tinyint(1) DEFAULT '1',
  PRIMARY KEY (`client_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+
 
 CREATE TABLE `push_client_group` (
  `client_group_id` bigint(20) NOT NULL AUTO_INCREMENT,
