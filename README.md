@@ -85,7 +85,30 @@ To get notification client, please visit https://github.com/kamshory/PushNotific
 
 To modify configuration, open *config.ini*, modify and save it.
 
-### Encrypt Database Configuration
+### SMTP Configuration
+
+You can use SMTP with authentication and also without authentication.
+For SMTP without authentication, use localhost. In this way, emails will be sent faster. 
+
+Configuring SMTP with authentication on localhost is as follows:
+```
+MAIL_HOST                    = mail.example.com
+MAIL_USE_AUTH                = TRUE
+MAIL_USERNAME                = user
+MAIL_PASSWORD                = password
+```
+
+Configuring SMTP without authentication on localhost is as follows:
+```ini
+MAIL_HOST                    = localhost
+MAIL_USE_AUTH                = FALSE
+MAIL_USERNAME                = 
+MAIL_PASSWORD                = 
+```
+
+On production mode, user **MAIL_PASSWORD_ENCRYPTED** to store the password and let **MAIL_PASSWORD** 
+
+### Encrypt Configuration
 
 To create encrypted database configuration, please do steps as follow:
 
