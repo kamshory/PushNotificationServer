@@ -8,6 +8,8 @@ The notification server can be part of the application server and can also be pr
 
 The application server must know the device ID of each user. When the application server sends notifications to users, the application server sends notifications to the notification server that is addressed to the user's device.
 
+When the pusher address filter is applied, the pusher address must be registered in the database in order to send notifications to the destination device. When a new address tries to send a notification, the server records the new address and sends an email to the administrator to approve the address. If the address is approved by the administrator, pusher can send notifications accordingly. This address can be activated and deactivated at any time.
+
 ## Features
 1. Unlimited Notification
 2. Notification Group
@@ -20,6 +22,7 @@ The application server must know the device ID of each user. When the applicatio
 9. Encrypted Database Configuration
 10. Encrypted Keystore Password
 11. End-to-End Encryption
+12. Send Mail for Pusher Approval
 
 HTTP and HTTPS port is different. So pusher can choose one of them.
 
