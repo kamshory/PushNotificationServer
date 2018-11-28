@@ -79,7 +79,7 @@ Push Notification Server require MySQL database server, MariaDB database server 
 4. Execute *createapi.sql* on your database
 
 #### For PostgreSQL
-1. Create MySQL or MariaDB database
+1. Create PostgreSQL database
 2. Import *notification-postgresql.sql* database into your database
 3. Open *createapi-postgresql.sql*, replace **passclient** with your client password and **passpusher** with your pusher password 
 4. Execute *createapi-postgresql.sql* on your database
