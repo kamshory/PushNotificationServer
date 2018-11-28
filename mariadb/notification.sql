@@ -72,8 +72,8 @@ CREATE TABLE `push_client_group` (
 CREATE TABLE `push_notification` (
  `notification_id` bigint(20) NOT NULL AUTO_INCREMENT,
  `device_id` varchar(40) DEFAULT NULL,
- `api_id` bigint(20) NULL,
- `client_group_id` bigint(20) NULL DEFAULT '0',
+ `api_id` bigint(20) DEFAULT NULL,
+ `client_group_id` bigint(20) DEFAULT '0',
  `title` text,
  `subtitle` text,
  `message` longtext,
@@ -88,14 +88,14 @@ CREATE TABLE `push_notification` (
  `small_icon` longtext,
  `type` varchar(20) DEFAULT NULL,
  `misc_data` longtext,
- `time_create` datetime(6) DEFAULT NULL,
- `is_read` tinyint(1) NULL DEFAULT '0',
- `time_read` datetime(6) DEFAULT NULL,
- `is_sent` tinyint(1) NULL DEFAULT '0',
- `time_sent` datetime(6) DEFAULT NULL,
- `expire` tinyint(1) NULL DEFAULT '0',
- `expiration_time` datetime(6) DEFAULT NULL,
- `active` tinyint(1) NULL DEFAULT '1',
+ `time_create` datetime DEFAULT NULL,
+ `is_read` tinyint(1) DEFAULT '0',
+ `time_read` datetime DEFAULT NULL,
+ `is_sent` tinyint(1) DEFAULT '0',
+ `time_sent` datetime DEFAULT NULL,
+ `expire` tinyint(1) DEFAULT '0',
+ `expiration_time` datetime DEFAULT NULL,
+ `active` tinyint(1) DEFAULT '1',
  PRIMARY KEY (`notification_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
