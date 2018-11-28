@@ -6,7 +6,9 @@
 </head>
 
 <body>
-<p>New address was sent notification. </p>
+<p>Dear {user}</p>
+<p>A new address has tried to send notifications. Notifications will not be sent to the destination device until you confirm the address.</p>
+<p>The following is detailed information about the sender.</p>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr>
     <td width="200">Remote Address</td>
@@ -16,8 +18,31 @@
     <td>Time</td>
     <td>{time}</td>
   </tr>
+  <tr>
+    <td>Application Name</td>
+    <td>{app_name}</td>
+  </tr>
+  <tr>
+    <td>Application Version</td>
+    <td>{app_version}</td>
+  </tr>
+  <tr>
+    <td>User Agent</td>
+    <td>{user_agent}</td>
+  </tr>
+  <tr>
+    <td>Target API</td>
+    <td>{api}</td>
+  </tr>
 </table>
 <p>If that address is yours, please confirm by clicking link bellow: </p>
 <p><a href="http://push.planetedu.id/address-approval/?auth={auth}">http://push.planetedu.id/address-approval/?auth={auth}</a></p>
+<p>If the address is not yours and you do not want the address to send notifications, ignore and delete this email.</p>
+<p>You can see detail information of notification senders via your account by clicking the following link:</p>
+<p><a href="http://push.planetedu.id/api/pusher-address.php?option=detail&pusher_address_id={id}">http://push.planetedu.id/api/pusher-address.php?option=detail&amp;pusher_address_id={id}</a></p>
+<p>You can also see the list of notification senders via your account by clicking the following link:</p>
+<p><a href="http://push.planetedu.id/api/pusher-address.php">http://push.planetedu.id/api/pusher-address.php</a></p>
+<p>If your email   application does not allow you to open the link, copy the following URL   and paste it in the browser address bar then enter:</p>
+<p>http://push.planetedu.id/api/pusher-address.php?option=detail&amp;pusher_address_id={id}</p>
 </body>
 </html>
