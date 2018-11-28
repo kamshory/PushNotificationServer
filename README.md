@@ -49,6 +49,7 @@ To get notification client, please visit https://github.com/kamshory/PushNotific
 | Production Mode                  	|   ✘  	|    ✔    	|
 | Encrypted Database Configuration 	|   ✘  	|    ✔    	|
 | Encrypted Keystore Password      	|   ✘  	|    ✔    	|
+| Send Mail for Pusher Approval     |   ✘    |    ✔      |
 
 ## Requirement
 1. Operating System
