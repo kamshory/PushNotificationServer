@@ -10,6 +10,8 @@ The application server must know the device ID of each user. When the applicatio
 
 When the pusher address filter is applied, the pusher address must be registered in the database in order to send notifications to the destination device. When a new address tries to send a notification, the server records the new address and sends an email to the administrator to approve the address. If the address is approved by the administrator, pusher can send notifications accordingly. This address can be activated and deactivated at any time.
 
+User can modify the mail template. See file *mail-template.html*
+
 ## Features
 1. Unlimited Notification
 2. Notification Group
