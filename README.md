@@ -150,6 +150,7 @@ DATABASE3_NAME               = {db-name}
 DATABASE3_USED               = TRUE
 
 KEYSTORE_PASSWORD            = {keystore-pass}
+MAIL_PASSWORD                = {mail-pass}
 ```
 
 TABLE_PREFIX must be appropriate with the table name. For example, the table name listed bellow:
@@ -169,7 +170,7 @@ So the TABLE_PREFIX  will be **push_**. You can change the TABLE_PREFIX accordin
 java -jar pushserver.jar config=config.ini
 ```
 
-3. Copy DATABASE1_CONFIGURATION, DATABASE2_CONFIGURATION DATABASE3_CONFIGURATION, and KEYSTORE_PASSWORD_ENCRYPTED to file *config.ini*
+3. Copy DATABASE1_CONFIGURATION, DATABASE2_CONFIGURATION DATABASE3_CONFIGURATION, KEYSTORE_PASSWORD_ENCRYPTED and MAIL_PASSWORD_ENCRYPTED to file *config.ini*
 
 4. Remove properties bellow
 
@@ -196,6 +197,7 @@ DATABASE3_USER_PASSWORD      = {db-pass}
 DATABASE3_NAME               = {db-name}
 
 KEYSTORE_PASSWORD            = {keystore-pass}
+MAIL_PASSWORD                = {mail-pass}
 
 ```
 
