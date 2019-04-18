@@ -49,6 +49,7 @@ To get notification client, please visit https://github.com/kamshory/PushNotific
 | PostgreSQL Database Support       |   ✔  	|    ✔    	|
 | HTTP and HTTPS Pusher            	|   ✔  	|    ✔    	|
 | HTTP and HTTPS Remover           	|   ✔  	|    ✔    	|
+| Native and SSL Socket           	|   ✔  	|    ✔    	|
 | End-to-End Encryption            	|   ✘  	|    ✔    	|
 | Commercial Use                  	|   ✘  	|    ✔    	|
 | Production Mode                  	|   ✘  	|    ✔    	|
