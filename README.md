@@ -352,5 +352,9 @@ We are sure that this list of commands will definitely save developers' time whi
 
 For more information, visit https://dzone.com/articles/understand-java-keytool-keystore-commands 
 
+## KeyStore Application
 
+Another way to create keystore is by using KeyStore Explorer. KeyStore Explorer is an open source GUI replacement for the Java command-line utilities keytool and jarsigner. KeyStore Explorer presents their functionality, and more, via an intuitive graphical user interface. 
+
+Download KeyStore Explorer from https://keystore-explorer.org/
 
