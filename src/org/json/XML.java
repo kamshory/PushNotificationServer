@@ -26,15 +26,8 @@ SOFTWARE.
 
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.Iterator;
-
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
+import java.util.NoSuchElementException;
 
 /**
  * This provides static methods to convert an XML text into a JSONObject, and to
@@ -99,6 +92,10 @@ public class XML {
 
                     @Override
                     public Integer next() {
+                    	if(!hasNext())
+                    	{
+                    		throw new NoSuchElementException("No such element");
+                    	}
                         int result = string.codePointAt(this.nextIndex);
                         this.nextIndex += Character.charCount(result);
                         return result;
@@ -678,10 +675,6 @@ public class XML {
             }
             
             String result = sb.toString();
-            if(indent > 0)
-            {
-            	result = prettyFormat(result, indent);
-            }
             
             return result;
 
@@ -711,24 +704,4 @@ public class XML {
                         + ">" + string + "</" + tagName + ">";
 
     }
-    public static String prettyFormat(String input, int indent) 
-	{
-		Source xmlInput = new StreamSource(new StringReader(input));
-		StringWriter stringWriter = new StringWriter();
-		try 
-		{
-			TransformerFactory transformerFactory = TransformerFactory.newInstance();
-			Transformer transformer = transformerFactory.newTransformer();
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, "yes");
-			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", indent+"");
-			transformer.transform(xmlInput, new StreamResult(stringWriter));
-
-			return stringWriter.toString().trim();
-		} 
-		catch (Exception e) 
-		{
-			throw new RuntimeException(e);
-		}
-	}
 }

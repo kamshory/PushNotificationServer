@@ -13,11 +13,9 @@ import org.json.JSONObject;
 
 import com.planetbiru.pushserver.config.Config;
 import com.planetbiru.pushserver.database.Database;
-import com.planetbiru.pushserver.database.DatabaseConfig;
 import com.planetbiru.pushserver.database.DatabaseTypeException;
 import com.planetbiru.pushserver.notification.Notification;
 import com.planetbiru.pushserver.utility.HTTPIO;
-import com.planetbiru.pushserver.utility.QueryParserException;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -28,18 +26,6 @@ import com.sun.net.httpserver.HttpHandler;
  */
 public class PusherHandler implements HttpHandler 
 {
-	/**
-	 * Primary database configuration
-	 */
-	private DatabaseConfig databaseConfig1;
-	/**
-	 * Secondary database configuration
-	 */
-	private DatabaseConfig databaseConfig2;
-	/**
-	 * Tertiary database configuration
-	 */
-	private DatabaseConfig databaseConfig3;
 	/**
 	 * Primary database for pusher
 	 */
@@ -74,60 +60,6 @@ public class PusherHandler implements HttpHandler
 	private boolean connectionPerPush = false;
 	private String command = "push-notification";
 	
-	public DatabaseConfig getDatabaseConfig1() {
-		return databaseConfig1;
-	}
-	public void setDatabaseConfig1(DatabaseConfig databaseConfig1) {
-		this.databaseConfig1 = databaseConfig1;
-	}
-	public DatabaseConfig getDatabaseConfig2() {
-		return databaseConfig2;
-	}
-	public void setDatabaseConfig2(DatabaseConfig databaseConfig2) {
-		this.databaseConfig2 = databaseConfig2;
-	}
-	public DatabaseConfig getDatabaseConfig3() {
-		return databaseConfig3;
-	}
-	public void setDatabaseConfig3(DatabaseConfig databaseConfig3) {
-		this.databaseConfig3 = databaseConfig3;
-	}
-	public Database getDatabasePusher1() {
-		return databasePusher1;
-	}
-	public void setDatabasePusher1(Database databasePusher1) {
-		this.databasePusher1 = databasePusher1;
-	}
-	public Database getDatabasePusher2() {
-		return databasePusher2;
-	}
-	public void setDatabasePusher2(Database databasePusher2) {
-		this.databasePusher2 = databasePusher2;
-	}
-	public Database getDatabasePusher3() {
-		return databasePusher3;
-	}
-	public void setDatabasePusher3(Database databasePusher3) {
-		this.databasePusher3 = databasePusher3;
-	}
-	public Database getDatabase1() {
-		return database1;
-	}
-	public void setDatabase1(Database database1) {
-		this.database1 = database1;
-	}
-	public Database getDatabase2() {
-		return database2;
-	}
-	public void setDatabase2(Database database2) {
-		this.database2 = database2;
-	}
-	public Database getDatabase3() {
-		return database3;
-	}
-	public void setDatabase3(Database database3) {
-		this.database3 = database3;
-	}
 	public JSONObject getData() {
 		return data;
 	}
@@ -148,32 +80,12 @@ public class PusherHandler implements HttpHandler
 		this.command = command;
 	}
 	/**
-	 * Constructor for multiple database connection
-	 * @param databaseConfig1 Primary database configuration
-	 * @param databaseConfig2 Secondary database configuration
-	 * @param databaseConfig3 Tertiary database configuration
-	 * @param database1 Primary Database object
-	 * @param database2 Secondary Database object
-	 * @param database3 Tertiary Database object
-	 */
-	public PusherHandler(String command, DatabaseConfig databaseConfig1, DatabaseConfig databaseConfig2, DatabaseConfig databaseConfig3, Database database1, Database database2, Database database3)
-	{
-		this.command = command;
-		this.databaseConfig1 = databaseConfig1;
-		this.databaseConfig2 = databaseConfig2;
-		this.databaseConfig3 = databaseConfig2;	
-		this.database1 = database1;
-		this.database1 = database2;
-		this.database1 = database3;
-		this.connectionPerPush = true;
-	}
-	/**
 	 * Constructor for single database connection
 	 * @param database1 Primary Database object
 	 * @param database2 Secondary Database object
 	 * @param database3 Tertiary Database object
 	 */
-	public PusherHandler(String command, Database database1, Database database2, Database database3)
+	public PusherHandler(String command)
 	{
 		this.command = command;
 		this.databasePusher1 = database1;
@@ -182,133 +94,10 @@ public class PusherHandler implements HttpHandler
 		this.connectionPerPush = false;
 	}
 	/**
-	 * Make sure that all database connection is connected and ready to be used
-	 * @return true if success and false if failed
-	 */
-	public boolean connect()
-	{
-		boolean dbok1 = true;
-		boolean dbok2 = false;
-		if(this.connectionPerPush)
-		{
-			// Connect databasePusher
-			dbok1 = false;
-			this.databasePusher1 = new Database(this.databaseConfig1);
-			this.databasePusher2 = new Database(this.databaseConfig2);
-			this.databasePusher3 = new Database(this.databaseConfig3);
-			try 
-			{
-				this.databasePusher1.connect();
-				this.databasePusher2.connect();
-				this.databasePusher3.connect();
-				dbok1 = true;
-			} 
-			catch (ClassNotFoundException | SQLException | DatabaseTypeException e) 
-			{
-				if(Config.isPrintStackTrace())
-				{
-					e.printStackTrace();
-				}
-				dbok1 = false;
-				do
-				{
-					try 
-					{
-						Thread.sleep(Config.getWaitDatabaseReconnect());
-					} 
-					catch (InterruptedException e1) 
-					{
-						if(Config.isPrintStackTrace())
-						{
-							e1.printStackTrace();
-						}
-					}
-					dbok1 = this.databasePusher1.justReconnect();
-					this.databasePusher2.justReconnect();
-					this.databasePusher3.justReconnect();
-				}
-				while(!dbok1);
-			}
-			/**
-			 * Check connection for database1
-			 * If not connected, reconnect
-			 */
-			do 
-			{
-				dbok2 = this.database1.checkConnection();
-				if(!dbok2)
-				{
-					try 
-					{
-						Thread.sleep(Config.getWaitDatabaseReconnect());
-					} 
-					catch (InterruptedException e) 
-					{
-						if(Config.isPrintStackTrace()) 
-						{
-							e.printStackTrace();
-						}
-					}
-					try 
-					{
-						dbok2 = this.database1.connect();
-					} 
-					catch (ClassNotFoundException | SQLException | DatabaseTypeException e) 
-					{
-						if(Config.isPrintStackTrace()) 
-						{
-							e.printStackTrace();
-						}
-					}
-				}
-			}
-			while(!dbok2);
-		}
-		else
-		{
-			/**
-			 * Check connection for databasePusher1
-			 * If not connected, reconnect
-			 */
-			do 
-			{
-				dbok2 = this.databasePusher1.checkConnection();
-				if(!dbok2)
-				{
-					try 
-					{
-						Thread.sleep(Config.getWaitDatabaseReconnect());
-					} 
-					catch (InterruptedException e) 
-					{
-						if(Config.isPrintStackTrace()) 
-						{
-							e.printStackTrace();
-						}
-					}
-					try 
-					{
-						dbok2 = this.databasePusher1.connect();
-					} 
-					catch (ClassNotFoundException | SQLException | DatabaseTypeException e) 
-					{
-						if(Config.isPrintStackTrace()) 
-						{
-							e.printStackTrace();
-						}
-					}
-				}
-			}
-			while(!dbok2);
-		}
-		return dbok1 & dbok2;
-	}
-	/**
 	 * Override handle method
 	 */
 	public void handle(HttpExchange httpExchange) throws IOException 
 	{
-		this.connect();
 		Headers requestHeaders = httpExchange.getRequestHeaders();		
 		String authorization = requestHeaders.getFirst("Authorization");
 		if(authorization.startsWith("Bearer "))
@@ -377,14 +166,6 @@ public class PusherHandler implements HttpHandler
 					e.printStackTrace();
 				}
 				HTTPIO.sendHTTPResponse(httpExchange, responseHeaders, HttpURLConnection.HTTP_INTERNAL_ERROR);
-			}
-			catch (QueryParserException e) 
-			{
-				if(Config.isPrintStackTrace())
-				{
-					e.printStackTrace();
-				}
-				HTTPIO.sendHTTPResponse(httpExchange, responseHeaders, HttpURLConnection.HTTP_BAD_REQUEST);
 			}
 			catch (JSONException e) 
 			{

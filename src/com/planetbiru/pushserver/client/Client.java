@@ -2,7 +2,10 @@ package com.planetbiru.pushserver.client;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import com.planetbiru.code.ConstantString;
 
 /**
  * <strong>Client</strong> is object contains Device
@@ -14,7 +17,7 @@ public class Client
 	/**
 	 * Client list
 	 */
-	private static Map<String, ArrayList<Device>> deviceList = new HashMap<>();	
+	private static Map<String, List<Device>> deviceList = new HashMap<>();	
 	/**
 	 * Default constructor
 	 */
@@ -26,7 +29,7 @@ public class Client
 	{
 		device.setIndex(requestID);
 		String key = deviceID+"_"+apiID+"_"+groupID;
-		ArrayList<Device> deviceList;
+		List<Device> deviceList;
 		deviceList = Client.deviceList.get(key);
 		if(deviceList == null)
 		{
@@ -43,9 +46,9 @@ public class Client
 	 * @return Array list contains device
 	 * @throws ClientException if any errors
 	 */
-	public static ArrayList<Device> get(String deviceID, long apiID, long groupID) throws ClientException
+	public static List<Device> get(String deviceID, long apiID, long groupID) throws ClientException
 	{
-		ArrayList<Device> deviceList;
+		List<Device> deviceList;
 		String key = deviceID+"_"+apiID+"_"+groupID;
 		if(Client.deviceList.containsKey(key))
 		{
@@ -53,7 +56,7 @@ public class Client
 		}
 		else
 		{
-			throw new ClientException("Device not found");
+			throw new ClientException(ConstantString.DEVICE_NOT_FOUND);
 		}
 		return deviceList;
 
@@ -68,7 +71,7 @@ public class Client
 	 */
 	public static Device get(String deviceID, long apiID, long groupID, long requestID) throws ClientException
 	{
-		ArrayList<Device> deviceList;
+		List<Device> deviceList;
 		String key = deviceID+"_"+apiID+"_"+groupID;
 		if(Client.deviceList.containsKey(key))
 		{
@@ -80,11 +83,11 @@ public class Client
 					return device;
 				}
 			}
-			throw new ClientException("Device not found");
+			throw new ClientException(ConstantString.DEVICE_NOT_FOUND);
 		}
 		else
 		{
-			throw new ClientException("Device not found");
+			throw new ClientException(ConstantString.DEVICE_NOT_FOUND);
 		}
 	}
 	/**
@@ -97,7 +100,7 @@ public class Client
 	public static void remove(String deviceID, long apiID, long groupID, long requestID)
 	{
 		String key = deviceID+"_"+apiID+"_"+groupID;
-		ArrayList<Device> deviceList;
+		List<Device> deviceList;
 		deviceList = Client.deviceList.get(key);
 		Device device;
 		if(deviceList != null)

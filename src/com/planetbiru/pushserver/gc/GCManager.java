@@ -1,10 +1,7 @@
 package com.planetbiru.pushserver.gc;
 
-import java.sql.SQLException;
-
 import com.planetbiru.pushserver.config.Config;
 import com.planetbiru.pushserver.database.DatabaseConfig;
-import com.planetbiru.pushserver.database.DatabaseTypeException;
 import com.planetbiru.pushserver.utility.Utility;
 
 /**
@@ -56,32 +53,11 @@ public class GCManager extends Thread
 				now = Utility.now("HH:mm");
 				if(now.equals(Config.getCleanUpTime()))
 				{
-					this.gc = new GC(this.databaseConfig1, this.databaseConfig2, this.databaseConfig3);
+					this.gc = new GC();
 					this.gc.start();
 				}
 			} 
 			catch (InterruptedException e) 
-			{
-				if(Config.isPrintStackTrace())
-				{
-					e.printStackTrace();
-				}
-			} 
-			catch (ClassNotFoundException e) 
-			{
-				if(Config.isPrintStackTrace())
-				{
-					e.printStackTrace();
-				}
-			} 
-			catch (SQLException e) 
-			{
-				if(Config.isPrintStackTrace())
-				{
-					e.printStackTrace();
-				}
-			} 
-			catch (DatabaseTypeException e) 
 			{
 				if(Config.isPrintStackTrace())
 				{

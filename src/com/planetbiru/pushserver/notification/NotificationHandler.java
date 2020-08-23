@@ -7,7 +7,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -41,20 +40,6 @@ import com.planetbiru.pushserver.utility.Utility;
  */
 public class NotificationHandler extends Thread
 {
-	/**
-	 * Primary Database object
-	 */
-	private Database database1 = new Database();
-	/**
-	 * Secondary Database object
-	 */
-	@SuppressWarnings("unused")
-	private Database database2 = new Database();
-	/**
-	 * Tertiary Database object
-	 */
-	@SuppressWarnings("unused")
-	private Database database3 = new Database();
 	/**
 	 * Client socket
 	 */
@@ -122,68 +107,18 @@ public class NotificationHandler extends Thread
 	 * @param database2 Secondary Database object
 	 * @param database3 Tertiary Database object
 	 */
-	public NotificationHandler(Socket socket, long requestID, Database database1, Database database2, Database database3)
+	public NotificationHandler(Socket socket, long requestID)
 	{
-		this.database1 = database1;
-		this.database2 = database2;
-		this.database3 = database3;
 		this.setSocket(socket);
 		this.requestID = requestID;
 	}
-	/**
-	 * Test the database connection whether is still connected or not.
-	 * @return true if database is still connected and false if database connection is loss
-	 */
-	private boolean testDBConnection()
-	{
-		return this.database1.checkConnection();
-	}
-	/**
-	 * Make sure that database connection whether is still connected or not. If database connection is loss, it will create new connection with same database object
-	 * @return true if success and false if failed
-	 */
-	public boolean connect()
-	{
-		boolean dbok = false;
-		do 
-		{
-			dbok = this.testDBConnection();
-			if(!dbok)
-			{
-				try 
-				{
-					Thread.sleep(Config.getWaitDatabaseReconnect());
-				} 
-				catch (InterruptedException e) 
-				{
-					if(Config.isPrintStackTrace()) 
-					{
-						e.printStackTrace();
-					}
-				}
-				try 
-				{
-					this.database1.connect();
-				} 
-				catch (ClassNotFoundException | SQLException | DatabaseTypeException e) 
-				{
-					if(Config.isPrintStackTrace()) 
-					{
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-		while(!dbok);
-		return dbok;
-	}
+
 	/**
 	 * Override run method
 	 */
 	@Override
 	public void run()
 	{
-		this.connect();
 		try 
 		{
 			this.acceptRequest();
@@ -259,7 +194,7 @@ public class NotificationHandler extends Thread
 				if(message.length() > 15)
 				{
 					this.deviceID = this.getDeviceID(message);
-					notification = new Notification(this.database1, this.database1, this.database1, this.requestID);
+					notification = new Notification(this.requestID);
 					String authorization = "";
 					authorization = socketIO.getFirst(headers, "Authorization");
 					if(authorization.startsWith("Bearer "))
@@ -390,10 +325,9 @@ public class NotificationHandler extends Thread
 		socketIO.resetRequestHeader();
 		socketIO.addRequestHeader("Command", "ping-reply");
 		socketIO.addRequestHeader("Content-Type", "application/json");
-		boolean databaseConnection = this.database1.checkConnection();
 		JSONObject jo = new JSONObject();
 		jo.put("service", "alive");
-		jo.put("database", (databaseConnection)?"connected":"disconnected");
+		jo.put("database", "connected");
 		socketIO.write(jo.toString());
 	}
 	/**
@@ -422,7 +356,7 @@ public class NotificationHandler extends Thread
 	public void downloadLastNotification() throws JSONException, SQLException, IOException, SocketException, DatabaseTypeException, InvalidKeyException, IllegalArgumentException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException
 	{
 		SocketIO socketIO = new SocketIO(this.getSocket());
-		Notification notification = new Notification(this.database1, this.database1, this.database1, this.requestID);
+		Notification notification = new Notification(this.requestID);
 		String offileNotification = "";
 		while(notification.countNotification(this.apiID, this.deviceID, this.groupID) > 0)
 		{
@@ -458,7 +392,7 @@ public class NotificationHandler extends Thread
 	public void downloadLastDeleteLog() throws JSONException, SQLException, IOException, SocketException, DatabaseTypeException, InvalidKeyException, IllegalArgumentException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException
 	{
 		SocketIO socketIO = new SocketIO(this.getSocket());
-		Notification notification = new Notification(this.database1, this.database1, this.database1, this.requestID);
+		Notification notification = new Notification(this.requestID);
 		JSONArray trash;
 		String offileNotification = "";
 		while(notification.countDeletionLog(this.apiID, this.deviceID, this.groupID) > 0)
@@ -557,95 +491,74 @@ public class NotificationHandler extends Thread
 	{
 		JSONObject jo = new JSONObject();
 		boolean sendToken = false;
-		try
+		jo = new JSONObject(data);
+		String clientAnswer = jo.optString("answer", "");
+		String lQuestion = jo.optString("question", "");
+		String serverAnswer = this.buildAnswer(this.hashPasswordClient, lQuestion, this.deviceID);
+		if(serverAnswer.equals(clientAnswer))
 		{
-			jo = new JSONObject(data);
-			String clientAnswer = jo.optString("answer", "");
-			String lQuestion = jo.optString("question", "");
-			String serverAnswer = this.buildAnswer(this.hashPasswordClient, lQuestion, this.deviceID);
-			if(serverAnswer.equals(clientAnswer))
+			this.token = Utility.sha1(this.deviceID+this.answer+(Math.random()*1000000));
+			SocketIO socketIO = new SocketIO(this.getSocket());
+			socketIO.resetRequestHeader();
+			socketIO.addRequestHeader("Command", "token");
+			socketIO.addRequestHeader("Content-Type", "application/json");				
+			TimeZone timeZone = TimeZone.getDefault();
+			timeZone.getID();
+			long timeZoneOffset = (timeZone.getRawOffset() / 60000);
+			String time = Utility.now("yyyy-MM-dd HH:mm:ss")+"."+(System.nanoTime()%1000000000/1000);
+			JSONObject jo2 = new JSONObject();
+			long waitToNext = Math.round(Config.getInspectionInterval() * 1.05);
+			/**
+			 * The server promises no later than waitToNext milliseconds to send a new token
+			 */
+			jo2.put("waitToNext", waitToNext);
+			jo2.put("deviceID", this.deviceID);
+			jo2.put("token", this.token);
+			jo2.put("time", time);
+			jo2.put("timeZone", timeZoneOffset);
+			try 
 			{
-				this.token = Utility.sha1(this.deviceID+this.answer+(Math.random()*1000000));
-				SocketIO socketIO = new SocketIO(this.getSocket());
-				socketIO.resetRequestHeader();
-				socketIO.addRequestHeader("Command", "token");
-				socketIO.addRequestHeader("Content-Type", "application/json");				
-				TimeZone timeZone = TimeZone.getDefault();
-				timeZone.getID();
-				long timeZoneOffset = (timeZone.getRawOffset() / 60000);
-				String time = Utility.now("yyyy-MM-dd HH:mm:ss")+"."+(System.nanoTime()%1000000000/1000);
-				JSONObject jo2 = new JSONObject();
-				long waitToNext = Math.round(Config.getInspectionInterval() * 1.05);
-				/**
-				 * The server promises no later than waitToNext milliseconds to send a new token
-				 */
-				jo2.put("waitToNext", waitToNext);
-				jo2.put("deviceID", this.deviceID);
-				jo2.put("token", this.token);
-				jo2.put("time", time);
-				jo2.put("timeZone", timeZoneOffset);
-				try 
+				sendToken = socketIO.write(jo2.toString());	
+				String address = this.getSocket().getInetAddress().getHostAddress().replace("/", "").trim();
+				if(sendToken)
 				{
-					sendToken = socketIO.write(jo2.toString());	
-					String address = this.getSocket().getInetAddress().getHostAddress().replace("/", "").trim();
-					if(sendToken)
-					{
-						this.setConnected(true);
-						this.updateDeviceToken(this.apiID, this.deviceID, this.groupID, this.token, address, time);
-						this.connectionEvaluator = new ConnectionEvaluator(this, Config.getInspectionInterval());
-						this.connectionEvaluator.start();
-					}
-					return sendToken;
-				} 
-				catch (IOException e)
-				{
-					if(Config.isPrintStackTrace()) 
-					{
-						e.printStackTrace();
-					}
-					try 
-					{
-						this.getSocket().close();
-					} 
-					catch (IOException e2) 
-					{
-						if(Config.isPrintStackTrace())
-						{
-							e2.printStackTrace();
-						}
-					}
+					this.setConnected(true);
+					this.updateDeviceToken(this.apiID, this.deviceID, this.groupID, this.token, address, time);
+					this.connectionEvaluator = new ConnectionEvaluator(this, Config.getInspectionInterval());
+					this.connectionEvaluator.start();
 				}
-			}
-			else
+				return sendToken;
+			} 
+			catch (IOException e)
 			{
+				if(Config.isPrintStackTrace()) 
+				{
+					e.printStackTrace();
+				}
 				try 
 				{
 					this.getSocket().close();
 				} 
-				catch (IOException e) 
+				catch (IOException e2) 
 				{
-					if(Config.isPrintStackTrace()) 
+					if(Config.isPrintStackTrace())
 					{
-						e.printStackTrace();
+						e2.printStackTrace();
 					}
 				}
 			}
 		}
-		catch(SQLException e)
+		else
 		{
-			if(Config.isPrintStackTrace()) 
-			{
-				e.printStackTrace();
-			}
 			try 
 			{
 				this.getSocket().close();
 			} 
-			catch (IOException e2) 
+			catch (IOException e) 
 			{
 				if(Config.isPrintStackTrace()) 
 				{
-					e2.printStackTrace();
+					e.printStackTrace();
 				}
 			}
 		}
@@ -662,52 +575,54 @@ public class NotificationHandler extends Thread
 	 * @throws SQLException if any SQL errors
 	 * @throws DatabaseTypeException if database type not supported 
 	 */
-	private void updateDeviceToken(long apiID, String deviceID, long groupID, String token, String address, String time) throws SQLException, DatabaseTypeException 
+	private void updateDeviceToken(long apiID, String deviceID, long groupID, String token, String address, String time)
 	{
-		QueryBuilder query1 = new QueryBuilder(Config.getDatabaseConfig1().getDatabaseType());
-		deviceID = query1.escapeSQL(deviceID);
-		token = query1.escapeSQL(token);
-		address = query1.escapeSQL(address);
-		time = query1.escapeSQL(time);
+		Database database1 = new Database(Config.getDatabaseConfig1());
+		try
+		{		
+			database1.connect();
+			QueryBuilder query1 = new QueryBuilder(database1.getDatabaseType());
+			deviceID = query1.escapeSQL(deviceID);
+			token = query1.escapeSQL(token);
+			address = query1.escapeSQL(address);
+			time = query1.escapeSQL(time);
+			
 		
-	
-		int connection = 0;
-		ArrayList<Device> cons;
-		try 
-		{
-			cons = Client.get(deviceID, apiID, groupID);
-			if(cons != null)
+			int connection = 0;
+			List<Device> cons;
+			try 
 			{
-				connection = cons.size();			
-			}
-			else
+				cons = Client.get(deviceID, apiID, groupID);
+				if(cons != null)
+				{
+					connection = cons.size();			
+				}
+				else
+				{
+					connection = 1;
+				}
+			} 
+			catch (ClientException e) 
 			{
 				connection = 1;
 			}
-		} 
-		catch (ClientException e) 
-		{
-			connection = 1;
-		}
-		if(connection == 0)
-		{
-			connection = 1;
-		}
-		try
-		{
+			if(connection == 0)
+			{
+				connection = 1;
+			}
 			String sqlUpdate = query1.newQuery()
 					.update(Config.getTablePrefix()+"client")
 					.set("connection = '"+connection+"', last_token = '"+token+"', last_ip = '"+address+"', last_time = '"+time+"' ")
 					.where("device_id = '"+deviceID+"' and api_id = "+apiID+" ")
 					.toString();
-			this.database1.execute(sqlUpdate);
+			database1.execute(sqlUpdate);
 		}
-		catch(SQLException e)
+		catch(SQLException | ClassNotFoundException | DatabaseTypeException | NullPointerException | IllegalArgumentException e)
 		{
-			if(Config.isPrintStackTrace())
-			{
-				e.printStackTrace();
-			}
+			
+		}
+		finally {
+			database1.disconnect();
 		}
 		
 	}
@@ -952,34 +867,54 @@ public class NotificationHandler extends Thread
 	 */
 	private boolean registerDevice(String deviceID) throws NotificationException, SQLException, IOException, SocketException, JSONException, DatabaseTypeException, NoSuchAlgorithmException, NullPointerException, IllegalArgumentException 
 	{
-		QueryBuilder query1 = new QueryBuilder(Config.getDatabaseConfig1().getDatabaseType());
 		boolean success = false;
-		String address = this.getSocket().getInetAddress().getHostAddress().toString().replace("/", "").trim();
-		deviceID = query1.escapeSQL(deviceID);
-		String lToken = query1.escapeSQL(this.token);
-		address = query1.escapeSQL(address);
-		ResultSet rs;	
-		String sqlSelect = query1.newQuery()
-				.select("device_id")
-				.from(Config.getTablePrefix()+"client")
-				.where("device_id = '"+deviceID+"' and api_id = "+this.apiID+" ")
-				.toString();
-		rs = this.database1.executeQuery(sqlSelect);
-		if(!rs.isBeforeFirst())
+		ResultSet rs = null;
+		Database database1 = new Database(Config.getDatabaseConfig1());
+		try
 		{
-			String slqInsert = query1.newQuery()
-					.insert()
-					.into(Config.getTablePrefix()+"client")
-					.fields("(device_id, api_id, last_token, last_time, last_ip, time_create)")
-					.values("('"+deviceID+"', "+this.apiID+", '"+lToken+"', now(), '"+address+"', now())")
+			database1.connect();
+			QueryBuilder query1 = new QueryBuilder(database1.getDatabaseType());
+			String address = this.getSocket().getInetAddress().getHostAddress().toString().replace("/", "").trim();
+			deviceID = query1.escapeSQL(deviceID);
+			String lToken = query1.escapeSQL(this.token);
+			address = query1.escapeSQL(address);
+			String sqlSelect = query1.newQuery()
+					.select("device_id")
+					.from(Config.getTablePrefix()+"client")
+					.where("device_id = '"+deviceID+"' and api_id = "+this.apiID+" ")
 					.toString();
-			this.database1.execute(slqInsert);				
-			success = true;
-			this.sendQuestion();
+			rs = database1.executeQuery(sqlSelect);
+			if(!rs.isBeforeFirst())
+			{
+				String slqInsert = query1.newQuery()
+						.insert()
+						.into(Config.getTablePrefix()+"client")
+						.fields("(device_id, api_id, last_token, last_time, last_ip, time_create)")
+						.values("('"+deviceID+"', "+this.apiID+", '"+lToken+"', now(), '"+address+"', now())")
+						.toString();
+				database1.execute(slqInsert);				
+				success = true;
+				this.sendQuestion();
+			}
+			else
+			{
+				throw new NotificationException("Device already exists");
+			}
 		}
-		else
+		catch(SQLException | ClassNotFoundException | DatabaseTypeException | NoSuchAlgorithmException | NullPointerException | IllegalArgumentException e)
 		{
-			throw new NotificationException("Device already exists");
+			
+		}
+		finally {
+			if(rs != null)
+			{
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			database1.disconnect();
 		}
 		return success;
 	}
@@ -991,32 +926,51 @@ public class NotificationHandler extends Thread
 	 * @throws SQLException if any SQL errors
 	 * @throws DatabaseTypeException if database type not supported 
 	 */
-	private boolean unregisterDevice(String deviceID) throws NotificationException, SQLException, DatabaseTypeException
+	private boolean unregisterDevice(String deviceID) throws NotificationException
 	{
-		QueryBuilder query1 = new QueryBuilder(Config.getDatabaseConfig1().getDatabaseType());
 		boolean success = false;
-		deviceID = query1.escapeSQL(deviceID);
-		ResultSet rs;	
-		String sqlSelect = query1.newQuery()
-				.select("device_id")
-				.from(Config.getTablePrefix()+"client")
-				.where("device_id = '"+deviceID+"' and api_id = "+this.apiID+" ")
-				.toString();
-		rs = this.database1.executeQuery(sqlSelect);
-		if(rs.isBeforeFirst())
+		ResultSet rs = null;
+		Database database1 = new Database(Config.getDatabaseConfig1());
+		try
 		{
-			String slqDelete = query1.newQuery()
-					.delete()
+			database1.connect();
+			QueryBuilder query1 = new QueryBuilder(database1.getDatabaseType());
+			deviceID = query1.escapeSQL(deviceID);
+			String sqlSelect = query1.newQuery()
+					.select("device_id")
 					.from(Config.getTablePrefix()+"client")
 					.where("device_id = '"+deviceID+"' and api_id = "+this.apiID+" ")
 					.toString();
-			this.database1.execute(slqDelete);
-			success = true;
+			rs = database1.executeQuery(sqlSelect);
+			if(rs.isBeforeFirst())
+			{
+				String slqDelete = query1.newQuery()
+						.delete()
+						.from(Config.getTablePrefix()+"client")
+						.where("device_id = '"+deviceID+"' and api_id = "+this.apiID+" ")
+						.toString();
+				database1.execute(slqDelete);
+				success = true;
+			}
+			else
+			{
+				throw new NotificationException("Device not exists");
+			}
 		}
-		else
+		catch(SQLException | ClassNotFoundException | DatabaseTypeException | NullPointerException | IllegalArgumentException e)
 		{
-			success = false;
-			throw new NotificationException("Device not exists");
+			
+		}
+		finally {
+			if(rs != null)
+			{
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			database1.disconnect();
 		}
 		return success;
 	}
@@ -1028,27 +982,48 @@ public class NotificationHandler extends Thread
 	 */
 	private void markAsSent(List<String> ids) throws SQLException, DatabaseTypeException 
 	{
-		String offline = "";
-		int max = ids.size();
-		int i;
-		for(i = 0; i < max; i++)
+		ResultSet rs = null;
+		Database database1 = new Database(Config.getDatabaseConfig1());
+		try
 		{
-			if(i > 0)
+			database1.connect();
+			StringBuilder offline = new StringBuilder();
+			int max = ids.size();
+			int i;
+			for(i = 0; i < max; i++)
 			{
-				offline += ",";
+				if(i > 0)
+				{
+					offline.append(",");
+				}
+				offline.append(ids.get(i));			
 			}
-			offline += ids.get(i);			
+			if(max > 0)
+			{
+				QueryBuilder query1 = new QueryBuilder(database1.getDatabaseType());
+				String sqlCommand = query1.newQuery() 
+						.update(Config.getTablePrefix()+"notification")
+						.set("is_sent = 1, time_sent = now()")
+						.where("notification_id in ("+offline.toString()+")")
+						.toString();
+				database1.execute(sqlCommand);
+			}		
 		}
-		if(max > 0)
+		catch(SQLException | ClassNotFoundException | DatabaseTypeException | NullPointerException | IllegalArgumentException e)
 		{
-			QueryBuilder query1 = new QueryBuilder(this.database1.getDatabaseType());
-			String sqlCommand = query1.newQuery() 
-					.update(Config.getTablePrefix()+"notification")
-					.set("is_sent = 1, time_sent = now()")
-					.where("notification_id in ("+offline+")")
-					.toString();
-			this.database1.execute(sqlCommand);
-		}		
+			
+		}
+		finally {
+			if(rs != null)
+			{
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			database1.disconnect();
+		}
 	}
 	public boolean isRunning() {
 		return running;

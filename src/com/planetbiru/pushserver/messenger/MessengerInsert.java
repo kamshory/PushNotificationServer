@@ -47,18 +47,6 @@ public class MessengerInsert extends Thread
 	 */
 	private long notificationID = 0;
 	/**
-	 * Primary Database object
-	 */
-	private Database database1;
-	/**
-	 * Secondary Database object
-	 */
-	private Database database2;
-	/**
-	 * Tertiary Database object
-	 */
-	private Database database3;
-	/**
 	 * Command
 	 */
 	private String command = "";
@@ -87,24 +75,6 @@ public class MessengerInsert extends Thread
 	public void setNotificationID(long notificationID) {
 		this.notificationID = notificationID;
 	}
-	public Database getDatabase1() {
-		return database1;
-	}
-	public void setDatabase1(Database database1) {
-		this.database1 = database1;
-	}
-	public Database getDatabase2() {
-		return database2;
-	}
-	public void setDatabase2(Database database2) {
-		this.database2 = database2;
-	}
-	public Database getDatabase3() {
-		return database3;
-	}
-	public void setDatabase3(Database database3) {
-		this.database3 = database3;
-	}
 	public String getCommand() {
 		return command;
 	}
@@ -131,15 +101,12 @@ public class MessengerInsert extends Thread
 	 * @param database3 Tertiary Database object
 	 * @param command Command
 	 */
-	public MessengerInsert(long apiID, List<Device> deviceList, long groupID, String data, long notificationID, Database database1, Database database2, Database database3, String command)
+	public MessengerInsert(long apiID, List<Device> deviceList, long groupID, String data, long notificationID, String command)
 	{
 		this.deviceList  = deviceList;
 		this.apiID = apiID;
 		this.groupID = groupID;
 		this.data = data;
-		this.database1 = database1;
-		this.database2 = database2;
-		this.database3 = database3;
 		this.notificationID = notificationID;
 		if(command.equals(""))
 		{
@@ -249,12 +216,28 @@ public class MessengerInsert extends Thread
 	 */
 	public void markAsSent(long notificationID) throws SQLException, DatabaseTypeException 
 	{
-		QueryBuilder query1 = new QueryBuilder(Config.getDatabaseConfig1().getDatabaseType());
-		String sqlCommand = query1.newQuery()
-				.update(Config.getTablePrefix()+"notification")
-				.set("is_sent = 1, time_sent = now()")
-				.where("notification_id = "+notificationID)
-				.toString();
-		this.database1.execute(sqlCommand);	
+		Database database1 = new Database(Config.getDatabaseConfig1());
+		try
+		{
+			database1.connect();
+			QueryBuilder query1 = new QueryBuilder(Config.getDatabaseConfig1().getDatabaseType());
+			String sqlCommand = query1.newQuery()
+					.update(Config.getTablePrefix()+"notification")
+					.set("is_sent = 1, time_sent = now()")
+					.where("notification_id = "+notificationID)
+					.toString();
+			database1.execute(sqlCommand);	
+		}
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException e)
+		{
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
+		}
+		finally {
+			database1.disconnect();
+		}
+
 	}	
 }

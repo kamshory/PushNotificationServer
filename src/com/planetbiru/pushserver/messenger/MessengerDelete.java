@@ -7,6 +7,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -20,7 +21,6 @@ import com.planetbiru.pushserver.client.Client;
 import com.planetbiru.pushserver.client.ClientException;
 import com.planetbiru.pushserver.client.Device;
 import com.planetbiru.pushserver.config.Config;
-import com.planetbiru.pushserver.database.Database;
 import com.planetbiru.pushserver.database.DatabaseTypeException;
 import com.planetbiru.pushserver.notification.Notification;
 import com.planetbiru.pushserver.utility.Encryption;
@@ -52,18 +52,6 @@ public class MessengerDelete extends Thread
 	 * Notification ID
 	 */
 	private long notificationID = 0;
-	/**
-	 * Primary Database object
-	 */
-	private Database database1;
-	/**
-	 * Secondary Database object
-	 */
-	private Database database2;
-	/**
-	 * Tertiary Database object
-	 */
-	private Database database3;
 	/**
 	 * Command
 	 */
@@ -102,24 +90,6 @@ public class MessengerDelete extends Thread
 	public void setNotificationID(long notificationID) {
 		this.notificationID = notificationID;
 	}
-	public Database getDatabase1() {
-		return database1;
-	}
-	public void setDatabase1(Database database1) {
-		this.database1 = database1;
-	}
-	public Database getDatabase2() {
-		return database2;
-	}
-	public void setDatabase2(Database database2) {
-		this.database2 = database2;
-	}
-	public Database getDatabase3() {
-		return database3;
-	}
-	public void setDatabase3(Database database3) {
-		this.database3 = database3;
-	}
 	public String getCommand() {
 		return command;
 	}
@@ -145,14 +115,11 @@ public class MessengerDelete extends Thread
 	 * @param database3 Database 3
 	 * @param command Command
 	 */
-	public MessengerDelete(long apiID, String deviceID, long groupID, long requestID, JSONArray data, Database database1, Database database2, Database database3, String command)
+	public MessengerDelete(long apiID, String deviceID, long groupID, long requestID, JSONArray data, String command)
 	{
 		this.apiID = apiID;
 		this.data = data;
 		this.requestID = requestID;
-		this.database1 = database1;
-		this.database2 = database2;
-		this.database3 = database3;
 		if(command.equals(""))
 		{
 			command = "delete-notification";
@@ -169,7 +136,7 @@ public class MessengerDelete extends Thread
 	 * @throws SQLException if any SQL errors
 	 * @throws DatabaseTypeException if database type not supported 
 	 */
-	public void inserDeleteHistory(Notification notification, long apiID, long groupID, JSONArray data) throws JSONException, SQLException, DatabaseTypeException
+	public void inserDeleteHistory(Notification notification, long apiID, long groupID, JSONArray data) 
 	{
 		notification.insertDeletionLog(this.apiID, groupID, this.data);
 	}
@@ -178,21 +145,11 @@ public class MessengerDelete extends Thread
 	 */
 	public void run()
 	{
-		Notification notification = new Notification(this.database1, this.database2, this.database3);
-		try 
-		{
-			this.inserDeleteHistory(notification, this.apiID, this.groupID, this.data);
-		} 
-		catch (JSONException | SQLException | DatabaseTypeException e) 
-		{
-			if(Config.isPrintStackTrace()) 
-			{
-				e.printStackTrace();
-			}
-		} 
+		Notification notification = new Notification();
+		this.inserDeleteHistory(notification, this.apiID, this.groupID, this.data);
 		try
 		{
-			ArrayList<Device> deviceList = new ArrayList<>();
+			List<Device> deviceList = new ArrayList<>();
 			try 
 			{
 				int length = this.data.length();

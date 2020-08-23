@@ -38,7 +38,7 @@ public class XMLTokener extends JSONTokener {
    /** The table of entity values. It initially contains Character values for
     * amp, apos, gt, lt, quot.
     */
-   public static final java.util.HashMap<String, Character> entity;
+   private static final java.util.HashMap<String, Character> entity;
 
    static {
        entity = new java.util.HashMap<String, Character>(8);

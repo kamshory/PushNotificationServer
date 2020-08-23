@@ -107,16 +107,6 @@ public class JSONObject {
      */
     private static final class Null {
 
-        /**
-         * There is only intended to be a single instance of the NULL object,
-         * so the clone method returns itself.
-         *
-         * @return NULL.
-         */
-        @Override
-        protected final Object clone() {
-            return this;
-        }
 
         /**
          * A Null object is equal to the null value and to itself.
@@ -1138,18 +1128,19 @@ public class JSONObject {
             return (BigDecimal) val;
         }
         if (val instanceof BigInteger){
-            return new BigDecimal((BigInteger) val);
+            return BigDecimal.valueOf((long) val);
         }
         if (val instanceof Double || val instanceof Float){
-            return new BigDecimal(((Number) val).doubleValue());
+            return BigDecimal.valueOf((double)val);
         }
         if (val instanceof Long || val instanceof Integer
                 || val instanceof Short || val instanceof Byte){
-            return new BigDecimal(((Number) val).longValue());
+            return BigDecimal.valueOf((long) val);
         }
         // don't check if it's a string in case of unchecked Number subclasses
         try {
-            return new BigDecimal(val.toString());
+        	Double num = new Double(val.toString());
+            return BigDecimal.valueOf(num);
         } catch (Exception e) {
             return defaultValue;
         }
@@ -1178,7 +1169,7 @@ public class JSONObject {
             return ((BigDecimal) val).toBigInteger();
         }
         if (val instanceof Double || val instanceof Float){
-            return new BigDecimal(((Number) val).doubleValue()).toBigInteger();
+            return BigInteger.valueOf((long) val);
         }
         if (val instanceof Long || val instanceof Integer
                 || val instanceof Short || val instanceof Byte){
@@ -1546,6 +1537,10 @@ public class JSONObject {
     }
 
     private String getKeyNameFromMethod(Method method) {
+    	if(method == null)
+    	{
+    		return null;
+    	}
         final int ignoreDepth = getAnnotationDepth(method, JSONPropertyIgnore.class);
         if (ignoreDepth > 0) {
             final int forcedNameDepth = getAnnotationDepth(method, JSONPropertyName.class);
@@ -1560,6 +1555,8 @@ public class JSONObject {
             return annotation.value();
         }
         String key;
+        try
+        {
         final String name = method.getName();
         if (name.startsWith("get") && name.length() > 3) {
             key = name.substring(3);
@@ -1578,6 +1575,11 @@ public class JSONObject {
             key = key.toLowerCase(Locale.ROOT);
         } else if (!Character.isUpperCase(key.charAt(1))) {
             key = key.substring(0, 1).toLowerCase(Locale.ROOT) + key.substring(1);
+        }
+        }
+        catch(NullPointerException e)
+        {
+        	key = null;
         }
         return key;
     }
@@ -2289,7 +2291,7 @@ public class JSONObject {
         try {
             return this.toString(0);
         } catch (Exception e) {
-            return null;
+            return "";
         }
     }
 
@@ -2427,7 +2429,7 @@ public class JSONObject {
 
     static final Writer writeValue(Writer writer, Object value,
             int indentFactor, int indent) throws JSONException, IOException {
-        if (value == null || value.equals(null)) {
+        if (value == null) {
             writer.write("null");
         } else if (value instanceof JSONString) {
             Object o;

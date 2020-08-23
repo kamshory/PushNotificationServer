@@ -763,7 +763,7 @@ public class JSONArray implements Iterable<Object> {
             return ((BigDecimal) val).toBigInteger();
         }
         if (val instanceof Double || val instanceof Float){
-            return new BigDecimal(((Number) val).doubleValue()).toBigInteger();
+        	return BigDecimal.valueOf((long) val).toBigInteger();
         }
         if (val instanceof Long || val instanceof Integer
                 || val instanceof Short || val instanceof Byte){
@@ -800,17 +800,18 @@ public class JSONArray implements Iterable<Object> {
             return (BigDecimal) val;
         }
         if (val instanceof BigInteger){
-            return new BigDecimal((BigInteger) val);
+            return BigDecimal.valueOf((long) val);
         }
         if (val instanceof Double || val instanceof Float){
-            return new BigDecimal(((Number) val).doubleValue());
+            return BigDecimal.valueOf((double) val);
         }
         if (val instanceof Long || val instanceof Integer
                 || val instanceof Short || val instanceof Byte){
-            return new BigDecimal(((Number) val).longValue());
+            return BigDecimal.valueOf((long) val);
         }
         try {
-            return new BigDecimal(val.toString());
+        	Double obj = new Double(val.toString());
+            return BigDecimal.valueOf(obj);
         } catch (Exception e) {
             return defaultValue;
         }
@@ -1393,7 +1394,7 @@ public class JSONArray implements Iterable<Object> {
         try {
             return this.toString(0);
         } catch (Exception e) {
-            return null;
+            return "";
         }
     }
 

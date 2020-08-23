@@ -31,7 +31,6 @@ import com.planetbiru.pushserver.database.DatabaseFunctionFoundException;
 import com.planetbiru.pushserver.database.DatabaseTypeException;
 import com.planetbiru.pushserver.database.QueryBuilder;
 import com.planetbiru.pushserver.database.TableNotFoundException;
-import com.planetbiru.pushserver.gc.GCManager;
 import com.planetbiru.pushserver.httphandler.PusherHandler;
 import com.planetbiru.pushserver.httphandler.WelcomeHandler;
 import com.planetbiru.pushserver.utility.ProcessKiller;
@@ -175,277 +174,109 @@ public class Application
 				} 
 	    	}
 	
-			boolean dbok1 = false;
-			boolean dbok2 = false;
-			boolean dbok3 = false;
-	
-			Database database1 = new Database(Config.getDatabaseConfig1());
-			Database database2 = new Database(Config.getDatabaseConfig2());
-			Database database3 = new Database(Config.getDatabaseConfig3());
-	
-			if(configured)
+	    	Config.setDebugMode(debugMode.equals("true") || debugMode.equals("yes") || debugMode.equals("ok"));
+			
+			boolean databaseValid = false;
+			try 
 			{
-				if(debugMode.toUpperCase().trim().equals("TRUE"))
-	    		{
-	    			Config.setDebugMode(true);
-	    		}
-	    		else if(debugMode.toUpperCase().trim().equals("FALSE"))
-	    		{
-	    			Config.setDebugMode(false);
-	    		}
-				GCManager gcManager = new GCManager(Config.getDatabaseConfig1(), Config.getDatabaseConfig2(), Config.getDatabaseConfig3());
-				gcManager.start();			
+				if(Config.isPusherSSLEnabled())
+				{
+					HttpsServer requestHandlerHTTPS;
+					try 
+					{
+						requestHandlerHTTPS = HttpsServer.create(new InetSocketAddress(Config.getPusherPortSSL()), 0);
+					    char[] password = Config.getKeystorePassword().toCharArray();
+					    KeyStore keyStore;
+						try 
+						{
+							keyStore = KeyStore.getInstance("JKS");
+							FileInputStream fileInputStream = new FileInputStream (Config.getKeystoreFile());
+							SSLContext sslContext = SSLContext.getInstance("TLS");
+							keyStore.load (fileInputStream, password);
+						    KeyManagerFactory keyManagementFactory = KeyManagerFactory.getInstance("SunX509");
+						    keyManagementFactory.init (keyStore, password);
+						    TrustManagerFactory trustFactory = TrustManagerFactory.getInstance("SunX509");
+						    trustFactory.init (keyStore);
+						    sslContext.init(keyManagementFactory.getKeyManagers(), trustFactory.getTrustManagers(), null);							    
+							HttpsConfigurator httpsConfigurator = new HttpsConfigurator(sslContext);
+							requestHandlerHTTPS.setHttpsConfigurator(httpsConfigurator);										
+							requestHandlerHTTPS.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextPusher(), new PusherHandler("push-notification"));
+							requestHandlerHTTPS.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextRemover(), new PusherHandler("delete-notification"));	
+							requestHandlerHTTPS.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextCreateGroup(), new PusherHandler("create-group"));		
+							requestHandlerHTTPS.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextRegisterDevice(), new PusherHandler("register-device"));		
+							requestHandlerHTTPS.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextUnregisterDevice(), new PusherHandler("unregister-device"));		
+							requestHandlerHTTPS.createContext("/", new WelcomeHandler("welcome"));
+							requestHandlerHTTPS.createContext("/ping", new WelcomeHandler("ping"));
+							requestHandlerHTTPS.start();
+							System.out.println("SSL Service for pusher is started");
+						} 
+					    catch (NoSuchAlgorithmException | CertificateException | UnrecoverableKeyException | KeyManagementException e) 
+					    {
+					    	if(Config.isPrintStackTrace())
+							{
+					    		e.printStackTrace();
+							}
+						} 						
+						catch (KeyStoreException e) 
+						{
+							if(Config.isPrintStackTrace())
+							{
+					    		e.printStackTrace();
+							}
+						}
+					} 
+					catch (IOException e) 
+					{
+						if(Config.isPrintStackTrace())
+						{
+							e.printStackTrace();
+						}
+					}
+				}						
+				HttpServer requestHandlerHTTP;
 				try 
 				{
-					dbok1 = database1.connect();
-					dbok2 = database2.connect();
-					dbok3 = database3.connect();
+					requestHandlerHTTP = HttpServer.create(new InetSocketAddress(Config.getPusherPort()), 0);
+					requestHandlerHTTP.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextPusher(), new PusherHandler("push-notification"));
+					requestHandlerHTTP.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextRemover(), new PusherHandler("delete-notification"));			
+					requestHandlerHTTP.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextCreateGroup(), new PusherHandler("create-group"));			
+					requestHandlerHTTP.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextRegisterDevice(), new PusherHandler("register-device"));			
+					requestHandlerHTTP.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextUnregisterDevice(), new PusherHandler("unregister-device"));			
+					requestHandlerHTTP.createContext("/", new WelcomeHandler("welcome"));
+					requestHandlerHTTP.createContext("/ping", new WelcomeHandler("ping"));
+					requestHandlerHTTP.start();
+					System.out.println("Service for pusher is started");
 				} 
-				catch (ClassNotFoundException | SQLException e1) 
+				catch (IOException e) 
 				{
-					if(Config.isPrintStackTrace())
-					{	
-						e1.printStackTrace();
-					}
-					dbok1 = false;
-					dbok2 = false;
-					dbok3 = false;
-					while(!dbok1)
-					{
-						if(Config.isDebugMode())
-						{
-							System.out.println("Database Error: "+e1.getMessage());
-							System.out.println("Reconnect in  : "+Config.getWaitDatabaseReconnect()+" miliseconds");
-						}
-						try 
-						{
-							Thread.sleep(Config.getWaitDatabaseReconnect());
-						} 
-						catch (InterruptedException e) 
-						{
-							if(Config.isPrintStackTrace())
-							{
-								e.printStackTrace();
-							}
-						}
-						try 
-						{
-							dbok1 = database1.connect();
-							dbok2 = database2.connect();
-							dbok3 = database3.connect();
-						} 
-						catch (ClassNotFoundException | SQLException e) 
-						{
-							if(Config.isPrintStackTrace())
-							{
-								e.printStackTrace();
-							}
-							dbok1 = false;
-							dbok2 = false;
-							dbok3 = false;
-						} 
-						catch (DatabaseTypeException e) 
-						{
-							if(Config.isDebugMode())
-							{
-								System.err.println("Unsupported database type. Make sure that you only use MariaDB, MySQL or PostgreSQL");
-							}
-							if(Config.isPrintStackTrace())
-							{
-								e.printStackTrace();
-							}
-						}
-					}
-				} 
-				catch (DatabaseTypeException e) 
-				{
-					if(Config.isDebugMode())
-					{
-						System.err.println("Unsupported database type. Make sure that you only use MariaDB, MySQL or PostgreSQL");
-					}
 					if(Config.isPrintStackTrace())
 					{
 						e.printStackTrace();
 					}
 				}
-			}
-			else
+				
+				if(Config.isNotificationSSLEnabled())
+				{
+					Application.notificationServerSSL = new NotificationServerSSL();
+					Application.notificationServerSSL.start();
+					System.out.println("SSL Service for notification is started");
+				}
+				
+				Application.notificationServer = new NotificationServer();
+				Application.notificationServer.start();
+				System.out.println("Service for notification is started");
+				
+			} 
+			catch(IndexOutOfBoundsException e1)
 			{
-				if(Config.isDebugMode())
+				if(Config.isPrintStackTrace())
 				{
-					System.err.println("Database configuration error. Please fix it first!");
+					e1.printStackTrace();
 				}
+				databaseValid = false;
+				System.err.println("Database exists but errors occured while access id.");
 			}
-			
-			if(dbok1)
-			{				
-				boolean databaseValid = false;
-				try 
-				{
-					if(Application.checkDatabases(database1, database2, database3))
-					{
-						databaseValid = false;						
-						if(Config.isPusherSSLEnabled())
-						{
-							HttpsServer requestHandlerHTTPS;
-							try 
-							{
-								requestHandlerHTTPS = HttpsServer.create(new InetSocketAddress(Config.getPusherPortSSL()), 0);
-							    char[] password = Config.getKeystorePassword().toCharArray();
-							    KeyStore keyStore;
-								try 
-								{
-									keyStore = KeyStore.getInstance("JKS");
-									FileInputStream fileInputStream = new FileInputStream (Config.getKeystoreFile());
-								    try 
-								    {
-										SSLContext sslContext = SSLContext.getInstance("TLS");
-										keyStore.load (fileInputStream, password);
-									    KeyManagerFactory keyManagementFactory = KeyManagerFactory.getInstance("SunX509");
-									    keyManagementFactory.init (keyStore, password);
-									    TrustManagerFactory trustFactory = TrustManagerFactory.getInstance("SunX509");
-									    trustFactory.init (keyStore);
-									    sslContext.init(keyManagementFactory.getKeyManagers(), trustFactory.getTrustManagers(), null);							    
-										HttpsConfigurator httpsConfigurator = new HttpsConfigurator(sslContext);
-										requestHandlerHTTPS.setHttpsConfigurator(httpsConfigurator);										
-										if(Config.isConnectionPerPush())
-										{
-											requestHandlerHTTPS.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextPusher(), new PusherHandler("push-notification", Config.getDatabaseConfig1(), Config.getDatabaseConfig1(), Config.getDatabaseConfig1(), database1, database2, database3));
-											requestHandlerHTTPS.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextRemover(), new PusherHandler("delete-notification", Config.getDatabaseConfig1(), Config.getDatabaseConfig1(), Config.getDatabaseConfig1(), database1, database2, database3));	
-											requestHandlerHTTPS.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextCreateGroup(), new PusherHandler("create-group", Config.getDatabaseConfig1(), Config.getDatabaseConfig1(), Config.getDatabaseConfig1(), database1, database2, database3));		
-											requestHandlerHTTPS.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextRegisterDevice(), new PusherHandler("register-device", Config.getDatabaseConfig1(), Config.getDatabaseConfig1(), Config.getDatabaseConfig1(), database1, database2, database3));		
-											requestHandlerHTTPS.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextUnregisterDevice(), new PusherHandler("unregister-device", Config.getDatabaseConfig1(), Config.getDatabaseConfig1(), Config.getDatabaseConfig1(), database1, database2, database3));		
-										}
-										else
-										{
-											requestHandlerHTTPS.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextPusher(), new PusherHandler("push-notification", database1, database2, database3));
-											requestHandlerHTTPS.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextRemover(), new PusherHandler("delete-notification", database1, database2, database3));
-											requestHandlerHTTPS.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextCreateGroup(), new PusherHandler("create-group", database1, database2, database3));	
-											requestHandlerHTTPS.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextRegisterDevice(), new PusherHandler("register-device", database1, database2, database3));	
-											requestHandlerHTTPS.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextUnregisterDevice(), new PusherHandler("register-device", database1, database2, database3));	
-										}
-										requestHandlerHTTPS.createContext("/", new WelcomeHandler("welcome"));
-										requestHandlerHTTPS.createContext("/ping", new WelcomeHandler("ping"));
-										requestHandlerHTTPS.start();
-										System.out.println("SSL Service for pusher is started");
-									} 
-								    catch (NoSuchAlgorithmException | CertificateException | UnrecoverableKeyException | KeyManagementException e) 
-								    {
-										e.printStackTrace();
-									} 						
-								} 
-								catch (KeyStoreException e) 
-								{
-									e.printStackTrace();
-								}
-							} 
-							catch (IOException e) 
-							{
-								if(Config.isPrintStackTrace())
-								{
-									e.printStackTrace();
-								}
-							}
-						}						
-						HttpServer requestHandlerHTTP;
-						try 
-						{
-							requestHandlerHTTP = HttpServer.create(new InetSocketAddress(Config.getPusherPort()), 0);
-							if(Config.isConnectionPerPush())
-							{
-								requestHandlerHTTP.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextPusher(), new PusherHandler("push-notification", Config.getDatabaseConfig1(), Config.getDatabaseConfig1(), Config.getDatabaseConfig1(), database1, database2, database3));
-								requestHandlerHTTP.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextRemover(), new PusherHandler("delete-notification", Config.getDatabaseConfig1(), Config.getDatabaseConfig1(), Config.getDatabaseConfig1(), database1, database2, database3));			
-								requestHandlerHTTP.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextCreateGroup(), new PusherHandler("create-group", Config.getDatabaseConfig1(), Config.getDatabaseConfig1(), Config.getDatabaseConfig1(), database1, database2, database3));			
-								requestHandlerHTTP.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextRegisterDevice(), new PusherHandler("register-device", Config.getDatabaseConfig1(), Config.getDatabaseConfig1(), Config.getDatabaseConfig1(), database1, database2, database3));			
-								requestHandlerHTTP.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextUnregisterDevice(), new PusherHandler("unregister-device", Config.getDatabaseConfig1(), Config.getDatabaseConfig1(), Config.getDatabaseConfig1(), database1, database2, database3));			
-							}
-							else
-							{
-								requestHandlerHTTP.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextPusher(), new PusherHandler("push-notification", database1, database2, database3));
-								requestHandlerHTTP.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextRemover(), new PusherHandler("delete-notification", database1, database2, database3));
-								requestHandlerHTTP.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextCreateGroup(), new PusherHandler("create-group", database1, database2, database3));
-								requestHandlerHTTP.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextRegisterDevice(), new PusherHandler("register-device", database1, database2, database3));
-								requestHandlerHTTP.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextUnregisterDevice(), new PusherHandler("unregister-device", database1, database2, database3));
-							}
-							requestHandlerHTTP.createContext("/", new WelcomeHandler("welcome"));
-							requestHandlerHTTP.createContext("/ping", new WelcomeHandler("ping"));
-							requestHandlerHTTP.start();
-							System.out.println("Service for pusher is started");
-						} 
-						catch (IOException e) 
-						{
-							if(Config.isPrintStackTrace())
-							{
-								e.printStackTrace();
-							}
-						}
-						
-						if(Config.isNotificationSSLEnabled())
-						{
-							Application.notificationServerSSL = new NotificationServerSSL(database1, database2, database3);
-							Application.notificationServerSSL.start();
-							System.out.println("SSL Service for notification is started");
-						}
-						
-						Application.notificationServer = new NotificationServer(database1, database2, database3);
-						Application.notificationServer.start();
-						System.out.println("Service for notification is started");
-						
-					}
-					else
-					{
-						databaseValid = false;
-					}
-				} 
-				catch (DatabaseTypeException e1) 
-				{
-					if(Config.isPrintStackTrace())
-					{
-						e1.printStackTrace();
-					}
-					databaseValid = false;
-					System.err.println("Database type in unsupported.");
-				} 
-				catch (SQLException e1) 
-				{
-					if(Config.isPrintStackTrace())
-					{
-						e1.printStackTrace();
-					}
-					databaseValid = false;
-					System.err.println("Database exists but errors occured while access id.");
-				} 
-				catch(IndexOutOfBoundsException e1)
-				{
-					if(Config.isPrintStackTrace())
-					{
-						e1.printStackTrace();
-					}
-					databaseValid = false;
-					System.err.println("Database exists but errors occured while access id.");
-				}
-				catch (TableNotFoundException e1) 
-				{
-					if(Config.isPrintStackTrace())
-					{
-						e1.printStackTrace();
-					}
-					databaseValid = false;
-					System.err.println("Database exists but required table of function is not exists. Please import database first.");
-					System.err.println(e1.getMessage());
-				}
-				catch (DatabaseFunctionFoundException e1) 
-				{
-					if(Config.isPrintStackTrace())
-					{
-						e1.printStackTrace();
-					}
-					databaseValid = false;
-					System.err.println("Database exists but required function of function is not exists. Please import database or define function first.");
-					System.err.println(e1.getMessage());
-				}
-			}
-    	}
+		}
 	}
 	/**
 	 * Fix file path
@@ -479,7 +310,7 @@ public class Application
 	 * @throws IndexOutOfBoundsException if out of bound
 	 * @throws TableNotFoundException if required table is not exists
 	 */
-	public static boolean checkTables(Database database1, Database database2, Database database3) throws DatabaseTypeException, SQLException, IndexOutOfBoundsException, TableNotFoundException
+	public static boolean checkTables() throws DatabaseTypeException, SQLException, IndexOutOfBoundsException, TableNotFoundException
 	{
 		String prefix = Config.getTablePrefix().trim();
 		ArrayList<String> tables = new ArrayList<>();
@@ -491,58 +322,77 @@ public class Application
 		list.add(prefix+"notification");
 		list.add(prefix+"pusher_address");
 		list.add(prefix+"trash");
-		
-		QueryBuilder query1;
-		query1 = new QueryBuilder(Config.getDatabaseConfig1().getDatabaseType());
-		String sqlCommand = "";
-		String tableName = "";
-		ResultSet rs;
-		if(Config.getDatabaseConfig1().getDatabaseType().equals("postgresql"))
-		{			
-			sqlCommand = query1.newQuery()
-					.select("*")
-					.from("pg_catalog.pg_tables")
-					.where("schemaname != 'pg_catalog' and schemaname != 'information_schema'")
-					.toString();
-			rs = database1.executeQuery(sqlCommand);
-			if(rs.isBeforeFirst())
-			{
-				while(rs.next())
-				{
-					tableName = rs.getString("tablename");
-					tables.add(tableName);
-				}
-			}
-		}
-		else if(Config.getDatabaseConfig1().getDatabaseType().equals("mysql") || Config.getDatabaseConfig1().getDatabaseType().equals("mariadb"))
-		{
-			sqlCommand = query1.newQuery("show tables")
-					.toString();
-			
-			rs = database1.executeQuery(sqlCommand);
-			if(rs.isBeforeFirst())
-			{
-				while(rs.next())
-				{
-					tableName = rs.getString(1);
-					tables.add(tableName);
-				}
-			}
-		}
-		int i;
+
 		boolean valid = false;
-		for(i = 0; i < list.size(); i++)
+
+		Database database1 = new Database(Config.getDatabaseConfig1());
+		ResultSet rs = null;
+		try
 		{
-			if(tables.contains(list.get(i)))
-			{
-				valid = true;
+			database1.connect();
+			QueryBuilder query1 = new QueryBuilder(Config.getDatabaseConfig1().getDatabaseType());
+			String sqlCommand = "";
+			String tableName = "";
+			if(Config.getDatabaseConfig1().getDatabaseType().equals("postgresql"))
+			{			
+				sqlCommand = query1.newQuery()
+						.select("*")
+						.from("pg_catalog.pg_tables")
+						.where("schemaname != 'pg_catalog' and schemaname != 'information_schema'")
+						.toString();
+				rs = database1.executeQuery(sqlCommand);
+				if(rs.isBeforeFirst())
+				{
+					while(rs.next())
+					{
+						tableName = rs.getString("tablename");
+						tables.add(tableName);
+					}
+				}
 			}
-			else
+			else if(Config.getDatabaseConfig1().getDatabaseType().equals("mysql") || Config.getDatabaseConfig1().getDatabaseType().equals("mariadb"))
 			{
-				throw new TableNotFoundException("Table "+list.get(i)+" not found.");
+				sqlCommand = query1.newQuery("show tables")
+						.toString();
+				
+				rs = database1.executeQuery(sqlCommand);
+				if(rs.isBeforeFirst())
+				{
+					while(rs.next())
+					{
+						tableName = rs.getString(1);
+						tables.add(tableName);
+					}
+				}
+			}
+			int i;
+			for(i = 0; i < list.size(); i++)
+			{
+				if(tables.contains(list.get(i)))
+				{
+					valid = true;
+				}
+				else
+				{
+					throw new TableNotFoundException("Table "+list.get(i)+" not found.");
+				}
 			}
 		}
-		
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
+		{
+			
+		}
+		finally {
+			if(rs != null)
+			{
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			database1.disconnect();
+		}
 		return valid;
 	}
 	/**
@@ -557,41 +407,45 @@ public class Application
 	 * @throws TableNotFoundException if table is not exists
 	 * @throws DatabaseFunctionFoundException if function is not exists
 	 */
-	public static boolean checkFunctions(Database database1, Database database2, Database database3) throws DatabaseTypeException, SQLException, IndexOutOfBoundsException, TableNotFoundException, DatabaseFunctionFoundException
+	public static boolean checkFunctions()
 	{
 		
-		QueryBuilder query1;
-		query1 = new QueryBuilder(Config.getDatabaseConfig1().getDatabaseType());
-		String sqlCommand = "";
-		ResultSet rs;
-		sqlCommand = query1.newQuery()
-				.select("sha1('123') as result")
-				.toString();
+		boolean valid = false;
+
+		Database database1 = new Database(Config.getDatabaseConfig1());
+		ResultSet rs = null;
 		try
 		{
+			database1.connect();
+			QueryBuilder query1 = new QueryBuilder(Config.getDatabaseConfig1().getDatabaseType());
+			String sqlCommand = "";
+			sqlCommand = query1.newQuery()
+					.select("sha1('123') as result")
+					.toString();
 			rs = database1.executeQuery(sqlCommand);
 			if(rs.isBeforeFirst())
 			{
 				rs.next();
 				String val = rs.getString("result");
-				if(val.length() > 20)
-				{
-					return true;
-				}
-				else
-				{
-					throw new DatabaseFunctionFoundException("Function sha1 not found.");
-				}
-			}
-			else
-			{
-				throw new DatabaseFunctionFoundException("Function sha1 not found.");
+				valid = (val.length() > 20);
 			}
 		}
-		catch(SQLException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
 		{
-			throw new DatabaseFunctionFoundException("Function sha1 not found.");		
+			
 		}
+		finally {
+			if(rs != null)
+			{
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			database1.disconnect();
+		}
+		return valid;	
 	}
 	/**
 	 * Database validation
@@ -605,10 +459,10 @@ public class Application
 	 * @throws TableNotFoundException if required table is not exists
 	 * @throws DatabaseFunctionFoundException if function is not exists
 	 */
-	public static boolean checkDatabases(Database database1, Database database2, Database database3) throws DatabaseTypeException, SQLException, IndexOutOfBoundsException, TableNotFoundException, DatabaseFunctionFoundException
+	public static boolean checkDatabases() throws DatabaseTypeException, SQLException, IndexOutOfBoundsException, TableNotFoundException, DatabaseFunctionFoundException
 	{
-		boolean valid2 = Application.checkFunctions(database1, database2, database3);
-		boolean valid1 = Application.checkTables(database1, database2, database3);
+		boolean valid2 = Application.checkFunctions();
+		boolean valid1 = Application.checkTables();
 		return valid1 && valid2;
 	}
 	/**
