@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="jar/http-2.2.1.jar"/>
+	<classpathentry kind="lib" path="jar/httpclient-4.5.3.jar"/>
+	<classpathentry kind="lib" path="jar/httpcore-4.4.4.jar"/>
+	<classpathentry kind="lib" path="jar/com.mysql.jdbc_5.1.5.jar"/>
+	<classpathentry kind="lib" path="jar/postgresql-9.2-1002.jdbc3.jar"/>
+	<classpathentry kind="lib" path="jar/mail.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
