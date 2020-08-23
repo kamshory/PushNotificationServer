@@ -50,12 +50,11 @@ To get notification client, please visit https://github.com/kamshory/PushNotific
 | HTTP and HTTPS Pusher            	|   ✔  	|    ✔    	|
 | HTTP and HTTPS Remover           	|   ✔  	|    ✔    	|
 | Native and SSL Socket           	|   ✔  	|    ✔    	|
-| End-to-End Encryption            	|   ✘  	|    ✔    	|
-| Commercial Use                  	|   ✘  	|    ✔    	|
-| Production Mode                  	|   ✘  	|    ✔    	|
-| Encrypted Database Configuration 	|   ✘  	|    ✔    	|
-| Encrypted Keystore Password      	|   ✘  	|    ✔    	|
-| Send Mail for Pusher Approval     |   ✘    |    ✔      |
+| Commercial Use                  	|   ✔  	|    ✔    	|
+| Production Mode                  	|   ✔  	|    ✔    	|
+| Encrypted Database Configuration 	|   ✘  	|    ✔     |
+| Encrypted Keystore Password      	|   ✘  	|    ✔     |
+| Send Mail for Pusher Approval     |   ✘   |    ✔     |
 
 ## Requirement
 1. Operating System
