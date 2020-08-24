@@ -1,4 +1,4 @@
-package com.planetbiru.code;
+package com.planetbiru.pushserver.code;
 
 /**
  * Response code

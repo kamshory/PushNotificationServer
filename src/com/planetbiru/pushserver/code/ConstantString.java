@@ -1,4 +1,4 @@
-package com.planetbiru.code;
+package com.planetbiru.pushserver.code;
 
 public class ConstantString {
 	private ConstantString()
@@ -7,5 +7,4 @@ public class ConstantString {
 	}
 
 	public static final String DEVICE_NOT_FOUND = "Device not found";
-
 }

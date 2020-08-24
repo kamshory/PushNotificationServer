@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.planetbiru.code.ConstantString;
+import com.planetbiru.pushserver.code.ConstantString;
 
 /**
  * <strong>Client</strong> is object contains Device
