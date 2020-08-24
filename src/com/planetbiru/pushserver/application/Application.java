@@ -24,6 +24,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 
 import org.json.JSONException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.planetbiru.pushserver.config.Config;
 import com.planetbiru.pushserver.database.Database;
@@ -48,6 +50,7 @@ import com.sun.net.httpserver.HttpsServer;
  */
 public class Application 
 {
+	private static Logger logger = LoggerFactory.getLogger(Application.class);
 	private static NotificationServer notificationServer;
 	private static NotificationServerSSL notificationServerSSL;
 	private static long requestID = 0;
@@ -62,7 +65,6 @@ public class Application
 	 * Main method
 	 * @param args Arguments when application is executed
 	 */
-	@SuppressWarnings("unused")
 	public static void main(String[] args)
 	{
     	String pathName = new java.io.File(Application.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName();    	
@@ -84,17 +86,20 @@ public class Application
     	action = Utility.getFirst(args, "action", "", "=").toLowerCase();
     	configPath = Utility.getFirst(args, "config", "", "=").trim();
     	debugMode = Utility.getFirst(args, "debug-mode", "", "=").trim();
-    	if(args.length > 0 && args[0].contains("-h") || args[0].contains("--help"))
+    	if(args.length > 0)
     	{
-    		System.out.println("Push Notification Server version "+Config.getVersion()+"\r\n");	    		
-    		System.out.println("|-----------------------------|--------------------------------------|");
-    		System.out.println("| Argument                    | Meaning                              |");
-    		System.out.println("|-----------------------------|--------------------------------------|");
-    		System.out.println("| config={config-path-file}   | Set configuration path file          |");
-    		System.out.println("| action=start                | Start service                        |");
-    		System.out.println("| action=stop                 | Stop service/kill service            |");
-    		System.out.println("| debug-mode=true             | Run service in debug mode            |");
-    		System.out.println("|-----------------------------|--------------------------------------|");
+    		if(args[0].contains("-h") || args[0].contains("--help"))
+    		{
+	    		logger.info("Push Notification Server version "+Config.getVersion()+"\r\n");	    		
+	    		logger.info("|-----------------------------|--------------------------------------|");
+	    		logger.info("| Argument                    | Meaning                              |");
+	    		logger.info("|-----------------------------|--------------------------------------|");
+	    		logger.info("| config={config-path-file}   | Set configuration path file          |");
+	    		logger.info("| action=start                | Start service                        |");
+	    		logger.info("| action=stop                 | Stop service/kill service            |");
+	    		logger.info("| debug-mode=true             | Run service in debug mode            |");
+	    		logger.info("|-----------------------------|--------------------------------------|");
+    		}
     		return;
     	}
     	
@@ -106,7 +111,7 @@ public class Application
 			} 
     		catch (IOException e) 
     		{
-    			System.out.println("Can not kill the process. "+e.getMessage()+"\r\nPlease try again");
+    			logger.info("Can not kill the process. {}\r\nPlease try again", e.getMessage());
 				if(Config.isPrintStackTrace())
 				{
 					e.printStackTrace();
@@ -123,7 +128,7 @@ public class Application
     			} 
         		catch (IOException e) 
         		{
-        			System.out.println("Can not kill the process. "+e.getMessage()+"\r\nPlease try again");
+        			logger.info("Can not kill the process. {}\r\nPlease try again", e.getMessage());
     				if(Config.isPrintStackTrace())
     				{
     					e.printStackTrace();
@@ -174,53 +179,106 @@ public class Application
 	    	Config.setDebugMode(debugMode.equals("true") || debugMode.equals("yes") || debugMode.equals("ok"));
 			
 			boolean databaseValid = false;
-			try 
+			
+			try {
+				databaseValid = Application.checkDatabases();
+			} catch (IndexOutOfBoundsException e2) {
+				logger.error("Database exists but errors occured while access it.");
+				e2.printStackTrace();
+			} catch (DatabaseTypeException e2) {
+				logger.error("Database exists but errors occured while access it.");
+				e2.printStackTrace();
+			} catch (SQLException e2) {
+				logger.error("Database exists but errors occured while access it.");
+				e2.printStackTrace();
+			} catch (TableNotFoundException e2) {
+				logger.error("Database exists but errors occured while access it.");
+				e2.printStackTrace();
+			} catch (DatabaseFunctionFoundException e2) {
+				logger.error("Database exists but errors occured while access it.");
+				e2.printStackTrace();
+			}
+			
+			
+			
+			if(configured && databaseValid)
 			{
-				if(Config.isPusherSSLEnabled())
+				try 
 				{
-					HttpsServer requestHandlerHTTPS;
-					try 
+					if(Config.isPusherSSLEnabled())
 					{
-						requestHandlerHTTPS = HttpsServer.create(new InetSocketAddress(Config.getPusherPortSSL()), 0);
-					    char[] password = Config.getKeystorePassword().toCharArray();
-					    KeyStore keyStore;
+						HttpsServer requestHandlerHTTPS;
 						try 
 						{
-							keyStore = KeyStore.getInstance("JKS");
-							FileInputStream fileInputStream = new FileInputStream (Config.getKeystoreFile());
-							SSLContext sslContext = SSLContext.getInstance("TLS");
-							keyStore.load (fileInputStream, password);
-						    KeyManagerFactory keyManagementFactory = KeyManagerFactory.getInstance("SunX509");
-						    keyManagementFactory.init (keyStore, password);
-						    TrustManagerFactory trustFactory = TrustManagerFactory.getInstance("SunX509");
-						    trustFactory.init (keyStore);
-						    sslContext.init(keyManagementFactory.getKeyManagers(), trustFactory.getTrustManagers(), null);							    
-							HttpsConfigurator httpsConfigurator = new HttpsConfigurator(sslContext);
-							requestHandlerHTTPS.setHttpsConfigurator(httpsConfigurator);										
-							requestHandlerHTTPS.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextPusher(), new PusherHandler("push-notification"));
-							requestHandlerHTTPS.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextRemover(), new PusherHandler("delete-notification"));	
-							requestHandlerHTTPS.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextCreateGroup(), new PusherHandler("create-group"));		
-							requestHandlerHTTPS.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextRegisterDevice(), new PusherHandler("register-device"));		
-							requestHandlerHTTPS.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextUnregisterDevice(), new PusherHandler("unregister-device"));		
-							requestHandlerHTTPS.createContext("/", new WelcomeHandler("welcome"));
-							requestHandlerHTTPS.createContext("/ping", new WelcomeHandler("ping"));
-							requestHandlerHTTPS.start();
-							System.out.println("SSL Service for pusher is started");
-						} 
-					    catch (NoSuchAlgorithmException | CertificateException | UnrecoverableKeyException | KeyManagementException e) 
-					    {
-					    	if(Config.isPrintStackTrace())
+							requestHandlerHTTPS = HttpsServer.create(new InetSocketAddress(Config.getPusherPortSSL()), 0);
+						    char[] password = Config.getKeystorePassword().toCharArray();
+						    KeyStore keyStore;
+						    FileInputStream fileInputStream = null;
+							try 
 							{
-					    		e.printStackTrace();
+								keyStore = KeyStore.getInstance("JKS");
+								fileInputStream = new FileInputStream (Config.getKeystoreFile());
+								SSLContext sslContext = SSLContext.getInstance("TLS");
+								keyStore.load (fileInputStream, password);
+							    KeyManagerFactory keyManagementFactory = KeyManagerFactory.getInstance("SunX509");
+							    keyManagementFactory.init (keyStore, password);
+							    TrustManagerFactory trustFactory = TrustManagerFactory.getInstance("SunX509");
+							    trustFactory.init (keyStore);
+							    sslContext.init(keyManagementFactory.getKeyManagers(), trustFactory.getTrustManagers(), null);							    
+								HttpsConfigurator httpsConfigurator = new HttpsConfigurator(sslContext);
+								requestHandlerHTTPS.setHttpsConfigurator(httpsConfigurator);										
+								requestHandlerHTTPS.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextPusher(), new PusherHandler("push-notification"));
+								requestHandlerHTTPS.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextRemover(), new PusherHandler("delete-notification"));	
+								requestHandlerHTTPS.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextCreateGroup(), new PusherHandler("create-group"));		
+								requestHandlerHTTPS.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextRegisterDevice(), new PusherHandler("register-device"));		
+								requestHandlerHTTPS.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextUnregisterDevice(), new PusherHandler("unregister-device"));		
+								requestHandlerHTTPS.createContext("/", new WelcomeHandler("welcome"));
+								requestHandlerHTTPS.createContext("/ping", new WelcomeHandler("ping"));
+								requestHandlerHTTPS.start();
+								logger.info("SSL Service for pusher is started");
+							} 
+						    catch (NoSuchAlgorithmException | CertificateException | UnrecoverableKeyException | KeyManagementException e) 
+						    {
+						    	if(Config.isPrintStackTrace())
+								{
+						    		e.printStackTrace();
+								}
+							} 						
+							catch (KeyStoreException e) 
+							{
+								if(Config.isPrintStackTrace())
+								{
+						    		e.printStackTrace();
+								}
 							}
-						} 						
-						catch (KeyStoreException e) 
+							finally {
+								if(fileInputStream != null)
+								{
+									fileInputStream.close();
+								}
+							}
+						} 
+						catch (IOException e) 
 						{
 							if(Config.isPrintStackTrace())
 							{
-					    		e.printStackTrace();
+								e.printStackTrace();
 							}
 						}
+					}						
+					HttpServer requestHandlerHTTP;
+					try 
+					{
+						requestHandlerHTTP = HttpServer.create(new InetSocketAddress(Config.getPusherPort()), 0);
+						requestHandlerHTTP.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextPusher(), new PusherHandler("push-notification"));
+						requestHandlerHTTP.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextRemover(), new PusherHandler("delete-notification"));			
+						requestHandlerHTTP.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextCreateGroup(), new PusherHandler("create-group"));			
+						requestHandlerHTTP.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextRegisterDevice(), new PusherHandler("register-device"));			
+						requestHandlerHTTP.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextUnregisterDevice(), new PusherHandler("unregister-device"));			
+						requestHandlerHTTP.createContext("/", new WelcomeHandler("welcome"));
+						requestHandlerHTTP.createContext("/ping", new WelcomeHandler("ping"));
+						requestHandlerHTTP.start();
+						logger.info("Service for pusher is started");
 					} 
 					catch (IOException e) 
 					{
@@ -229,51 +287,28 @@ public class Application
 							e.printStackTrace();
 						}
 					}
-				}						
-				HttpServer requestHandlerHTTP;
-				try 
-				{
-					requestHandlerHTTP = HttpServer.create(new InetSocketAddress(Config.getPusherPort()), 0);
-					requestHandlerHTTP.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextPusher(), new PusherHandler("push-notification"));
-					requestHandlerHTTP.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextRemover(), new PusherHandler("delete-notification"));			
-					requestHandlerHTTP.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextCreateGroup(), new PusherHandler("create-group"));			
-					requestHandlerHTTP.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextRegisterDevice(), new PusherHandler("register-device"));			
-					requestHandlerHTTP.createContext("/"+Config.getApiDocumentRoot()+"/"+Config.getVersion()+"/"+Config.getPusherContextUnregisterDevice(), new PusherHandler("unregister-device"));			
-					requestHandlerHTTP.createContext("/", new WelcomeHandler("welcome"));
-					requestHandlerHTTP.createContext("/ping", new WelcomeHandler("ping"));
-					requestHandlerHTTP.start();
-					System.out.println("Service for pusher is started");
+					
+					if(Config.isNotificationSSLEnabled())
+					{
+						Application.notificationServerSSL = new NotificationServerSSL();
+						Application.notificationServerSSL.start();
+						logger.info("SSL Service for notification is started");
+					}
+					
+					Application.notificationServer = new NotificationServer();
+					Application.notificationServer.start();
+					logger.info("Service for notification is started");
+					
 				} 
-				catch (IOException e) 
+				catch(IndexOutOfBoundsException e1)
 				{
 					if(Config.isPrintStackTrace())
 					{
-						e.printStackTrace();
+						e1.printStackTrace();
 					}
 				}
-				
-				if(Config.isNotificationSSLEnabled())
-				{
-					Application.notificationServerSSL = new NotificationServerSSL();
-					Application.notificationServerSSL.start();
-					System.out.println("SSL Service for notification is started");
-				}
-				
-				Application.notificationServer = new NotificationServer();
-				Application.notificationServer.start();
-				System.out.println("Service for notification is started");
-				
-			} 
-			catch(IndexOutOfBoundsException e1)
-			{
-				if(Config.isPrintStackTrace())
-				{
-					e1.printStackTrace();
-				}
-				databaseValid = false;
-				System.err.println("Database exists but errors occured while access id.");
 			}
-		}
+    	}
 	}
 	/**
 	 * Fix file path
@@ -429,7 +464,10 @@ public class Application
 		}
 		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
 			if(rs != null)
@@ -456,7 +494,7 @@ public class Application
 	 * @throws TableNotFoundException if required table is not exists
 	 * @throws DatabaseFunctionFoundException if function is not exists
 	 */
-	public static boolean checkDatabases() throws DatabaseTypeException, SQLException, IndexOutOfBoundsException, TableNotFoundException, DatabaseFunctionFoundException
+	public static boolean checkDatabases() throws DatabaseTypeException, SQLException, TableNotFoundException, DatabaseFunctionFoundException
 	{
 		boolean valid2 = Application.checkFunctions();
 		boolean valid1 = Application.checkTables();

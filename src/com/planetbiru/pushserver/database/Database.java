@@ -224,9 +224,9 @@ public final class Database {
 					this.databaseUserName, 
 					this.databaseUserPassword
 					);
-				if(this.databaseConnection != null)
+				if(this.databaseConnection == null)
 				{
-					this.connected = true;
+					this.connected = false;
 				}
 			}		
 			else if(this.databaseType.equals("mysql"))
@@ -240,13 +240,14 @@ public final class Database {
 					this.databaseUserName, 
 					this.databaseUserPassword
 					);	
-				if(this.databaseConnection != null)
+				if(this.databaseConnection == null)
 				{
-					this.connected = true;				
+					this.connected = false;				
 				}
 			}
 			else
 			{
+				this.connected = false;		
 				throw new DatabaseTypeException("Unsupported database type ("+this.databaseType+")");
 			}
 			return true;
@@ -322,9 +323,9 @@ public final class Database {
 					}
 					return false;
 				}
-				if(this.databaseConnection != null)
+				if(this.databaseConnection == null)
 				{
-					this.connected = true;
+					this.connected = false;
 				}
 			}	
 			else if(this.databaseType.equals("mysql"))
@@ -349,9 +350,9 @@ public final class Database {
 					}
 					return false;
 				}
-				if(this.databaseConnection != null)
+				if(this.databaseConnection == null)
 				{
-					this.connected = true;				
+					this.connected = false;				
 				}
 			}
 			else
@@ -788,22 +789,6 @@ public final class Database {
 	 * Get Query
 	 * @return Query object
 	 */
-	/**
-	 * Set host name of the database
-	 * @param databaseHostName Host name of the database
-	 */
-	public void setHostName(String databaseHostName)
-	{
-		this.databaseHostName = databaseHostName;
-	}
-	/**
-	 * Return host name of the database 
-	 * @return Database host name
-	 */
-	public String getHostName()
-	{
-		return this.databaseHostName;
-	}
 	/**
 	 * Set port number of the database
 	 * @param databasePortNumber Port number of the database
