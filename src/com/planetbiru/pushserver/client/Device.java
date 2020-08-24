@@ -2,6 +2,8 @@ package com.planetbiru.pushserver.client;
 
 import java.net.Socket;
 
+import org.json.JSONObject;
+
 /**
  * <strong>Device</strong> is object contains client socket, device ID, request ID, and active flag.
  * @author Kamshory, MT
@@ -117,13 +119,12 @@ public class Device {
 	 */
 	public String toString()
 	{
-		String str = "";
-		str += "{";
-		str += "\t\"socket\": \""+socket.toString()+"\", \r\n";
-		str += "\t\"deviceID\": \""+deviceID.toString()+"\", \r\n";
-		str += "\t\"requestID\": \""+socket.toString()+"\", \r\n";
-		str += "\t\"active\": "+active+" \r\n";
-		str += "}";
-		return str;
+		JSONObject res = new JSONObject();
+		res.put("socket", socket.toString());
+		res.put("deviceID", deviceID);
+		res.put("requestID", socket.toString());
+		res.put("active", active);
+		
+		return res.toString(4);
 	}
 }

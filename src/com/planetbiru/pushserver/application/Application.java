@@ -84,21 +84,18 @@ public class Application
     	action = Utility.getFirst(args, "action", "", "=").toLowerCase();
     	configPath = Utility.getFirst(args, "config", "", "=").trim();
     	debugMode = Utility.getFirst(args, "debug-mode", "", "=").trim();
-    	if(args.length > 0)
+    	if(args.length > 0 && args[0].contains("-h") || args[0].contains("--help"))
     	{
-	    	if(args[0].contains("-h") || args[0].contains("--help"))
-	    	{
-	    		System.out.println("Push Notification Server version "+Config.getVersion()+"\r\n");	    		
-	    		System.out.println("|-----------------------------|--------------------------------------|");
-	    		System.out.println("| Argument                    | Meaning                              |");
-	    		System.out.println("|-----------------------------|--------------------------------------|");
-	    		System.out.println("| config={config-path-file}   | Set configuration path file          |");
-	    		System.out.println("| action=start                | Start service                        |");
-	    		System.out.println("| action=stop                 | Stop service/kill service            |");
-	    		System.out.println("| debug-mode=true             | Run service in debug mode            |");
-	    		System.out.println("|-----------------------------|--------------------------------------|");
-	    		return;
-	    	}
+    		System.out.println("Push Notification Server version "+Config.getVersion()+"\r\n");	    		
+    		System.out.println("|-----------------------------|--------------------------------------|");
+    		System.out.println("| Argument                    | Meaning                              |");
+    		System.out.println("|-----------------------------|--------------------------------------|");
+    		System.out.println("| config={config-path-file}   | Set configuration path file          |");
+    		System.out.println("| action=start                | Start service                        |");
+    		System.out.println("| action=stop                 | Stop service/kill service            |");
+    		System.out.println("| debug-mode=true             | Run service in debug mode            |");
+    		System.out.println("|-----------------------------|--------------------------------------|");
+    		return;
     	}
     	
     	if(action.equals("stop"))

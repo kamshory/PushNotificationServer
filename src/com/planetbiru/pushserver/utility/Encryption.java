@@ -1,7 +1,7 @@
 package com.planetbiru.pushserver.utility;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -165,7 +165,7 @@ public class Encryption
     public String base64Encode(String input) throws NullPointerException
     {
 		byte[] encodedBytes = Base64.getEncoder().encode(input.getBytes());
-    	return new String(encodedBytes, Charset.forName("UTF-8"));
+    	return new String(encodedBytes, StandardCharsets.UTF_8);
     }
     /**
      * Base64 decoding
@@ -175,6 +175,6 @@ public class Encryption
     public String base64Decode(String input) throws NullPointerException, IllegalArgumentException
     {
         byte[] decodedBytes = Base64.getDecoder().decode(input);
-        return new String(decodedBytes, Charset.forName("UTF-8"));
+        return new String(decodedBytes, StandardCharsets.UTF_8);
     }
 }

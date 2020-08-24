@@ -11,6 +11,9 @@ import com.planetbiru.pushserver.notification.NotificationHandler;
 public class NotificationServerSSL extends Thread{
 	public NotificationServerSSL()
 	{
+		/**
+		 * Constructor
+		 */
 	}
 	@Override
 	public void run()

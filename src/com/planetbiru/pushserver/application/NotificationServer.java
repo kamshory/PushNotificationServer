@@ -10,6 +10,9 @@ public class NotificationServer extends Thread
 {
 	public NotificationServer()
 	{
+		/**
+		 * Constructor
+		 */
 	}
 	
 	@Override

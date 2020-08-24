@@ -3,12 +3,10 @@ package com.planetbiru.pushserver.utility;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import org.json.JSONObject;
 
 import com.sun.net.httpserver.Headers;
@@ -24,7 +22,7 @@ public class HTTPIO
 	/**
 	 * Default constructor
 	 */
-	public HTTPIO()
+	private HTTPIO()
 	{
 		
 	}
@@ -36,54 +34,47 @@ public class HTTPIO
 	 */
 	public static Map<String, String> parseQuery(String query) throws QueryParserException
     {
-		Map<String, String> data = new HashMap<String, String>(); 	
-    	if(query != null)
+		Map<String, String> data = new HashMap<>(); 	
+    	if(query == null)
     	{
-        	if(query.length() > 0)
-        	{
-        		if(query.contains("="))
-        		{
-			    	String[] args;
-			    	int i;
-			    	String arg = "";
-			    	String[] arr;
-			    	String key = "";
-			    	String value = "";
-		    		if(query.contains("&"))
-		    		{
-		    			args = query.split("&");
-		    		}
-		    		else
-		    		{
-		    			args = new String[1];
-		    			args[0] = query;
-		    		}
-		    		for(i = 0; i<args.length; i++)
-		    		{
-		    			arg = args[i];
-		    			if(arg.contains("="))
-		    			{
-		    				arr = arg.split("=", 2);
-		    				key = arr[0];
-		    				value = Utility.urlDecode(arr[1]);
-		    				data.put(key, value);
-		    			}
-		    		}
-        		}
-        		else
-        		{
-        			throw new QueryParserException("Query is not contains \"=\"");
-        		}
-	    	}
-        	else
-        	{
-        		throw new QueryParserException("Query is empty");
-        	}
+    		query = "";
     	}
-    	else
-    	{
-    		throw new QueryParserException("Query is null");
-    	}
+        	
+		if(query.contains("="))
+		{
+	    	String[] args;
+	    	int i;
+	    	String arg = "";
+	    	String[] arr;
+	    	String key = "";
+	    	String value = "";
+    		if(query.contains("&"))
+    		{
+    			args = query.split("&");
+    		}
+    		else
+    		{
+    			args = new String[1];
+    			args[0] = query;
+    		}
+    		for(i = 0; i<args.length; i++)
+    		{
+    			arg = args[i];
+    			if(arg.contains("="))
+    			{
+    				arr = arg.split("=", 2);
+    				key = arr[0];
+    				value = Utility.urlDecode(arr[1]);
+    				data.put(key, value);
+    			}
+    		}
+		}
+		else
+		{
+			throw new QueryParserException("Query is not contains \"=\"");
+		}
+	
+    	
     	return data;
     }
 	/**
@@ -92,33 +83,27 @@ public class HTTPIO
 	 * @return Request body
 	 * @throws IOException if any IO errors
 	 */
-	@SuppressWarnings("unused")
 	public static String getHTTPRequest(HttpExchange httpExchange) throws IOException
 	{
-		String body = "";
+		StringBuilder body = new StringBuilder();
 		if(httpExchange.getRequestMethod().equalsIgnoreCase("POST") || httpExchange.getRequestMethod().equalsIgnoreCase("PUT")) 
         {
             Headers requestHeaders = httpExchange.getRequestHeaders();
-            Set<Map.Entry<String, List<String>>> entries = requestHeaders.entrySet();
             int contentLength = Integer.parseInt(requestHeaders.getFirst("Content-length"));
-            InputStream inputStream = httpExchange.getRequestBody();
-            byte[] postData = new byte[contentLength];
             int j;
             for(j = 0; j < contentLength; j++)
             {
             	byte b = (byte) httpExchange.getRequestBody().read();
-            	body += String.format("%c", b);
+            	body.append(String.format("%c", b));
             }
         }
         else if(httpExchange.getRequestMethod().equalsIgnoreCase("GET")) 
         {
-            Headers requestHeaders = httpExchange.getRequestHeaders();
-            Set<Map.Entry<String, List<String>>> entries = requestHeaders.entrySet();
             String queryString = httpExchange.getRequestURI().getQuery();
             JSONObject getJSON =  new JSONObject(Utility.parseQuery(queryString));
-            body = getJSON.optString("data", "").toString();
+            body.append(getJSON.optString("data", ""));
         }
-		return body;
+		return body.toString();
 	}
 	/**
 	 * Get HTTP request body
@@ -138,7 +123,7 @@ public class HTTPIO
 			bos.write(buffer, 0, len);
 		}
 		bos.close();
-		body = new String(bos.toByteArray(), Charset.forName("UTF-8"));
+		body = new String(bos.toByteArray(), StandardCharsets.UTF_8);
 		return body;
 	}
 	/**

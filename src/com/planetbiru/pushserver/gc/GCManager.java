@@ -1,7 +1,6 @@
 package com.planetbiru.pushserver.gc;
 
 import com.planetbiru.pushserver.config.Config;
-import com.planetbiru.pushserver.database.DatabaseConfig;
 import com.planetbiru.pushserver.utility.Utility;
 
 /**
@@ -12,18 +11,6 @@ import com.planetbiru.pushserver.utility.Utility;
 public class GCManager extends Thread
 {
 	/**
-	 * Primary database configuration
-	 */
-	public DatabaseConfig databaseConfig1;
-	/**
-	 * Secondary database configuration
-	 */
-	public DatabaseConfig databaseConfig2;
-	/**
-	 * Tertiary database configuration
-	 */
-	public DatabaseConfig databaseConfig3;
-	/**
 	 * Garbage collection
 	 */
 	private GC gc;
@@ -33,15 +20,14 @@ public class GCManager extends Thread
 	 * @param databaseConfig2 Secondary database configuration
 	 * @param databaseConfig3 Tertiary database configuration
 	 */
-	public GCManager(DatabaseConfig databaseConfig1, DatabaseConfig databaseConfig2, DatabaseConfig databaseConfig3)
+	public GCManager()
 	{
-		this.databaseConfig1 = databaseConfig1;
-		this.databaseConfig2 = databaseConfig2;
-		this.databaseConfig3 = databaseConfig3;
 	}
 	/**
 	 * Override run method
 	 */
+	
+	@Override
 	public void run()
 	{
 		String now = "";

@@ -29,7 +29,7 @@ public class SocketIO
 	/**
 	 * Response header
 	 */
-	private Map<String, String> responseHeader = new HashMap<String, String>();
+	private Map<String, String> responseHeader = new HashMap<>();
 	/**
 	 * Request header
 	 */
@@ -94,7 +94,7 @@ public class SocketIO
 	 */
 	public void resetResponseHeader()
 	{
-		this.responseHeader = new HashMap<String, String>();
+		this.responseHeader = new HashMap<>();
 	}
 	/**
 	 * Add request header
@@ -137,7 +137,7 @@ public class SocketIO
 	 */
 	public void resetRequestHeader()
 	{
-		this.requestHeader = new HashMap<String, String>();
+		this.requestHeader = new HashMap<>();
 	}
 	/**
 	 * Add request header
@@ -199,13 +199,13 @@ public class SocketIO
 		byte[] b = data.getBytes();
 		int dataLength = b.length;
 		int offset = dataLength - length;
-		String result = "";
+		StringBuilder result = new StringBuilder();
 		int i;
 		for(i = offset; i<dataLength; i++ )
 		{
-			result += String.format("%c", b[i]);
+			result.append(String.format("%c", b[i]));
 		}
-		return result;
+		return result.toString();
 	}
 	/**
 	 * Read response header
@@ -215,20 +215,22 @@ public class SocketIO
 	public String readResponseHeader() throws IOException
 	{
 		int buf;
-		String data = "";
+		StringBuilder data = new StringBuilder();
 		do
 		{
 			buf = this.socket.getInputStream().read();
 			if(buf >= 0)
 			{
-				data += String.format("%c", buf);
+				data.append(String.format("%c", buf));
 			}
 		}
-		while(!this.last(data, 4).equals("\r\n\r\n") && buf > -1);
-		data = data.trim();
-		this.rawRequestHeader = data;
-		this.header = data;
-		return data;
+		while(!this.last(data.toString(), 4).equals("\r\n\r\n") && buf > -1);
+		
+		String result = data.toString().trim();
+		
+		this.rawRequestHeader = result;
+		this.header = result;
+		return result;
 	}
 	/**
 	 * Get first value of headers
@@ -249,7 +251,7 @@ public class SocketIO
 	{
 		String data = this.readResponseHeader();
 	    String[] lines = data.split("\\r?\\n"); // split on new lines
-	    Map<String, String> header = new HashMap<String, String>();
+	    Map<String, String> lHeader = new HashMap<>();
 	    int i;
 	    String line = "";
 	    String[] arr;
@@ -259,11 +261,11 @@ public class SocketIO
 	    	if(line.contains(":"))
 	    	{
 	    		arr = line.split("\\:", 2);
-	    		header.put(arr[0].trim(), arr[1].trim());
+	    		lHeader.put(arr[0].trim(), arr[1].trim());
 	    	}
 	    }
-	    this.requestHeader = header;
-		return header;
+	    this.requestHeader = lHeader;
+		return lHeader;
 	}
 	/**
 	 * Get request data length
@@ -271,11 +273,11 @@ public class SocketIO
 	 */
 	public long getRequestDataLength()
 	{
-		String header = this.rawRequestHeader;
+		String lHeader = this.rawRequestHeader;
 		long length = 0;
-		if(header.length() > 1)
+		if(lHeader.length() > 1)
 		{
-			String[] lines = header.split("\\r\\n");
+			String[] lines = lHeader.split("\\r\\n");
 			int i;
 			String line;
 			String x;
@@ -308,13 +310,13 @@ public class SocketIO
 	{
 		int buf;
 		long i;
-		String data = "";
+		StringBuilder data = new StringBuilder();
 		if(length > 0)
 		{
 			for(i = 0; i < length; i++)
 			{
 				buf = this.socket.getInputStream().read();
-				data += String.format("%c", buf);
+				data.append(String.format("%c", buf));
 			}
 			this.contentLength = length;
 		}
@@ -322,7 +324,7 @@ public class SocketIO
 		{
 			this.contentLength = length;
 		}
-		return data;
+		return data.toString();
 	}
 	/**
 	 * Get headers
@@ -330,8 +332,7 @@ public class SocketIO
 	 */
 	public String[] getHeaders()
 	{
-		String[] lines = this.header.split("\\r\\n");
-		return lines;
+		return this.header.split("\\r\\n");
 	}
 	/**
 	 * Get request body
@@ -404,20 +405,20 @@ public class SocketIO
 		if(socket.isConnected() && !socket.isClosed())
 		{
 			String hdr = "";
-			this.addRequestHeader("Content-Length", data.length());
-			String data2sent = "";
+			this.addRequestHeader("Content-length", data.length());
+			StringBuilder data2sent = new StringBuilder();
 			if(!this.requestHeader.isEmpty())
 			{
 				 Set<Map.Entry<String, String>> entrySet = this.requestHeader.entrySet();
 				 for (Entry<String, String> entry : entrySet) 
 				 {
-				    hdr = entry.getKey().toString().trim()+": "+entry.getValue().toString().trim()+"\r\n";
-				    data2sent += hdr;
+				    hdr = entry.getKey().trim()+": "+entry.getValue().trim()+"\r\n";
+				    data2sent.append(hdr);
 				 }
 			}
-			data2sent += "\r\n";
-			data2sent += data;
-			socket.getOutputStream().write(data2sent.getBytes());
+			data2sent.append("\r\n");
+			data2sent.append(data);
+			socket.getOutputStream().write(data2sent.toString().getBytes());
 			return true;
 		}
 		else

@@ -525,30 +525,23 @@ public final class Database {
 	 */
 	public boolean setConfigurationString(String configuration) throws JSONException, NumberFormatException
 	{
-		JSONObject json = new JSONObject();
-		json = new JSONObject(configuration);
-		String databaseType = "";
-		String databaseHostName = "";
-		String databasePortNumber = "";
-		String databaseUserName = "";
-		String databaseUserPassword = "";
-		String databaseName = "";		
-		databaseType = json.optString("DATABASE_TYPE", "").toString();
-		databaseHostName = json.optString("DATABASE_HOST_NAME", "").toString();
-		databasePortNumber = json.optString("DATABASE_PORT_NUMBER", "0").toString();
-		databaseUserName = json.optString("DATABASE_USER_NAME", "").toString();
-		databaseUserPassword = json.optString("DATABASE_USER_PASSWORD", "").toString();
-		databaseName = json.optString("DATABASE_NAME", "").toString();
-		if(databasePortNumber.equals(""))
+		JSONObject json = new JSONObject(configuration);
+		String lDatabaseType = json.optString("DATABASE_TYPE", "");
+		String lDatabaseHostName = json.optString("DATABASE_HOST_NAME", "");
+		String lDatabasePortNumber = json.optString("DATABASE_PORT_NUMBER", "0");
+		String lDatabaseUserName = json.optString("DATABASE_USER_NAME", "");
+		String lDatabaseUserPassword = json.optString("DATABASE_USER_PASSWORD", "");
+		String lDatabaseName = json.optString("DATABASE_NAME", "");
+		if(lDatabasePortNumber.equals(""))
 		{
-			databasePortNumber = "0";
+			lDatabasePortNumber = "0";
 		}			
-		this.databaseType = databaseType.trim();
-		this.databaseHostName = databaseHostName.trim();
-		this.databasePortNumber = Integer.parseInt(databasePortNumber.trim());
-		this.databaseUserName = databaseUserName.trim();
-		this.databaseUserPassword = databaseUserPassword.trim();
-		this.databaseName = databaseName.trim();
+		this.databaseType = lDatabaseType.trim();
+		this.databaseHostName = lDatabaseHostName.trim();
+		this.databasePortNumber = Integer.parseInt(lDatabasePortNumber.trim());
+		this.databaseUserName = lDatabaseUserName.trim();
+		this.databaseUserPassword = lDatabaseUserPassword.trim();
+		this.databaseName = lDatabaseName.trim();
 		return true;
 	}
 	/**
@@ -577,28 +570,22 @@ public final class Database {
 					try 
 					{
 						json = new JSONObject(plainConfiguration);
-						String databaseType = "";
-						String databaseHostName = "";
-						String databasePortNumber = "";
-						String databaseUserName = "";
-						String databaseUserPassword = "";
-						String databaseName = "";		
-						databaseType = json.optString("DATABASE_TYPE", "").toString();
-						databaseHostName = json.optString("DATABASE_HOST_NAME", "").toString();
-						databasePortNumber = json.optString("DATABASE_PORT_NUMBER", "0").toString();
-						databaseUserName = json.optString("DATABASE_USER_NAME", "").toString();
-						databaseUserPassword = json.optString("DATABASE_USER_PASSWORD", "").toString();
-						databaseName = json.optString("DATABASE_NAME", "").toString();
-						if(databasePortNumber.equals(""))
+						String lDatabaseType = json.optString("DATABASE_TYPE", "");
+						String lDatabaseHostName = json.optString("DATABASE_HOST_NAME", "");
+						String lDatabasePortNumber = json.optString("DATABASE_PORT_NUMBER", "0");
+						String lDatabaseUserName = json.optString("DATABASE_USER_NAME", "");
+						String lDatabaseUserPassword = json.optString("DATABASE_USER_PASSWORD", "");
+						String lDatabaseName = json.optString("DATABASE_NAME", "");
+						if(lDatabasePortNumber.equals(""))
 						{
-							databasePortNumber = "0";
-						}
-						this.databaseType = databaseType.trim();
-						this.databaseHostName = databaseHostName.trim();
-						this.databasePortNumber = Integer.parseInt(databasePortNumber.trim());
-						this.databaseUserName = databaseUserName.trim();
-						this.databaseUserPassword = databaseUserPassword.trim();
-						this.databaseName = databaseName.trim();
+							lDatabasePortNumber = "0";
+						}			
+						this.databaseType = lDatabaseType.trim();
+						this.databaseHostName = lDatabaseHostName.trim();
+						this.databasePortNumber = Integer.parseInt(lDatabasePortNumber.trim());
+						this.databaseUserName = lDatabaseUserName.trim();
+						this.databaseUserPassword = lDatabaseUserPassword.trim();
+						this.databaseName = lDatabaseName.trim();
 						return true;
 					} 
 					catch (Exception e) 
@@ -699,33 +686,31 @@ public final class Database {
 		Encryption decryptor = new Encryption(Config.getEncryptionPassword());
 		String plainConfiguration = decryptor.decrypt(configuration, true);
 		JSONObject json;
-		if(plainConfiguration != null)
+		if(plainConfiguration == null)
 		{
-			if(plainConfiguration.length() > 10)
-			{
-				if(plainConfiguration.trim().substring(0, 1).equals("{"))
-				{
-					json = new JSONObject(plainConfiguration);						
-					String lDatabaseType = "";
-					String lDatabaseHostName = "";
-					String lDatabasePortNumber = "";
-					String lDatabaseUserName = "";
-					String lDatabaseUserPassword = "";
-					String lDatabaseName = "";		
-					lDatabaseType = json.optString("DATABASE_TYPE", "");
-					lDatabaseHostName = json.optString("DATABASE_HOST_NAME", "");
-					lDatabasePortNumber = json.optString("DATABASE_PORT_NUMBER", "0");
-					lDatabaseUserName = json.optString("DATABASE_USER_NAME", "");
-					lDatabaseUserPassword = json.optString("DATABASE_USER_PASSWORD", "");
-					lDatabaseName = json.optString("DATABASE_NAME", "");						
-					databaseConfig.setDatabaseType(lDatabaseType);
-					databaseConfig.setDatabaseHostName(lDatabaseHostName);
-					databaseConfig.setDatabasePortNumber(Integer.parseInt(lDatabasePortNumber));
-					databaseConfig.setDatabaseUserName(lDatabaseUserName);
-					databaseConfig.setDatabaseUserPassword(lDatabaseUserPassword);
-					databaseConfig.setDatabaseName(lDatabaseName);
-				}
-			}
+			plainConfiguration = "";
+		}
+		if(plainConfiguration.length() > 10 && plainConfiguration.trim().substring(0, 1).equals("{"))
+		{
+			json = new JSONObject(plainConfiguration);						
+			String lDatabaseType = "";
+			String lDatabaseHostName = "";
+			String lDatabasePortNumber = "";
+			String lDatabaseUserName = "";
+			String lDatabaseUserPassword = "";
+			String lDatabaseName = "";		
+			lDatabaseType = json.optString("DATABASE_TYPE", "");
+			lDatabaseHostName = json.optString("DATABASE_HOST_NAME", "");
+			lDatabasePortNumber = json.optString("DATABASE_PORT_NUMBER", "0");
+			lDatabaseUserName = json.optString("DATABASE_USER_NAME", "");
+			lDatabaseUserPassword = json.optString("DATABASE_USER_PASSWORD", "");
+			lDatabaseName = json.optString("DATABASE_NAME", "");						
+			databaseConfig.setDatabaseType(lDatabaseType);
+			databaseConfig.setDatabaseHostName(lDatabaseHostName);
+			databaseConfig.setDatabasePortNumber(Integer.parseInt(lDatabasePortNumber));
+			databaseConfig.setDatabaseUserName(lDatabaseUserName);
+			databaseConfig.setDatabaseUserPassword(lDatabaseUserPassword);
+			databaseConfig.setDatabaseName(lDatabaseName);
 		}
 		return databaseConfig;
 	}
@@ -757,8 +742,7 @@ public final class Database {
 		json.put("DATABASE_USER_PASSWORD", databaseUserPassword);
 		json.put("DATABASE_NAME", databaseName);
 		String plainConfiguration = json.toString();
-		String configuration = encryptor.encrypt(plainConfiguration, true);
-		return configuration;
+		return encryptor.encrypt(plainConfiguration, true);
 	}
 	/**
 	 * Set the driver type of the database

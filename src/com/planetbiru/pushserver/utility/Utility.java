@@ -154,14 +154,14 @@ public class Utility {
 	 */
 	public static Map<String, String> splitQuery(String query) throws UnsupportedEncodingException 
 	{
-	    Map<String, String> query_pairs = new LinkedHashMap<String, String>();
+	    Map<String, String> queryPairs = new LinkedHashMap<>();
 	    String[] pairs = query.split("&");
 	    for (String pair : pairs) 
 	    {
 	        int idx = pair.indexOf("=");
-	        query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+	        queryPairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
 	    }
-	    return query_pairs;
+	    return queryPairs;
 	}
 	/**
 	 * Parse query string into JSON object
@@ -171,38 +171,39 @@ public class Utility {
 	 */
     public static Map<String, String> parseQuery(String query) throws JSONException
     {
-    	Map<String, String> queryString = new HashMap<String, String>();
-    	if(query != null)
+    	Map<String, String> queryString = new HashMap<>();
+    	if(query == null)
     	{
-        	if(query.length() > 0)
-        	{
-		    	String[] args;
-		    	int i;
-		    	String arg = "";
-		    	String[] arr;
-		    	String key = "";
-		    	String value = "";
-	    		if(query.contains("&"))
-	    		{
-	    			args = query.split("&");
-	    		}
-	    		else
-	    		{
-	    			args = new String[1];
-	    			args[0] = query;
-	    		}
-	    		for(i = 0; i<args.length; i++)
-	    		{
-	    			arg = args[i];
-	    			if(arg.contains("="))
-	    			{
-	    				arr = arg.split("=", 2);
-	    				key = arr[0];
-	    				value = Utility.urlDecode(arr[1]);
-	    				queryString.put(key, value);
-	    			}
-	    		}
-	    	}
+    		query = "";
+    	}
+    	if(query.length() > 0)
+    	{
+	    	String[] args;
+	    	int i;
+	    	String arg = "";
+	    	String[] arr;
+	    	String key = "";
+	    	String value = "";
+    		if(query.contains("&"))
+    		{
+    			args = query.split("&");
+    		}
+    		else
+    		{
+    			args = new String[1];
+    			args[0] = query;
+    		}
+    		for(i = 0; i<args.length; i++)
+    		{
+    			arg = args[i];
+    			if(arg.contains("="))
+    			{
+    				arr = arg.split("=", 2);
+    				key = arr[0];
+    				value = Utility.urlDecode(arr[1]);
+    				queryString.put(key, value);
+    			}
+    		}
     	}
     	return queryString;
     }
@@ -214,7 +215,7 @@ public class Utility {
      */
     public static String buildQuery(JSONObject query) throws JSONException
     {
-    	String result = "";
+    	StringBuilder result = new StringBuilder();
     	
     	Iterator<?> keys = query.keys();
     	String key = "";
@@ -229,16 +230,17 @@ public class Utility {
 				value = Utility.urlEncode(value);
 				if(i > 0)
 				{
-					result += "&";
+					result.append("&");
 				}
-				result += (key+"="+value);
+				result.append((key+"="+value));
 			}
+			i++;
     	}
-    	return result;
+    	return result.toString();
     }
     public static String buildQuery(Map<String, String> query) throws NullPointerException
     {
-    	String result = "";
+    	StringBuilder result = new StringBuilder();
     	int i = 0;
     	String key = "";
     	String value = "";
@@ -246,14 +248,15 @@ public class Utility {
     	{
     	    if(i > 0)
     	    {
-    	    	result += "&";
+    	    	result.append("&");
     	    }
     	    key = entry.getKey();
     	    value = entry.getValue();
     	    value = Utility.urlEncode(value);
-    	    result += (key+"="+value);
+    	    result.append((key+"="+value));
+    	    i++;
     	}
-    	return result;
+    	return result.toString();
    	
     }
 	/**
@@ -265,7 +268,7 @@ public class Utility {
 	public static String lTrim(String input, String mask)
 	{
 		int lastLen = input.length();
-		int curLen = lastLen;
+		int curLen;
 		do
 		{
 			lastLen = input.length();
@@ -283,8 +286,8 @@ public class Utility {
 	 */
 	public static String rTrim(String input, String mask)
 	{
-		int lastLen = input.length();
-		int curLen = lastLen;
+		int lastLen;
+		int curLen;
 		do
 		{
 			lastLen = input.length();
@@ -336,8 +339,8 @@ public class Utility {
 	public static String escapeParameter(String param)
 	{
 		String output = param;
-		output = output.replaceAll("&", "%26");
-		output = output.replaceAll("=", "%3D");
+		output = output.replace("&", "%26");
+		output = output.replace("=", "%3D");
 		return output;
 	}
 	/**
@@ -348,8 +351,8 @@ public class Utility {
 	public static String deescapeParameter(String param)
 	{
 		String output = param;
-		output = output.replaceAll("%26", "&");
-		output = output.replaceAll("%3D", "=");
+		output = output.replace("%26", "&");
+		output = output.replace("%3D", "=");
 		return output;
 	}
 	/**
@@ -360,10 +363,10 @@ public class Utility {
 	public static String escapeXML(String input)
 	{
 		String output = input;
-		output = output.replaceAll("&", "&amp;");
-		output = output.replaceAll("\"", "&quot;");
-		output = output.replaceAll("<", "&lt;");
-		output = output.replaceAll(">", "&gt;");
+		output = output.replace("&", "&amp;");
+		output = output.replace("\"", "&quot;");
+		output = output.replace("<", "&lt;");
+		output = output.replace(">", "&gt;");
 		return output;
 	}
 	/**
@@ -374,10 +377,10 @@ public class Utility {
 	public static String deescapeXML(String input)
 	{
 		String output = input;
-		output = output.replaceAll("&lt;", "<");
-		output = output.replaceAll("&gt;", ">");
-		output = output.replaceAll("&amp;", "&");
-		output = output.replaceAll("&quot;", "\"");
+		output = output.replace("&lt;", "<");
+		output = output.replace("&gt;", ">");
+		output = output.replace("&amp;", "&");
+		output = output.replace("&quot;", "\"");
 		return output;
 	}
 	/**
@@ -388,7 +391,7 @@ public class Utility {
 	public static String escapeSQL(String s)
 	{
 	    s = s.replaceAll("\\00", "\\\\0");
-	    s = s.replaceAll("'", "''");
+	    s = s.replace("'", "''");
 	    return s;
 	}
 	/**
@@ -399,7 +402,7 @@ public class Utility {
 	public static String deescapeSQL(String s)
 	{
 	    s = s.replaceAll("\\\\00", "\\0");
-	    s = s.replaceAll("''", "'");
+	    s = s.replace("''", "'");
 	    return s;
 	}
 	/**
@@ -412,7 +415,7 @@ public class Utility {
 		String output = "";
 		if(input != null)
 		{
-			output = input.replaceAll("\"", "\\\"");
+			output = input.replace("\"", "\\\"");
 		}
 		else
 		{		
@@ -427,7 +430,7 @@ public class Utility {
 	public static String deescapeJSON(String input)
 	{
 		String output = input;
-		output = output.replaceAll("\\\"", "\"");
+		output = output.replace("\\\"", "\"");
 		return output;
 	}
 	/**
@@ -438,10 +441,10 @@ public class Utility {
     public static String escapeHTML(String input)
     {
     	String ret = input;
-		ret = ret.replaceAll("&", "&amp;");
-		ret = ret.replaceAll("\"", "&quot;");
-		ret = ret.replaceAll("<", "&lt;");
-		ret = ret.replaceAll(">", "&gt;");
+		ret = ret.replace("&", "&amp;");
+		ret = ret.replace("\"", "&quot;");
+		ret = ret.replace("<", "&lt;");
+		ret = ret.replace(">", "&gt;");
     	return ret;
     }
     /**
@@ -452,31 +455,13 @@ public class Utility {
     public static String deescapeHTML(String input)
     {
     	String ret = input;
- 		ret = ret.replaceAll("&lt;", "<");
-		ret = ret.replaceAll("&gt;", ">");
-		ret = ret.replaceAll("&quot;", "\"");
-		ret = ret.replaceAll("&amp;", "&");
+ 		ret = ret.replace("&lt;", "<");
+		ret = ret.replace("&gt;", ">");
+		ret = ret.replace("&quot;", "\"");
+		ret = ret.replace("&amp;", "&");
      	return ret;
     }
-    public static String language1 = "English";
-    public static String language2 = "Indonesian";
-    public static String language3 = "Indonesian";
-	
-    public static JSONObject bilingual(String stringLanguage1, String stringLanguage2) throws JSONException
-    {
-    	JSONObject lang = new JSONObject();
-       	lang.put(Utility.language1, stringLanguage1);
-		lang.put(Utility.language2, stringLanguage2);
-        return lang;   	
-    }
-    public static JSONObject bilingual(String stringLanguage1, String stringLanguage2, String stringLanguage3) throws JSONException
-    {
-    	JSONObject lang = new JSONObject();
-       	lang.put(Utility.language1, stringLanguage1);
-		lang.put(Utility.language2, stringLanguage2);
-		lang.put(Utility.language3, stringLanguage3);
-        return lang;   	
-    }
+    
     public static Document loadXMLFromString(String xml) throws Exception
     {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -484,6 +469,7 @@ public class Utility {
         InputSource is = new InputSource(new StringReader(xml));
         return builder.parse(is);
     }
+    
     public static String prettyFormat(String input, int indent) throws TransformerException 
     {
     	String output = "";
@@ -501,17 +487,15 @@ public class Utility {
     }
 
     
-	public static String JSONToXML(JSONObject jsonObject) throws JSONException
+	public static String jsonToXML(JSONObject jsonObject) throws JSONException
 	{
 		String xml = "";
 		xml = XML.toString(jsonObject);
 		return xml;
 	}
-	public static JSONObject XMLToJSON(String xml) throws JSONException
+	public static JSONObject xmlToJSON(String xml) throws JSONException
 	{
-		JSONObject jsonObject = new JSONObject();
-		jsonObject = XML.toJSONObject(xml);
-		return jsonObject;
+		return XML.toJSONObject(xml);
 	}
 	/**
 	 * Get actual message length received from member
@@ -767,14 +751,12 @@ public class Utility {
      */
 	public static byte[] byteConcate(byte[] firstByte, byte[] secondByte, byte[] thirdByte, byte[] fourthByte) throws IOException
 	{
-		byte[] z = new byte[firstByte.length+secondByte.length+thirdByte.length];
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
 		outputStream.write(firstByte);
 		outputStream.write(secondByte);
 		outputStream.write(thirdByte);
 		outputStream.write(fourthByte);
-		z = outputStream.toByteArray();
-		return z;
+		return outputStream.toByteArray();
 	}
 	/**
 	 * Generate SHA-256 hash code from a string
@@ -1119,8 +1101,7 @@ public class Utility {
 	public static String base64Encode(String input)
 	{
 		byte[] encodedBytes = Base64.getEncoder().encode(input.getBytes());
-		String output = new String(encodedBytes);
-		return output;
+		return new String(encodedBytes);
 	}
 	/**
 	 * Decode string with base 64 encoding
@@ -1130,8 +1111,7 @@ public class Utility {
 	public static String base64Decode(String input)
 	{
 		byte[] decodedBytes = Base64.getDecoder().decode(input.getBytes());
-		String output = new String(decodedBytes);
-		return output;
+		return new String(decodedBytes);
 	}
 	
 }

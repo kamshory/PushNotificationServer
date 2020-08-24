@@ -4,7 +4,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
@@ -19,7 +18,6 @@ import com.planetbiru.pushserver.application.Application;
 import com.planetbiru.pushserver.database.Database;
 import com.planetbiru.pushserver.database.DatabaseConfig;
 import com.planetbiru.pushserver.utility.Encryption;
-import com.planetbiru.pushserver.utility.Utility;
 
 /**
  * Configuration class
@@ -77,8 +75,8 @@ public class Config {
 	 * API version
 	 */
 	private static String version = "1.0.0";
-	private static boolean HTTPProxyEnabled = false;
-	private static String HTTPAddressForwarder = "X-Remote-Address-Forwarder";
+	private static boolean httpProxyEnabled = false;
+	private static String httpAddressForwarder = "X-Remote-Address-Forwarder";
 	/**
 	 * Database connection per push
 	 */
@@ -312,16 +310,16 @@ public class Config {
 		Config.version = version;
 	}
 	public static boolean isHTTPProxyEnabled() {
-		return HTTPProxyEnabled;
+		return httpProxyEnabled;
 	}
 	public static void setHTTPProxyEnabled(boolean hTTPProxyEnabled) {
-		HTTPProxyEnabled = hTTPProxyEnabled;
+		httpProxyEnabled = hTTPProxyEnabled;
 	}
 	public static String getHTTPAddressForwarder() {
-		return HTTPAddressForwarder;
+		return httpAddressForwarder;
 	}
 	public static void setHTTPAddressForwarder(String hTTPAddressForwarder) {
-		HTTPAddressForwarder = hTTPAddressForwarder;
+		httpAddressForwarder = hTTPAddressForwarder;
 	}
 	public static boolean isConnectionPerPush() {
 		return connectionPerPush;
@@ -688,37 +686,39 @@ public class Config {
 	{
 		Config.properties = properties;
 	
-		String DATABASE1_TYPE   	   = "";
-		String DATABASE1_HOST_NAME     = "";
-		String DATABASE1_PORT_NUMBER   = "3306";
-		String DATABASE1_USER_NAME     = "";
-		String DATABASE1_USER_PASSWORD = "";
-		String DATABASE1_NAME          = "";
-		String DATABASE1_USED          = "";
+		String database1Type   	     = "";
+		String database1HostName     = "";
+		String database1PortNumber   = "3306";
+		String database1UserName     = "";
+		String database1UserPassword = "";
+		String database1Name         = "";
+		String database1Used         = "";
 		
-		String DATABASE2_TYPE          = "";
-		String DATABASE2_HOST_NAME     = "";
-		String DATABASE2_PORT_NUMBER   = "3306";
-		String DATABASE2_USER_NAME     = "";
-		String DATABASE2_USER_PASSWORD = "";
-		String DATABASE2_NAME          = "";
-		String DATABASE2_USED          = "";
-  		
-		String DATABASE3_TYPE          = "";
-		String DATABASE3_HOST_NAME     = "";
-		String DATABASE3_PORT_NUMBER   = "3306";
-		String DATABASE3_USER_NAME     = "";
-		String DATABASE3_USER_PASSWORD = "";
-		String DATABASE3_NAME          = "";
-		String DATABASE3_USED          = "";
+		String database2Type   	     = "";
+		String database2HostName     = "";
+		String database2PortNumber   = "3306";
+		String database2UserName     = "";
+		String database2UserPassword = "";
+		String database2Name         = "";
+		String database2Used         = "";
+		
+		String database3Type   	     = "";
+		String database3HostName     = "";
+		String database3PortNumber   = "3306";
+		String database3UserName     = "";
+		String database3UserPassword = "";
+		String database3Name         = "";
+		String database3Used         = "";
+		
 
-		DATABASE1_USED 			       = Config.properties.getProperty("DATABASE1_USED", "TRUE");
-		DATABASE2_USED 			       = Config.properties.getProperty("DATABASE2_USED", "FALSE");
-		DATABASE3_USED 			       = Config.properties.getProperty("DATABASE3_USED", "FALSE");
 
-		Config.databaseConfig1.setDatabaseUsed(DATABASE1_USED.equals("TRUE"));
-		Config.databaseConfig2.setDatabaseUsed(DATABASE2_USED.equals("TRUE"));
-		Config.databaseConfig3.setDatabaseUsed(DATABASE3_USED.equals("TRUE"));
+		database1Used 			       = Config.properties.getProperty("DATABASE1_USED", "TRUE");
+		database2Used 			       = Config.properties.getProperty("DATABASE2_USED", "FALSE");
+		database3Used 			       = Config.properties.getProperty("DATABASE3_USED", "FALSE");
+
+		Config.databaseConfig1.setDatabaseUsed(database1Used.equals("TRUE"));
+		Config.databaseConfig2.setDatabaseUsed(database2Used.equals("TRUE"));
+		Config.databaseConfig3.setDatabaseUsed(database3Used.equals("TRUE"));
 		
 		Config.developmentMode = (Config.properties.getProperty("DEVELOPMENT_MODE", "FALSE").equals("TRUE"))?true:false;
 		Config.createConfiguration = (Config.properties.getProperty("CREATE_CONFIGURATION", "FALSE").equals("TRUE"))?true:false;
@@ -727,31 +727,31 @@ public class Config {
 		// Free version end
 		if(Config.developmentMode)
 		{		
-			DATABASE1_TYPE 			= Config.properties.getProperty("DATABASE1_TYPE", "");
-			DATABASE1_HOST_NAME 	= Config.properties.getProperty("DATABASE1_HOST_NAME", "");
-			DATABASE1_PORT_NUMBER 	= Config.properties.getProperty("DATABASE1_PORT_NUMBER", "");
-			DATABASE1_USER_NAME 	= Config.properties.getProperty("DATABASE1_USER_NAME", "");
-			DATABASE1_USER_PASSWORD = Config.properties.getProperty("DATABASE1_USER_PASSWORD", "");
-			DATABASE1_NAME 			= Config.properties.getProperty("DATABASE1_NAME", "");
+			database1Type 			= Config.properties.getProperty("DATABASE1_TYPE", "");
+			database1HostName 	    = Config.properties.getProperty("DATABASE1_HOST_NAME", "");
+			database1PortNumber 	= Config.properties.getProperty("DATABASE1_PORT_NUMBER", "");
+			database1UserName 	    = Config.properties.getProperty("DATABASE1_USER_NAME", "");
+			database1UserPassword   = Config.properties.getProperty("DATABASE1_USER_PASSWORD", "");
+			database1Name 			= Config.properties.getProperty("DATABASE1_NAME", "");
 			
-			DATABASE2_TYPE 			= Config.properties.getProperty("DATABASE2_TYPE", "");
-			DATABASE2_HOST_NAME 	= Config.properties.getProperty("DATABASE2_HOST_NAME", "");
-			DATABASE2_PORT_NUMBER 	= Config.properties.getProperty("DATABASE2_PORT_NUMBER", "");
-			DATABASE2_USER_NAME 	= Config.properties.getProperty("DATABASE2_USER_NAME", "");
-			DATABASE2_USER_PASSWORD = Config.properties.getProperty("DATABASE2_USER_PASSWORD", "");
-			DATABASE2_NAME 			= Config.properties.getProperty("DATABASE2_NAME", "");
+			database2Type 			= Config.properties.getProperty("DATABASE2_TYPE", "");
+			database2HostName 	    = Config.properties.getProperty("DATABASE2_HOST_NAME", "");
+			database2PortNumber 	= Config.properties.getProperty("DATABASE2_PORT_NUMBER", "");
+			database2UserName 	    = Config.properties.getProperty("DATABASE2_USER_NAME", "");
+			database2UserPassword   = Config.properties.getProperty("DATABASE2_USER_PASSWORD", "");
+			database2Name 			= Config.properties.getProperty("DATABASE2_NAME", "");
 			
-			DATABASE3_TYPE 			= Config.properties.getProperty("DATABASE3_TYPE", "");
-			DATABASE3_HOST_NAME 	= Config.properties.getProperty("DATABASE3_HOST_NAME", "");
-			DATABASE3_PORT_NUMBER 	= Config.properties.getProperty("DATABASE3_PORT_NUMBER", "");
-			DATABASE3_USER_NAME 	= Config.properties.getProperty("DATABASE3_USER_NAME", "");
-			DATABASE3_USER_PASSWORD = Config.properties.getProperty("DATABASE3_USER_PASSWORD", "");
-			DATABASE3_NAME 			= Config.properties.getProperty("DATABASE3_NAME", "");
+			database3Type 			= Config.properties.getProperty("DATABASE3_TYPE", "");
+			database3HostName 	    = Config.properties.getProperty("DATABASE3_HOST_NAME", "");
+			database3PortNumber 	= Config.properties.getProperty("DATABASE3_PORT_NUMBER", "");
+			database3UserName 	    = Config.properties.getProperty("DATABASE3_USER_NAME", "");
+			database3UserPassword   = Config.properties.getProperty("DATABASE3_USER_PASSWORD", "");
+			database3Name 			= Config.properties.getProperty("DATABASE3_NAME", "");
 			
 			Config.keystorePassword = Config.properties.getProperty("KEYSTORE_PASSWORD", "");
 			Config.mailPassword     = Config.properties.getOrDefault("MAIL_PASSWORD", "").toString().trim();
 			
-			if(DATABASE1_TYPE.equals("") || DATABASE1_HOST_NAME.equals("") || DATABASE1_PORT_NUMBER.equals("") || DATABASE1_USER_NAME.equals("") || DATABASE1_NAME.equals(""))
+			if(database1Type.equals("") || database1HostName.equals("") || database1PortNumber.equals("") || database1UserName.equals("") || database1Name.equals(""))
 			{
 				System.err.println("Invalid database configuration");
 			}
@@ -760,9 +760,9 @@ public class Config {
 			{
 				Encryption en = new Encryption(Config.encryptionPassword);
 				Database db = new Database();
-				String configuration1 = db.encryptConfiguration(DATABASE1_TYPE, DATABASE1_HOST_NAME, Integer.parseInt(DATABASE1_PORT_NUMBER), DATABASE1_USER_NAME, DATABASE1_USER_PASSWORD, DATABASE1_NAME);
-				String configuration2 = db.encryptConfiguration(DATABASE2_TYPE, DATABASE2_HOST_NAME, Integer.parseInt(DATABASE2_PORT_NUMBER), DATABASE2_USER_NAME, DATABASE2_USER_PASSWORD, DATABASE2_NAME);
-				String configuration3 = db.encryptConfiguration(DATABASE3_TYPE, DATABASE3_HOST_NAME, Integer.parseInt(DATABASE3_PORT_NUMBER), DATABASE3_USER_NAME, DATABASE3_USER_PASSWORD, DATABASE3_NAME);
+				String configuration1 = db.encryptConfiguration(database1Type, database1HostName, Integer.parseInt(database1PortNumber), database1UserName, database1UserPassword, database1Name);
+				String configuration2 = db.encryptConfiguration(database2Type, database2HostName, Integer.parseInt(database2PortNumber), database2UserName, database2UserPassword, database2Name);
+				String configuration3 = db.encryptConfiguration(database3Type, database3HostName, Integer.parseInt(database3PortNumber), database3UserName, database3UserPassword, database3Name);
 				Config.keystorePasswordEncrypted = en.encrypt(Config.keystorePassword, true);
 				Config.mailPasswordEncrypted     = en.encrypt(Config.mailPassword, true);
 				
@@ -775,9 +775,9 @@ public class Config {
 				System.out.println();
 				System.exit(0);
 			}				
-			Config.databaseConfig1.initConfig(DATABASE1_TYPE, DATABASE1_HOST_NAME, Integer.parseInt(DATABASE1_PORT_NUMBER), DATABASE1_USER_NAME, DATABASE1_USER_PASSWORD, DATABASE1_NAME, DATABASE1_USED.equals("TRUE"));
-			Config.databaseConfig2.initConfig(DATABASE2_TYPE, DATABASE2_HOST_NAME, Integer.parseInt(DATABASE2_PORT_NUMBER), DATABASE2_USER_NAME, DATABASE2_USER_PASSWORD, DATABASE2_NAME, DATABASE2_USED.equals("TRUE"));
-			Config.databaseConfig3.initConfig(DATABASE3_TYPE, DATABASE3_HOST_NAME, Integer.parseInt(DATABASE3_PORT_NUMBER), DATABASE3_USER_NAME, DATABASE3_USER_PASSWORD, DATABASE3_NAME, DATABASE3_USED.equals("TRUE"));
+			Config.databaseConfig1.initConfig(database1Type, database1HostName, Integer.parseInt(database1PortNumber), database1UserName, database1UserPassword, database1Name, database1Used.equals("TRUE"));
+			Config.databaseConfig2.initConfig(database2Type, database2HostName, Integer.parseInt(database2PortNumber), database2UserName, database2UserPassword, database2Name, database2Used.equals("TRUE"));
+			Config.databaseConfig3.initConfig(database1Type, database3HostName, Integer.parseInt(database3PortNumber), database3UserName, database3UserPassword, database1Name, database3Used.equals("TRUE"));
 		}
 		else
 		{
@@ -785,9 +785,9 @@ public class Config {
 			Config.databaseConfig2 = Config.databaseConfig2.decryptConfigurationNative(properties.getOrDefault("DATABASE2_CONFIGURATION", "{}").toString());
 			Config.databaseConfig3 = Config.databaseConfig3.decryptConfigurationNative(properties.getOrDefault("DATABASE3_CONFIGURATION", "{}").toString());
 			
-			Config.databaseConfig1.setDatabaseUsed(DATABASE1_USED.equals("TRUE"));
-			Config.databaseConfig2.setDatabaseUsed(DATABASE2_USED.equals("TRUE"));
-			Config.databaseConfig3.setDatabaseUsed(DATABASE3_USED.equals("TRUE"));
+			Config.databaseConfig1.setDatabaseUsed(database1Used.equals("TRUE"));
+			Config.databaseConfig2.setDatabaseUsed(database2Used.equals("TRUE"));
+			Config.databaseConfig3.setDatabaseUsed(database3Used.equals("TRUE"));
 			
 			Config.keystorePasswordEncrypted    = Config.properties.getProperty("KEYSTORE_PASSWORD_ENCRYPTED", "");
 			Config.mailPasswordEncrypted        = Config.properties.getOrDefault("MAIL_PASSWORD_ENCRYPTED", "").toString().trim();
@@ -800,20 +800,20 @@ public class Config {
 		}			
 		Config.apiDocumentRoot           = Config.properties.getOrDefault("SERVER_DOCUMENT_ROOT", "notif").toString().trim();
 		Config.cleanUpTime               = Config.properties.getOrDefault("CLEAN_UP_TIME", "0200").toString().trim();
-		Config.notificationPort                = Integer.parseInt(Config.properties.getOrDefault("NOTIFICATION_PORT_HTTP", "92").toString().trim());
-		Config.notificationPortSSL             = Integer.parseInt(Config.properties.getOrDefault("NOTIFICATION_PORT_HTTPS", "93").toString().trim());
-		Config.pusherPort            = Integer.parseInt(Config.properties.getOrDefault("PUSHER_PORT_HTTP", "94").toString().trim());
-		Config.pusherPortSSL           = Integer.parseInt(Config.properties.getOrDefault("PUSHER_PORT_HTTPS", "95").toString().trim());
-		Config.pusherSSLEnabled        = Config.properties.getOrDefault("PUSHER_HTTPS_ENABLED", "FALSE").toString().trim().toUpperCase().equals("TRUE");
-		Config.notificationSSLEnabled           = Config.properties.getOrDefault("NOTIFICATION_HTTPS_ENABLED", "FALSE").toString().trim().toUpperCase().equals("TRUE");
+		Config.notificationPort          = Integer.parseInt(Config.properties.getOrDefault("NOTIFICATION_PORT_HTTP", "92").toString().trim());
+		Config.notificationPortSSL       = Integer.parseInt(Config.properties.getOrDefault("NOTIFICATION_PORT_HTTPS", "93").toString().trim());
+		Config.pusherPort                = Integer.parseInt(Config.properties.getOrDefault("PUSHER_PORT_HTTP", "94").toString().trim());
+		Config.pusherPortSSL             = Integer.parseInt(Config.properties.getOrDefault("PUSHER_PORT_HTTPS", "95").toString().trim());
+		Config.pusherSSLEnabled          = Config.properties.getOrDefault("PUSHER_HTTPS_ENABLED", "FALSE").toString().trim().equalsIgnoreCase("TRUE");
+		Config.notificationSSLEnabled    = Config.properties.getOrDefault("NOTIFICATION_HTTPS_ENABLED", "FALSE").toString().trim().equalsIgnoreCase("TRUE");
 		
 		Config.keystoreFile              = Config.properties.getOrDefault("KEYSTORE_PATH", "TRUE").toString().trim();
-		Config.connectionPerPush         = Config.properties.getOrDefault("DATABASE_CONNECTION_PER_PUSH", "TRUE").toString().trim().toUpperCase().equals("TRUE");
-		Config.printStackTrace           = Config.properties.getOrDefault("PRINT_STACK_TRACE", "FALSE").toString().trim().toUpperCase().equals("TRUE");
-		Config.debugMode                 = Config.properties.getOrDefault("DEBUG_MODE", "FALSE").toString().trim().toUpperCase().equals("TRUE");
-		Config.developmentMode           = Config.properties.getOrDefault("DEVELOPMENT_MODE", "FALSE").toString().trim().toUpperCase().equals("TRUE");
-		Config.filterSource              = Config.properties.getOrDefault("FILTER_SOURCE", "TRUE").toString().trim().toUpperCase().equals("TRUE");
-		Config.groupCreationApproval     = Config.properties.getOrDefault("GROUP_CREATION_APPROVAL", "TRUE").toString().trim().toUpperCase().equals("TRUE");
+		Config.connectionPerPush         = Config.properties.getOrDefault("DATABASE_CONNECTION_PER_PUSH", "TRUE").toString().trim().equalsIgnoreCase("TRUE");
+		Config.printStackTrace           = Config.properties.getOrDefault("PRINT_STACK_TRACE", "FALSE").toString().trim().equalsIgnoreCase("TRUE");
+		Config.debugMode                 = Config.properties.getOrDefault("DEBUG_MODE", "FALSE").toString().trim().equalsIgnoreCase("TRUE");
+		Config.developmentMode           = Config.properties.getOrDefault("DEVELOPMENT_MODE", "FALSE").toString().trim().equalsIgnoreCase("TRUE");
+		Config.filterSource              = Config.properties.getOrDefault("FILTER_SOURCE", "TRUE").toString().trim().equalsIgnoreCase("TRUE");
+		Config.groupCreationApproval     = Config.properties.getOrDefault("GROUP_CREATION_APPROVAL", "TRUE").toString().trim().equalsIgnoreCase("TRUE");
 		Config.inspectionInterval        = Long.parseLong(Config.properties.getOrDefault("INTERVAL_INSPECTION", "1800000").toString().trim());
 		Config.gcInterval                = Integer.parseInt(Config.properties.getOrDefault("INTERVAL_GARBAGE_COLLECTION", "59000").toString().trim());	
 		Config.limitNotification         = Long.parseLong(Config.properties.getOrDefault("LIMIT_NOTIFICATION", "50").toString().trim());
@@ -825,12 +825,12 @@ public class Config {
 		Config.waitForAnswer             = Integer.parseInt(Config.properties.getOrDefault("WAIT_FOR_ANSWER", "30000").toString().trim());			
 		Config.deleteNotifSent           = Integer.parseInt(Config.properties.getOrDefault("DELETE_NOTIF_SENT", "3").toString().trim());	
 		Config.deleteNotifNotSent        = Integer.parseInt(Config.properties.getOrDefault("DELETE_NOTIF_NOT_SENT", "10").toString().trim());	
-		Config.contentSecure             = Config.properties.getOrDefault("CONTENT_SECURE", "FALSE").toString().trim().toUpperCase().equals("TRUE");
+		Config.contentSecure             = Config.properties.getOrDefault("CONTENT_SECURE", "FALSE").toString().trim().equalsIgnoreCase("TRUE");
 		Config.redirectHome              = Config.properties.getOrDefault("REDIRECT_HOME", "https://www.planetbiru.com").toString().trim();		
 		
 		Config.mailHost                  = Config.properties.getOrDefault("MAIL_HOST", "localhost").toString().trim();	
 		Config.mailPort                  = Integer.parseInt(Config.properties.getOrDefault("MAIL_PORT", "25").toString().trim());	
-		Config.mailUseAuth               = Config.properties.getOrDefault("MAIL_USE_AUTH", "FALSE").toString().trim().toUpperCase().equals("TRUE");
+		Config.mailUseAuth               = Config.properties.getOrDefault("MAIL_USE_AUTH", "FALSE").toString().trim().equalsIgnoreCase("TRUE");
 		Config.mailUsername              = Config.properties.getOrDefault("MAIL_USERNAME", "").toString().trim();
 		
 		Config.mailSubject               = Config.properties.getOrDefault("MAIL_SUBJECT", "Pusher Address Confirmation").toString().trim();
@@ -840,71 +840,5 @@ public class Config {
 		Config.approvalURLTemplate       = Config.properties.getOrDefault("APPROVAL_URL_TEMPLATE", "http://push.example.com/approve-address/?auth={hash}").toString().trim();
 		Config.readConfigSuccess         = true;			
 		return Config.readConfigSuccess;		
-	}
-	/**
-	 * Overrides <strong>toString</strong> method to convert object to JSON String. This method is useful to debug or show value of each properties of the object.
-	 */
-	public String toString()
-	{
-		Field[] fields = this.getClass().getDeclaredFields();
-		int i, max = fields.length;
-		String fieldName = "";
-		String fieldType = "";
-		String ret = "";
-		String value = "";
-		boolean skip = false;
-		int j = 0;
-		for(i = 0; i < max; i++)
-		{
-			fieldName = fields[i].getName().toString();
-			fieldType = fields[i].getType().toString();
-			if(i == 0)
-			{
-				ret += "{";
-			}
-			if(fieldType.equals("int") || fieldType.equals("long") || fieldType.equals("float") || fieldType.equals("double") || fieldType.equals("boolean"))
-			{
-				try 
-				{
-					value = fields[i].get(this).toString();
-				}  
-				catch (Exception e) 
-				{
-					value = "0";
-				}
-				skip = false;
-			}
-			else if(fieldType.contains("String"))
-			{
-				try 
-				{
-					value = "\""+Utility.escapeJSON((String) fields[i].get(this))+"\"";
-				} 
-				catch (Exception e) 
-				{
-					value = "\""+"\"";
-				}
-				skip = false;
-			}
-			else
-			{
-				value = "\""+"\"";
-				skip = true;
-			}
-			if(!skip)
-			{
-				if(j > 0)
-				{
-					ret += ",";
-				}
-				j++;
-				ret += "\r\n\t\""+fieldName+"\":"+value;
-			}
-			if(i == max-1)
-			{
-				ret += "\r\n}";
-			}
-		}
-		return ret;
 	}
 }
