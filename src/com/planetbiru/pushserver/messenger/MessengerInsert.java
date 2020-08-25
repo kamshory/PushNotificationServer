@@ -97,9 +97,6 @@ public class MessengerInsert extends Thread
 	 * @param groupID Group ID
 	 * @param data Data to send to the client
 	 * @param notificationID Notification ID
-	 * @param database1 Primary Database object
-	 * @param database2 Secondary Database object
-	 * @param database3 Tertiary Database object
 	 * @param command Command
 	 */
 	public MessengerInsert(long apiID, List<Device> deviceList, long groupID, String data, long notificationID, String command)

@@ -334,9 +334,6 @@ public class Application
 	}
 	/**
 	 * Table validation
-	 * @param database1 Primary database object
-	 * @param database2 Secondary database object
-	 * @param database3 Tertiary database object
 	 * @return true if valid and false if invalid
 	 * @throws DatabaseTypeException if database type is not supported
 	 * @throws SQLException if any SQL errors
@@ -430,14 +427,7 @@ public class Application
 	}
 	/**
 	 * Function validation
-	 * @param database1 Primary database object
-	 * @param database2 Secondary database object
-	 * @param database3 Tertiary database object
 	 * @return true if valid and false if invalid
-	 * @throws DatabaseTypeException if database type is not supported
-	 * @throws SQLException if any SQL errors
-	 * @throws IndexOutOfBoundsException if out of bound
-	 * @throws TableNotFoundException if table is not exists
 	 * @throws DatabaseFunctionFoundException if function is not exists
 	 */
 	public static boolean checkFunctions() throws DatabaseFunctionFoundException
@@ -485,9 +475,6 @@ public class Application
 	}
 	/**
 	 * Database validation
-	 * @param database1 Primary database object
-	 * @param database2 Secondary database object
-	 * @param database3 Tertiary database object
 	 * @return true if valid and false if invalid
 	 * @throws DatabaseTypeException if database type is not supported
 	 * @throws SQLException if any SQL errors
@@ -514,6 +501,7 @@ public class Application
 	/**
 	 * Kill process
 	 * @param path File path
+	 * @param exceptThis Except this
 	 * @throws IOException if any IO errors
 	 */
 	public static void killProcess(String path, boolean exceptThis) throws IOException

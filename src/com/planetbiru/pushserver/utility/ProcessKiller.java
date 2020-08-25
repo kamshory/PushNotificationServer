@@ -38,6 +38,7 @@ public class ProcessKiller {
 	/**
 	 * Construtor with path initialization
 	 * @param path Application path to be killed
+	 * @param exceptThis Except this
 	 */
 	public ProcessKiller(String path, boolean exceptThis)
 	{

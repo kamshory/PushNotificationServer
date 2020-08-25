@@ -388,6 +388,7 @@ public class SocketIO
 	 * @param data Data
 	 * @return true if success and false if failed
 	 * @throws IOException if any IO errors
+	 * @throws SocketException if any socket errors
 	 */
 	public boolean write(String data) throws IOException, SocketException
 	{
@@ -399,6 +400,7 @@ public class SocketIO
 	 * @param data Data
 	 * @return true if success and false if failed
 	 * @throws IOException if any IO errors
+	 * @throws SocketException if any socket errors
 	 */
 	public boolean write(Socket socket, String data) throws IOException, SocketException
 	{

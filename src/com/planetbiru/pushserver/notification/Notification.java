@@ -1,7 +1,6 @@
 package com.planetbiru.pushserver.notification;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -14,8 +13,6 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import javax.mail.MessagingException;
-import javax.mail.internet.AddressException;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -147,9 +144,6 @@ public class Notification
 	}
 	/**
 	 * Constructor with database object from the "main"
-	 * @param database1 Primary Database object
-	 * @param database2 Secondary Database object
-	 * @param database3 Tertiary Database object
 	 * @param requestID Request ID
 	 */
 	public Notification(long requestID)
@@ -161,9 +155,6 @@ public class Notification
 	}
 	/**
 	 * Constructor with database initialization
-	 * @param database1 Primary Database object
-	 * @param database2 Secondary Database object
-	 * @param database3 Tertiary Database object
 	 */
 	public Notification() 
 	{
@@ -175,10 +166,6 @@ public class Notification
 	 * PushClient authentication
 	 * @param authorization URL encoded string contains the authentication sent by PushClient
 	 * @return true if valid and false if invalid
-	 * @throws SQLException if any SQL errors
-	 * @throws QueryParserException if any errors while parsing 
-	 * @throws DatabaseTypeException if database type not supported 
-	 * @throws NoSuchAlgorithmException if algorithm not found
 	 */
 	public boolean authentication(String authorization)
 	{
@@ -258,15 +245,6 @@ public class Notification
 	 * @param applicationVersion Application name of the pusher
 	 * @param userAgent User agent of the pusher
 	 * @return true if valid and false if invalid
-	 * @throws SQLException if any SQL errors
-	 * @throws QueryParserException if any errors while parsing
-	 * @throws DatabaseTypeException if database type not supported 
-	 * @throws NoSuchAlgorithmException if algorithm not found
-	 * @throws ClassCastException if any class cast errors
-	 * @throws NullPointerException if any null value
-	 * @throws MessagingException if any errors occurred while send message
-	 * @throws IllegalArgumentException if any illegal arguments
-	 * @throws AddressException if any invalid address
 	 */
 	public boolean authentication(String authorization, String serverAddress, String applicationName, String applicationVersion, String userAgent) 
 	{
@@ -362,14 +340,6 @@ public class Notification
 	 * @param applicationVersion Application name of the pusher
 	 * @param userAgent User agent of the pusher
 	 * @return JSONObject contains group creation information
-	 * @throws JSONException if any JSON errors
-	 * @throws DatabaseTypeException if database is unsupported
-	 * @throws SQLException if any SQL errors
-	 * @throws AddressException if any invalid address
-	 * @throws NullPointerException if any NULL pointer
-	 * @throws IllegalArgumentException if any illegal arguments
-	 * @throws MessagingException if any errors occurred while send message
-	 * @throws NoSuchAlgorithmException if algorithm is not found
 	 */
 	public JSONObject createGroup(String body, String remoteAddress, String applicationName, String applicationVersion, String userAgent)
 	{
@@ -392,13 +362,6 @@ public class Notification
 	 * @param applicationVersion Application name of the pusher
 	 * @param userAgent User agent of the pusher
 	 * @return JSONObject contains group creation information
-	 * @throws DatabaseTypeException if database is unsupported
-	 * @throws SQLException if any SQL errors
-	 * @throws AddressException if any invalid address
-	 * @throws NullPointerException if any NULL pointer
-	 * @throws IllegalArgumentException if any illegal arguments
-	 * @throws MessagingException if any errors occurred while send message
-	 * @throws NoSuchAlgorithmException if algorithm is not found
 	 */
 	public JSONObject createGroup(long apiID, String groupKey, String groupName, String description, String remoteAddress, String applicationName, String applicationVersion, String userAgent)
 	{
@@ -516,8 +479,6 @@ public class Notification
 	 * @param apiID API ID
 	 * @param groupKey Group key
 	 * @return Group ID
-	 * @throws SQLException if any SQL errors
-	 * @throws DatabaseTypeException if database type not supported 
 	 */
 	public long getGroupID(long apiID, String groupKey)
 	{
@@ -567,8 +528,6 @@ public class Notification
 	 * @param apiKey API key
 	 * @param groupKey Group key
 	 * @return Group ID
-	 * @throws SQLException if any SQL errors
-	 * @throws DatabaseTypeException if database type not supported 
 	 */
 	public long getGroupID(String apiKey, String groupKey)
 	{
@@ -622,13 +581,6 @@ public class Notification
 	 * @param applicationName Application version of the pusher
 	 * @param applicationVersion Application name of the pusher
 	 * @param userAgent User agent of the pusher
-	 * @throws SQLException if any SQL errors
-	 * @throws DatabaseTypeException if database type not supported 
-	 * @throws MessagingException if any errors occurred while send message
-	 * @throws IllegalArgumentException if any illegal arguments
-	 * @throws NullPointerException if any NULL pointer
-	 * @throws AddressException if any invalid address
-	 * @throws NoSuchAlgorithmException if algorithm is not found
 	 */
 	public void addPusherAddress(String serverAddress, String applicationName, String applicationVersion, String userAgent)
 	{
@@ -642,13 +594,6 @@ public class Notification
 	 * @param userAgent User agent of the pusher
 	 * @param needConfirmation Need confirmation
 	 * @param active Active
-	 * @throws SQLException if any SQL errors
-	 * @throws DatabaseTypeException if database type not supported 
-	 * @throws MessagingException if any errors occurred while send message
-	 * @throws IllegalArgumentException if any invalid arguments
-	 * @throws NullPointerException if any NULL pointer
-	 * @throws AddressException if any invalid address 
-	 * @throws NoSuchAlgorithmException if algorithm is not found
 	 */
 	public void addPusherAddress(String serverAddress, String applicationName, String applicationVersion, String userAgent, boolean needConfirmation, boolean active) 
 	{
@@ -722,10 +667,6 @@ public class Notification
 	 * @param applicationVersion Application name of the pusher
 	 * @param userAgent User agent of the pusher
 	 * @param time Time sent
-	 * @throws DatabaseTypeException if database type is not supported
-	 * @throws SQLException if any SQL errors
-	 * @throws AddressException if any invalid address 
-	 * @throws MessagingException if any errors occurred while send message
 	 */
 	public void sendMail(long pusherAddressID, String auth, String remoteAddress, String applicationName, String applicationVersion, String userAgent, String time) 
 	{
@@ -807,8 +748,6 @@ public class Notification
 	 * Load mail template from file
 	 * @param path Template file path
 	 * @return File content
-	 * @throws IOException if any IO errors
-	 * @throws FileNotFoundException if file not found or permission denied
 	 */
 	public String loadMailTemplate(String path)
 	{
@@ -976,14 +915,25 @@ public class Notification
 			database1.disconnect();
 		}
 		return response;
-	}	
+	}
+	/**
+	 * Unregister device
+	 * @param body Request body
+	 * @return Response to client
+	 */
 	public JSONObject unregisterDevice(String body)
 	{
 		JSONObject jo;
 		jo = new JSONObject(body);
 		return this.unregisterDevice(jo);
 	}
-	public JSONObject unregisterDevice(JSONObject jo)
+
+	/**
+	 * Unregister device
+	 * @param requestJSON JSONObject from request
+	 * @return Response to client
+	 */
+	public JSONObject unregisterDevice(JSONObject requestJSON)
 	{
 		JSONObject response = new JSONObject();
 		Database database1 = new Database(Config.getDatabaseConfig1());
@@ -992,7 +942,7 @@ public class Notification
 		{
 			database1.connect();
 			QueryBuilder query1 = new QueryBuilder(database1.getDatabaseType());
-			JSONObject data = jo.optJSONObject(JsonKey.DATA);
+			JSONObject data = requestJSON.optJSONObject(JsonKey.DATA);
 			if(data == null)
 			{
 				data = new JSONObject();
@@ -1038,9 +988,8 @@ public class Notification
 	}
 	/**
 	 * Insert notification
-	 * @param jo JSONObject of the notification. Pusher only send one notification message to PushServer but possible to send it to several devices
-	 * @return JSONArray of JSONObject contains notification ID and destination device ID
-	 * @throws JSONException if any JSON errors
+	 * @param request JSONObject of the notification. Pusher only send one notification message to PushServer but possible to send it to several devices
+	 * @return JSONObject contains notification ID and destination device ID
 	 * @throws SQLException if any SQL errors
 	 * @throws DatabaseTypeException if database type not supported 
 	 */
@@ -1219,8 +1168,6 @@ public class Notification
 	 * @param apiID API ID
 	 * @param deviceID Device ID
 	 * @return true is yes and false if not
-	 * @throws SQLException if any SQL errors
-	 * @throws DatabaseTypeException if database type not supported 
 	 */
 	public boolean checkDevice(long apiID, String deviceID)
 	{
@@ -1265,9 +1212,6 @@ public class Notification
 	 * @param groupID Group ID
 	 * @param limit Maximum notification selected
 	 * @return JSONArray contains notification
-	 * @throws SQLException if any SQL errors 
-	 * @throws DatabaseTypeException if database type not supported
-	 * @throws JSONException if any JSON errors 
 	 */
 	public JSONArray select(long apiID, String deviceID, long groupID, long limit)
 	{
@@ -1384,9 +1328,6 @@ public class Notification
 	 * @param deviceID Device ID
 	 * @param groupID Group ID
 	 * @return JSONArray contains notification
-	 * @throws JSONException if any JSON errors
-	 * @throws SQLException if any SQL errors 
-	 * @throws DatabaseTypeException if database type not supported 
 	 */
 	public JSONArray select(long apiID, String deviceID, long groupID)
 	{
@@ -1398,8 +1339,6 @@ public class Notification
 	 * @param deviceID Device ID
 	 * @param groupID Group ID
 	 * @return Offline notification count
-	 * @throws SQLException if any SQL errors 
-	 * @throws DatabaseTypeException if database type not supported 
 	 */
 	public long countNotification(long apiID, String deviceID, long groupID)
 	{
@@ -1445,9 +1384,6 @@ public class Notification
 	 * Delete notification stored in the database
 	 * @param body String contains JSONArray of pairs of notification ID and device ID. Pusher must send notification ID and device that will be deleted. PushServer only will delete the notification if notification ID, device ID and API ID is match
 	 * @return JSONArray contains notification ID and device ID of the deletion
-	 * @throws JSONException if any JSON errors
-	 * @throws SQLException if any SQL errors
-	 * @throws DatabaseTypeException if database type not supported 
 	 */
 	public JSONObject delete(String body)
 	{
@@ -1486,9 +1422,6 @@ public class Notification
 	 * @param id Notification ID
 	 * @param groupID Group ID
 	 * @return JSONArray contains notification ID and device ID of the deletion
-	 * @throws JSONException if any JSON errors
-	 * @throws SQLException if any SQL errors
-	 * @throws DatabaseTypeException if database type not supported 
 	 */
 	public JSONArray delete(long apiID, String deviceID, long groupID, long id)
 	{
@@ -1503,9 +1436,6 @@ public class Notification
 	 * @param groupID Group ID
 	 * @param ids Array long contains notification ID
 	 * @return JSONArray contains notification ID and device ID of the deletion
-	 * @throws JSONException if any JSON errors
-	 * @throws SQLException if any SQL errors
-	 * @throws DatabaseTypeException if database type not supported 
 	 */
 	public JSONArray delete(long apiID, String deviceID, long groupID, long[] ids)
 	{
@@ -1584,9 +1514,6 @@ public class Notification
 	 * @param apiID API ID
 	 * @param groupID Group ID
 	 * @param data JSONArray contains device ID and notification ID to be deleted
-	 * @throws SQLException if any SQL errors
-	 * @throws JSONException if any JSON errors
-	 * @throws DatabaseTypeException if database type not supported 
 	 */
 	public void insertDeletionLog(long apiID, long groupID, JSONArray data)
 	{
@@ -1640,7 +1567,7 @@ public class Notification
 	 * @throws SQLException if any SQL errors
 	 * @throws DatabaseTypeException if database type not supported 
 	 */
-	public JSONArray selectDeletionLog(long apiID, String deviceID, long groupID) throws JSONException, SQLException, DatabaseTypeException 
+	public JSONArray selectDeletionLog(long apiID, String deviceID, long groupID) throws SQLException, DatabaseTypeException 
 	{
 		return this.selectDeletionLog(apiID, deviceID, groupID, 0);
 	}
@@ -1651,9 +1578,6 @@ public class Notification
 	 * @param groupID Group ID
 	 * @param limit Maximum deletion log selected
 	 * @return JSONArray contains device ID and notification ID
-	 * @throws JSONException if any JSON errors
-	 * @throws SQLException if any SQL errors 
-	 * @throws DatabaseTypeException if database type not supported 
 	 */
 	public JSONArray selectDeletionLog(long apiID, String deviceID, long groupID, long limit)
 	{
@@ -1711,8 +1635,6 @@ public class Notification
 	 * @param deviceID Device ID
 	 * @param groupID Group ID
 	 * @return Count the notification deletion log
-	 * @throws SQLException if any SQL errors 
-	 * @throws DatabaseTypeException if database type not supported 
 	 */
 	public long countDeletionLog(long apiID, String deviceID, long groupID)
 	{
@@ -1759,8 +1681,6 @@ public class Notification
 	 * @param apiID API ID
 	 * @param deviceID Device ID
 	 * @param notificationID Notification ID
-	 * @throws SQLException if any SQL errors
-	 * @throws DatabaseTypeException if database type not supported 
 	 */
 	public void clearDeleteLog(long apiID, String deviceID, long notificationID)
 	{

@@ -1,7 +1,7 @@
 com.planetbiru.pushserver.application
 com.planetbiru.pushserver.client
+com.planetbiru.pushserver.code
 com.planetbiru.pushserver.config
-com.planetbiru.pushserver.constant
 com.planetbiru.pushserver.database
 com.planetbiru.pushserver.evaluator
 com.planetbiru.pushserver.gc

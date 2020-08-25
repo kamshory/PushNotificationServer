@@ -66,6 +66,7 @@ public class Client
 	 * @param deviceID Device ID
 	 * @param apiID API ID
 	 * @param groupID Group ID
+	 * @param requestID Request ID
 	 * @return Array list contains device
 	 * @throws ClientException if any errors
 	 */

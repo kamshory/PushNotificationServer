@@ -11,17 +11,13 @@ import com.planetbiru.pushserver.utility.Utility;
 public class GCManager extends Thread
 {
 	/**
-	 * Garbage collection
-	 */
-	private GC gc;
-	/**
 	 * Constructor
-	 * @param databaseConfig1 Primary database configuration
-	 * @param databaseConfig2 Secondary database configuration
-	 * @param databaseConfig3 Tertiary database configuration
 	 */
 	public GCManager()
 	{
+		/**
+		 * Constructor
+		 */
 	}
 	/**
 	 * Override run method
@@ -30,6 +26,7 @@ public class GCManager extends Thread
 	@Override
 	public void run()
 	{
+		GC gc;
 		String now = "";
 		while(true)
 		{
@@ -39,18 +36,11 @@ public class GCManager extends Thread
 				now = Utility.now("HH:mm");
 				if(now.equals(Config.getCleanUpTime()))
 				{
-					this.gc = new GC();
-					this.gc.start();
+					gc = new GC();
+					gc.start();
 				}
 			} 
-			catch (InterruptedException e) 
-			{
-				if(Config.isPrintStackTrace())
-				{
-					e.printStackTrace();
-				}
-			}
-			catch(IllegalArgumentException e)
+			catch (InterruptedException | IllegalArgumentException e) 
 			{
 				if(Config.isPrintStackTrace())
 				{
