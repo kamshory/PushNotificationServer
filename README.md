@@ -368,27 +368,26 @@ Assume that:
 ```php
 $YourAPIKey = "PLANETBIRU";
 $YourAPIPusherPassword = "PASSWORD123";
+$CanonicalRequestBody = str_replace(array("\r", "\n", "\t", " "), "", $RequestBody);
 
 $UnixTimestamp = time(0);
 $YourToken = sha1($UnixTimestamp . $YourAPIKey);
 $YourSignature = sha1(sha1($YourAPIPusherPassword)."-".$YourToken."-".$YourAPIKey); 
+$DataIntegrity = sha1(sha1($YourAPIPusherPassword)."-".$YourToken."-".$CanonicalRequestBody); 
 
 $YourAPIKey = urlencode($YourAPIKey);
-$YourToken = urlencode($YourToken);
-$YourSignature = urlencode($YourSignature);
-$UnixTimestamp = urlencode($UnixTimestamp);
 $YourGroup = urlencode($YourGroup);
-
 ```
 
-Note: Encode YourAPIKey, YourToken, YourSignature, UnixTimestamp and YourGroup with URL Encode before send it.
+RequestBody must be similar with request body sent by application server.. Missing or adding whitespace will
+
 
 ## Send Notification From Application Server
 
 ```http
 POST /pusher HTTP/1.1
 Host: yourdomain.tld:8080
-Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup
+Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup&integrity=DataIntegrity
 X-Application-Name: Your Application Name
 X-Application-Version: Your Application Version
 Content-Type: application/json
