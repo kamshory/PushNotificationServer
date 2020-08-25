@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.TimeZone;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -38,6 +39,7 @@ import org.json.XML;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
+import com.planetbiru.pushserver.code.ConstantString;
 import com.planetbiru.pushserver.config.Config;
 
 /**
@@ -46,6 +48,7 @@ import com.planetbiru.pushserver.config.Config;
  *
  */
 public class Utility {
+	private static Random random = new Random();
 	/**
 	 * Default constructor
 	 */
@@ -114,7 +117,7 @@ public class Utility {
 	   	String result = "";
 		try 
 		{
-			result = java.net.URLEncoder.encode(input, "UTF-8");
+			result = java.net.URLEncoder.encode(input, ConstantString.UTF_8);
 		} 
 		catch (UnsupportedEncodingException e) 
 		{
@@ -135,7 +138,7 @@ public class Utility {
     	String result = "";
 		try 
 		{
-			result = java.net.URLDecoder.decode(input, "UTF-8");
+			result = java.net.URLDecoder.decode(input, ConstantString.UTF_8);
 		} 
 		catch (UnsupportedEncodingException e) 
 		{
@@ -159,7 +162,7 @@ public class Utility {
 	    for (String pair : pairs) 
 	    {
 	        int idx = pair.indexOf("=");
-	        queryPairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+	        queryPairs.put(URLDecoder.decode(pair.substring(0, idx), ConstantString.UTF_8), URLDecoder.decode(pair.substring(idx + 1), ConstantString.UTF_8));
 	    }
 	    return queryPairs;
 	}
@@ -267,7 +270,7 @@ public class Utility {
 	 */
 	public static String lTrim(String input, String mask)
 	{
-		int lastLen = input.length();
+		int lastLen;
 		int curLen;
 		do
 		{
@@ -363,8 +366,8 @@ public class Utility {
 	public static String escapeXML(String input)
 	{
 		String output = input;
-		output = output.replace("&", "&amp;");
-		output = output.replace("\"", "&quot;");
+		output = output.replace("&", ConstantString.HTML_AMP);
+		output = output.replace("\"", ConstantString.HTML_QUOT);
 		output = output.replace("<", "&lt;");
 		output = output.replace(">", "&gt;");
 		return output;
@@ -379,8 +382,8 @@ public class Utility {
 		String output = input;
 		output = output.replace("&lt;", "<");
 		output = output.replace("&gt;", ">");
-		output = output.replace("&amp;", "&");
-		output = output.replace("&quot;", "\"");
+		output = output.replace(ConstantString.HTML_AMP, "&");
+		output = output.replace(ConstantString.HTML_QUOT, "\"");
 		return output;
 	}
 	/**
@@ -441,8 +444,8 @@ public class Utility {
     public static String escapeHTML(String input)
     {
     	String ret = input;
-		ret = ret.replace("&", "&amp;");
-		ret = ret.replace("\"", "&quot;");
+		ret = ret.replace("&", ConstantString.HTML_AMP);
+		ret = ret.replace("\"", ConstantString.HTML_QUOT);
 		ret = ret.replace("<", "&lt;");
 		ret = ret.replace(">", "&gt;");
     	return ret;
@@ -457,8 +460,8 @@ public class Utility {
     	String ret = input;
  		ret = ret.replace("&lt;", "<");
 		ret = ret.replace("&gt;", ">");
-		ret = ret.replace("&quot;", "\"");
-		ret = ret.replace("&amp;", "&");
+		ret = ret.replace(ConstantString.HTML_QUOT, "\"");
+		ret = ret.replace(ConstantString.HTML_AMP, "&");
      	return ret;
     }
     
@@ -497,56 +500,7 @@ public class Utility {
 	{
 		return XML.toJSONObject(xml);
 	}
-	/**
-	 * Get actual message length received from member
-	 * @param message Raw message
-	 * @param headerLength Header length
-	 * @param headerDirectionRequest Header direction. true = LSB left MSB right, false = MSB left LSB right
-	 * @return Actual message length
-	 */
-    public static long getLength(byte[] message, int headerLength, boolean headerDirectionRequest)
-    {
-      	int i;
-    	long result = 0;
-    	int x = 0;
-    	if(headerDirectionRequest)
-    	{
-    	   	// Little endian
-    		for(i = headerLength-1; i >= 0; i--)
-	    	{
-	    		result *= 256;
-	    		x = (byte) message[i];
-	    		if(x < 0)
-	    		{
-	    			x = x+256;
-	    		}
-	    		if(x > 256)
-	    		{
-	    			x = x-256;
-	    		}
-	    		result += x;
-	    	}  		
-    	}
-    	else
-    	{
-    		// Big endian
-	    	for(i = 0; i < headerLength; i++)
-	    	{
-	    		result *= 256;
-	    		x = (byte) message[i];
-	    		if(x < 0)
-	    		{
-	    			x = x+256;
-	    		}
-	    		if(x > 256)
-	    		{
-	    			x = x-256;
-	    		}
-	    		result += x;
-	    	}
-    	}
-    	return result;
-    }
+	
     /**
 	 * Get current time with MMddHHmmss format
 	 * @return Current time with MMddHHmmss format
@@ -590,7 +544,7 @@ public class Utility {
 	 */
 	public static String date10ToMySQLDate(String datetime)
 	{
-		return date10ToFullDate(datetime, "yyyy-MM-dd HH:mm:ss");
+		return date10ToFullDate(datetime, ConstantString.DATE_TIME_FORMAT_SQL);
 	}
 	/**
 	 * Convert Date10 to PgSQL date format (MMddHHmmss to yyyy-MM-dd HH:mm:ss.SSS) 
@@ -599,7 +553,7 @@ public class Utility {
 	 */
 	public static String date10ToPgSQLDate(String datetime)
 	{
-		return date10ToFullDate(datetime, "yyyy-MM-dd HH:mm:ss.SSS");
+		return date10ToFullDate(datetime, ConstantString.DATE_TIME_FORMAT_SQL_MILS);
 	}
 	/**
 	 * Convert Date10 to full date time
@@ -611,7 +565,7 @@ public class Utility {
 	{
 		while(datetime.length() < 10)
 		{
-			datetime = "0"+datetime;
+			datetime = String.format("0%s", datetime);
 		}
 		String yyyy = now("yyyy");
 		DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -627,8 +581,8 @@ public class Utility {
 		    		String month2 = now("MMdd");
 		    		if(!month2.equals("0101"))
 		    		{
-		    			int YYYY = Integer.parseInt(yyyy) - 1;
-		    			yyyy = YYYY+"";
+		    			int yyyy2 = Integer.parseInt(yyyy) - 1;
+		    			yyyy = yyyy2+"";
 		    		}
 	    		}
 	    	}
@@ -642,7 +596,7 @@ public class Utility {
 	    	{
 	    		e.printStackTrace();
 	    	}
-			result = MySQLDate();
+			result = mySQLDate();
 		}
 	    return result;
 	}
@@ -650,17 +604,17 @@ public class Utility {
 	 * Get MySQL format of current time
 	 * @return Current time with MySQL format
 	 */
-	public static String MySQLDate()
+	public static String mySQLDate()
 	{
-		return now("yyyy-MM-dd HH:mm:ss");
+		return now(ConstantString.DATE_TIME_FORMAT_SQL);
 	}
 	/**
 	 * Get PgSQL format of current time
 	 * @return Current time with PgSQL format
 	 */
-	public static String PgSQLDate()
+	public static String pgSQLDate()
 	{
-		return now("yyyy-MM-dd HH:mm:ss.SSS");
+		return now(ConstantString.DATE_TIME_FORMAT_SQL_MILS);
 	}
 
 	/**
@@ -731,14 +685,12 @@ public class Utility {
 	 */
 	public static int random(int min, int max)
 	{
-		if(min > max)
+		int rand = random.nextInt(max);
+		if(rand < min)
 		{
-			int tmp = max;
-			max = min;
-			min = tmp;
+			rand = min;
 		}
-		java.util.Random rand = new java.util.Random();
-	    return rand.nextInt((max - min) + 1) + min;
+		return rand;
 	}
     /**
      * Concate 3 byte array
@@ -823,7 +775,7 @@ public class Utility {
 		{
 			throw new NullPointerException("Input is null");
 		}
-	    StringBuffer hexString = new StringBuffer();
+	    StringBuilder hexString = new StringBuilder();
 	    for (int i = 0; i < hash.length; i++) 
 	    {
 		    String hex = Integer.toHexString(0xff & hash[i]);
@@ -838,7 +790,7 @@ public class Utility {
 	public static String now() throws NullPointerException, IllegalArgumentException
 	{
 		String result = "";
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		DateFormat dateFormat = new SimpleDateFormat(ConstantString.DATE_TIME_FORMAT_SQL);
 	    Date dateObject = new Date();
 	    result = dateFormat.format(dateObject);
 		return result;
@@ -885,7 +837,7 @@ public class Utility {
 			decimal = nanoSecond % 10;
 		}
 		String result = "";
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		DateFormat dateFormat = new SimpleDateFormat(ConstantString.DATE_TIME_FORMAT_SQL);
 	    Date dateObject = new Date();
 	    result = dateFormat.format(dateObject)+"."+decimal;
 		return result;
@@ -927,7 +879,7 @@ public class Utility {
 			decimal = nanoSecond % 10;
 		}
 		String result = "";
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		DateFormat dateFormat = new SimpleDateFormat(ConstantString.DATE_TIME_FORMAT_SQL);
 		dateFormat.setTimeZone(TimeZone.getTimeZone(timezone));
 	    Date dateObject = new Date();
 	    result = dateFormat.format(dateObject)+"."+decimal;
@@ -937,7 +889,7 @@ public class Utility {
 	{
 		String result = "";
 		long miliSecond = System.nanoTime() % 1000;
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		DateFormat dateFormat = new SimpleDateFormat(ConstantString.DATE_TIME_FORMAT_SQL);
 	    Date dateObject = new Date();
 	    result = dateFormat.format(dateObject)+"."+miliSecond;
 		return result;
@@ -946,7 +898,7 @@ public class Utility {
 	{
 		String result = "";
 		long microSecond = System.nanoTime() % 1000000;
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		DateFormat dateFormat = new SimpleDateFormat(ConstantString.DATE_TIME_FORMAT_SQL);
 	    Date dateObject = new Date();
 	    result = dateFormat.format(dateObject)+"."+microSecond;
 		return result;
@@ -984,40 +936,17 @@ public class Utility {
 	 */
 	public static String byteArrayToHexString(byte[] b) 
 	{
-		String result = "";
+		StringBuilder result = new StringBuilder();
 		for (int i=0; i < b.length; i++) 
 		{
-			result += Integer.toString((b[i] & 0xff) + 0x100, 16).substring(1);
+			result.append(Integer.toString((b[i] & 0xff) + 0x100, 16).substring(1));
 		}
-		return result;
-	}
-
-	/**
-	 * Print text to screen on debug mode
-	 * @param input Text to be printed
-	 */
-	public static void print(String input)
-	{
-		if(Config.isPrintStackTrace())
-		{
-			System.out.print(input);
-		}
-	}
-	/**
-	 * Print text to screen on debug mode. It will add new line on the end of text 
-	 * @param input Text to be printed
-	 */
-	public static void println(String input)
-	{
-		if(Config.isPrintStackTrace())
-		{
-			System.out.println(input+"\r");
-		}
+		return result.toString();
 	}
 	
 	public static String number36Encode(long input)
 	{
-		String key = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		String key = ConstantString.LIST_CHAR_36;
 		String chr = "";
 		int val = 0;
 		long inp = input;
@@ -1037,7 +966,7 @@ public class Utility {
 	}
 	public static String number36Encode(BigInteger input)
 	{
-		String key = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		String key = ConstantString.LIST_CHAR_36;
 		String chr = "";
 		int val;
 		BigInteger inp = input;
@@ -1058,7 +987,7 @@ public class Utility {
 	}
 	public static long number36Decode(String input)
 	{
-		String key = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		String key = ConstantString.LIST_CHAR_36;
 		String inp = input;
 		String chr = "";
 		long val = 0;
@@ -1076,7 +1005,7 @@ public class Utility {
 	}	
 	public static BigInteger number36DecodeBigint(String input)
 	{
-		String key = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		String key = ConstantString.LIST_CHAR_36;
 		String inp = input;
 		String chr = "";
 		BigInteger val;

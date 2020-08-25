@@ -12,7 +12,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.planetbiru.pushserver.config.Config;
-import com.planetbiru.pushserver.database.Database;
 import com.planetbiru.pushserver.database.DatabaseTypeException;
 import com.planetbiru.pushserver.notification.Notification;
 import com.planetbiru.pushserver.utility.HTTPIO;
@@ -26,30 +25,6 @@ import com.sun.net.httpserver.HttpHandler;
  */
 public class PusherHandler implements HttpHandler 
 {
-	/**
-	 * Primary database for pusher
-	 */
-	private Database databasePusher1;
-	/**
-	 * Secondary database for pusher
-	 */
-	private Database databasePusher2;
-	/**
-	 * Tertiary database for pusher
-	 */
-	private Database databasePusher3;
-	/**
-	 * Primary database
-	 */
-	private Database database1;
-	/**
-	 * Secondary database
-	 */
-	private Database database2;
-	/**
-	 * Tertiary database
-	 */
-	private Database database3;
 	/**
 	 * Data
 	 */
@@ -88,9 +63,6 @@ public class PusherHandler implements HttpHandler
 	public PusherHandler(String command)
 	{
 		this.command = command;
-		this.databasePusher1 = database1;
-		this.databasePusher2 = database2;
-		this.databasePusher3 = database3;	
 		this.connectionPerPush = false;
 	}
 	/**
@@ -111,7 +83,7 @@ public class PusherHandler implements HttpHandler
 			try 
 			{
 				String body = HTTPIO.getHTTPRequestBody(httpExchange);	
-				Notification notification = new Notification(this.databasePusher1, this.databasePusher2, this.databasePusher3);			
+				Notification notification = new Notification();			
 				String remoteAddress = httpExchange.getRemoteAddress().getAddress().getHostAddress();
 				if(Config.isHTTPProxyEnabled())
 		    	{
@@ -159,7 +131,7 @@ public class PusherHandler implements HttpHandler
 					HTTPIO.sendHTTPResponse(httpExchange, responseHeaders, HttpURLConnection.HTTP_NOT_AUTHORITATIVE);
 				}
 			}
-			catch (NoSuchAlgorithmException e) 
+			catch (NoSuchAlgorithmException | SQLException | DatabaseTypeException | ClassCastException e) 
 			{
 				if(Config.isPrintStackTrace())
 				{
@@ -167,7 +139,7 @@ public class PusherHandler implements HttpHandler
 				}
 				HTTPIO.sendHTTPResponse(httpExchange, responseHeaders, HttpURLConnection.HTTP_INTERNAL_ERROR);
 			}
-			catch (JSONException e) 
+			catch (JSONException | MessagingException e) 
 			{
 				if(Config.isPrintStackTrace())
 				{
@@ -175,69 +147,13 @@ public class PusherHandler implements HttpHandler
 				}
 				HTTPIO.sendHTTPResponse(httpExchange, responseHeaders, HttpURLConnection.HTTP_BAD_REQUEST);
 			}
-			catch (SQLException e) 
-			{
-				if(Config.isPrintStackTrace())
-				{
-					e.printStackTrace();
-				}
-				HTTPIO.sendHTTPResponse(httpExchange, responseHeaders, HttpURLConnection.HTTP_INTERNAL_ERROR);
-			}
-			catch (IOException e) 
+			catch (IOException | NullPointerException | IllegalArgumentException e) 
 			{
 				if(Config.isPrintStackTrace())
 				{
 					e.printStackTrace();
 				}
 				HTTPIO.sendHTTPResponse(httpExchange, responseHeaders, HttpURLConnection.HTTP_ACCEPTED);
-			} 
-			catch (DatabaseTypeException e) 
-			{
-				if(Config.isPrintStackTrace())
-				{
-					e.printStackTrace();
-				}
-				HTTPIO.sendHTTPResponse(httpExchange, responseHeaders, HttpURLConnection.HTTP_INTERNAL_ERROR);
-			}
-			catch (AddressException e) 
-			{
-				if(Config.isPrintStackTrace())
-				{
-					e.printStackTrace();
-				}
-				HTTPIO.sendHTTPResponse(httpExchange, responseHeaders, HttpURLConnection.HTTP_NOT_AUTHORITATIVE);
-			} 
-			catch (ClassCastException e) 
-			{
-				if(Config.isPrintStackTrace())
-				{
-					e.printStackTrace();
-				}
-				HTTPIO.sendHTTPResponse(httpExchange, responseHeaders, HttpURLConnection.HTTP_ACCEPTED);
-			} 
-			catch (NullPointerException e) 
-			{
-				if(Config.isPrintStackTrace())
-				{
-					e.printStackTrace();
-				}
-				HTTPIO.sendHTTPResponse(httpExchange, responseHeaders, HttpURLConnection.HTTP_ACCEPTED);
-			} 
-			catch (IllegalArgumentException e) 
-			{
-				if(Config.isPrintStackTrace())
-				{
-					e.printStackTrace();
-				}
-				HTTPIO.sendHTTPResponse(httpExchange, responseHeaders, HttpURLConnection.HTTP_ACCEPTED);
-			} 
-			catch (MessagingException e) 
-			{
-				if(Config.isPrintStackTrace())
-				{
-					e.printStackTrace();
-				}
-				HTTPIO.sendHTTPResponse(httpExchange, responseHeaders, HttpURLConnection.HTTP_BAD_REQUEST);
 			}
 		}
 		else
@@ -271,18 +187,15 @@ public class PusherHandler implements HttpHandler
 	 */
 	public JSONObject delete(Notification notification, String body) throws SQLException, JSONException, DatabaseTypeException
 	{
-		JSONObject data = notification.delete(body);
-		return data;
+		return notification.delete(body);
 	}
 	private JSONObject registerDevice(Notification notification, String body) throws JSONException, SQLException, DatabaseTypeException
 	{
-		JSONObject data = notification.registerDevice(body);
-		return data;
+		return notification.registerDevice(body);
 	}
 	private JSONObject unregisterDevice(Notification notification, String body) throws JSONException, SQLException, DatabaseTypeException
 	{
-		JSONObject data = notification.unregisterDevice(body);
-		return data;
+		return notification.unregisterDevice(body);
 	}
 	/**
 	 * Create group

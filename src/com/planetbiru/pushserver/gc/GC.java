@@ -1,7 +1,7 @@
 package com.planetbiru.pushserver.gc;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Date;
 
 import com.planetbiru.pushserver.config.Config;
@@ -50,7 +50,7 @@ public class GC extends Thread
 	private void cleanUpNotification()
 	{
 		Database database1 = new Database(Config.getDatabaseConfig1());
-		ResultSet rs = null;
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
@@ -66,21 +66,18 @@ public class GC extends Thread
 					.from(Config.getTablePrefix()+"notification")
 					.where("(is_sent = 1 and time_sent < '"+expireSent+"') or time_create < '"+expireCreate+"' ")
 					.toString();
-			database1.execute(sqlCommand);
+			stmt = database1.getDatabaseConnection().createStatement();
+			stmt.execute(sqlCommand);
 		}
 		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
-			if(rs != null)
-			{
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 	}
@@ -92,7 +89,7 @@ public class GC extends Thread
 	private void cleanUpTrash()
 	{
 		Database database1 = new Database(Config.getDatabaseConfig1());
-		ResultSet rs = null;
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
@@ -106,21 +103,18 @@ public class GC extends Thread
 					.from(Config.getTablePrefix()+"trash")
 					.where("time_delete < '"+expireCreate+"' ")
 					.toString();
-			database1.execute(sqlCommand);
+			stmt = database1.getDatabaseConnection().createStatement();
+			stmt.execute(sqlCommand);
 		}
 		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
-			if(rs != null)
-			{
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 	}

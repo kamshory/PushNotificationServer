@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -19,11 +20,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.planetbiru.code.DatabaseField;
-import com.planetbiru.code.JsonKey;
 import com.planetbiru.pushserver.client.Client;
 import com.planetbiru.pushserver.client.ClientException;
 import com.planetbiru.pushserver.client.Device;
+import com.planetbiru.pushserver.code.ConstantString;
+import com.planetbiru.pushserver.code.DatabaseField;
+import com.planetbiru.pushserver.code.JsonKey;
 import com.planetbiru.pushserver.config.Config;
 import com.planetbiru.pushserver.database.Database;
 import com.planetbiru.pushserver.database.QueryBuilder;
@@ -163,14 +165,11 @@ public class Notification
 	 * @param database2 Secondary Database object
 	 * @param database3 Tertiary Database object
 	 */
-	public Notification(Database database1, Database database2, Database database3) 
+	public Notification() 
 	{
 		this.timeZone = TimeZone.getDefault();
 		this.timeZone.getID();
 		this.timeZoneOffset = (this.timeZone.getRawOffset() / 60000);
-	}
-	public Notification() {
-		// TODO Auto-generated constructor stub
 	}
 	/**
 	 * PushClient authentication
@@ -184,8 +183,8 @@ public class Notification
 	public boolean authentication(String authorization)
 	{
 		Database database1 = new Database(Config.getDatabaseConfig1());
+		Statement stmt = null;
 		ResultSet rs = null;
-		
 		boolean auth = false;
 		try
 		{
@@ -194,7 +193,7 @@ public class Notification
 			String key = queryString.getOrDefault("key", "").trim();
 			String token = queryString.getOrDefault("token", "").trim();
 			String hash = queryString.getOrDefault("hash", "").trim();			
-			String time = queryString.getOrDefault("time", "0").trim();
+			String time = queryString.getOrDefault(JsonKey.TIME, "0").trim();
 			String groupKey = queryString.getOrDefault("group", "").trim();	
 			if(time.equals(""))
 			{
@@ -222,7 +221,9 @@ public class Notification
 							.from(Config.getTablePrefix()+"api")
 							.where("api_key = '"+key+"' and active = 1 ")
 							.toString();
-					rs = database1.executeQuery(sqlCommand);
+					
+					stmt = database1.getDatabaseConnection().createStatement();				
+					rs = stmt.executeQuery(sqlCommand);
 					if(rs.isBeforeFirst())
 					{
 						rs.next();
@@ -237,21 +238,14 @@ public class Notification
 		}
 		catch(SQLException | ClassNotFoundException | DatabaseTypeException | NoSuchAlgorithmException | NullPointerException e)
 		{
-			auth = false;
 			if(Config.isPrintStackTrace())
 			{
 				e.printStackTrace();
 			}
 		}
 		finally {
-			if(rs != null)
-			{
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			Database.closeResultSet(rs);
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 		return auth;	
@@ -276,9 +270,11 @@ public class Notification
 	 */
 	public boolean authentication(String authorization, String serverAddress, String applicationName, String applicationVersion, String userAgent) 
 	{
+		boolean valid = false;
 		Map<String, String> queryString;
-		ResultSet rs = null;
 		Database database1 = new Database(Config.getDatabaseConfig1());
+		ResultSet rs = null;
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
@@ -286,7 +282,7 @@ public class Notification
 			String key = queryString.getOrDefault("key", "").trim();
 			String token = queryString.getOrDefault("token", "").trim();
 			String hash = queryString.getOrDefault("hash", "").trim();			
-			String time = queryString.getOrDefault("time", "0").trim();
+			String time = queryString.getOrDefault(JsonKey.TIME, "0").trim();
 			String groupKey = queryString.getOrDefault("group", "0").trim();
 			if(time.equals(""))
 			{
@@ -318,7 +314,8 @@ public class Notification
 							.on(Config.getTablePrefix()+"pusher_address.address = '"+serverAddress+"' and "+Config.getTablePrefix()+"pusher_address.api_id = "+Config.getTablePrefix()+"api.api_id and "+Config.getTablePrefix()+"pusher_address.active = 1 and "+Config.getTablePrefix()+"pusher_address.blocked = 0")
 							.where(Config.getTablePrefix()+"api.api_key = '"+key+"' and "+Config.getTablePrefix()+"api.active = 1 ")
 							.toString();
-					rs = database1.executeQuery(sqlCommand);
+					stmt = database1.getDatabaseConnection().createStatement();				
+					rs = stmt.executeQuery(sqlCommand);
 					if(rs.isBeforeFirst())
 					{
 						rs.next();
@@ -332,42 +329,30 @@ public class Notification
 						{							
 							if(serverAddress1.equals(serverAddress2) || !Config.isFilterSource())
 							{
-								return true;
+								valid = true;
 							}
 							else
 							{
 								this.addPusherAddress(serverAddress, applicationName, applicationVersion, userAgent);
-								return false;
 							}
 						}
-						else
-						{
-							return false;
-						}
-					}
-					else
-					{
-						return false;
 					}
 				}
 			}
 		}
 		catch(SQLException | QueryParserException | ClassNotFoundException | DatabaseTypeException | NoSuchAlgorithmException | NullPointerException | IllegalArgumentException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
-			if(rs != null)
-			{
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			Database.closeResultSet(rs);
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
-		return false;	
+		return valid;	
 	}
 	/**
 	 * Create group
@@ -389,7 +374,7 @@ public class Notification
 	public JSONObject createGroup(String body, String remoteAddress, String applicationName, String applicationVersion, String userAgent)
 	{
 		JSONObject requestJSON = new JSONObject(body);
-		JSONObject requestData = requestJSON.optJSONObject("data");
+		JSONObject requestData = requestJSON.optJSONObject(JsonKey.DATA);
 		if(requestData == null)
 		{
 			requestData = new JSONObject();
@@ -421,6 +406,7 @@ public class Notification
 		JSONObject jo = new JSONObject();
 		Database database1 = new Database(Config.getDatabaseConfig1());
 		ResultSet rs = null;
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
@@ -441,7 +427,8 @@ public class Notification
 					.from(Config.getTablePrefix()+"api")
 					.where("api_id = "+apiID+" ")
 					.toString();
-			rs = database1.executeQuery(sqlCommand);
+			stmt = database1.getDatabaseConnection().createStatement();				
+			rs = stmt.executeQuery(sqlCommand);
 			if(rs.isBeforeFirst())
 			{
 				if(rs.next())
@@ -454,21 +441,17 @@ public class Notification
 							.where("api_id = "+apiID+" and group_key = '"+groupKey+"' ")
 							.toString();
 					
-					rs.close();
+					Database.closeResultSet(rs);
+					Database.closeStatement(stmt);
+
+					stmt = database1.getDatabaseConnection().createStatement();				
+					rs = stmt.executeQuery(sqlCommand);
 					
-					rs = database1.executeQuery(sqlCommand);
 					if(rs.isBeforeFirst())
 					{
-						if(rs.next())
-						{
-							jo.put("success", false);
-							jo.put(JsonKey.MESSAGE, "Group already exists");
-						}
-						else
-						{
-							jo.put("success", false);
-							jo.put(JsonKey.MESSAGE, "Group already exists");
-						}
+					
+						jo.put(JsonKey.SUCCESS, false);
+						jo.put(JsonKey.MESSAGE, "Group already exists");
 					}
 					else
 					{
@@ -478,8 +461,19 @@ public class Notification
 								.fields("(api_id, name, group_key, description, blocked, time_create, time_edit, ip_create, ip_edit, user_create, user_edit, active)")
 								.values("("+apiID+", '"+groupName+"', '"+groupKey+"', '"+description+"', 0, "+query1.now(6)+", "+query1.now(6)+", '"+remoteAddress+"', '"+remoteAddress+"', "+userCreate+", "+userCreate+", "+active+")")
 								.toString();
-						database1.execute(sqlCommand);
-						long lGroupID = database1.getLastAutoIncrement();					
+						Database.closeStatement(stmt);
+						stmt = database1.getDatabaseConnection().createStatement();	
+						stmt.execute(sqlCommand);
+						
+
+						sqlCommand = query1.newQuery().lastID().alias("last_id").toString();
+
+						Database.closeResultSet(rs);
+						Database.closeStatement(stmt);
+						stmt = database1.getDatabaseConnection().createStatement();				
+						rs = stmt.executeQuery(sqlCommand);
+						
+						long lGroupID = rs.getLong("last_id");				
 						
 						if(!Config.isGroupCreationApproval())
 						{
@@ -491,31 +485,28 @@ public class Notification
 						jdata.put("groupKey", groupKey);
 						jdata.put("groupID", lGroupID);
 						
-						jo.put("success", true);
+						jo.put(JsonKey.SUCCESS, true);
 						jo.put(JsonKey.MESSAGE, "");
-						jo.put("data", jdata);
+						jo.put(JsonKey.DATA, jdata);
 					}
 				}
 			}
 			else
 			{
-				jo.put("success", false);
-				jo.put(JsonKey.MESSAGE, "Invalid API");
+				jo.put(JsonKey.SUCCESS, false);
+				jo.put(JsonKey.MESSAGE, ConstantString.INVALID_API);
 			}
 		}
 		catch(SQLException | DatabaseTypeException | ClassNotFoundException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
-			if(rs != null)
-			{
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			Database.closeResultSet(rs);
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 		return jo;
@@ -537,6 +528,7 @@ public class Notification
 		long lGroupID = 0;
 		Database database1 = new Database(Config.getDatabaseConfig1());
 		ResultSet rs = null;
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
@@ -548,7 +540,8 @@ public class Notification
 					.from(Config.getTablePrefix()+"client_group")
 					.where("api_id = '"+apiID+"' and group_key = '"+groupKey+"'")
 					.toString();
-			rs = database1.executeQuery(sqlCommand);
+			stmt = database1.getDatabaseConnection().createStatement();
+			rs = stmt.executeQuery(sqlCommand);
 			if(rs.isBeforeFirst())
 			{
 				rs.next();
@@ -557,17 +550,14 @@ public class Notification
 		}
 		catch(SQLException | DatabaseTypeException | ClassNotFoundException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
-			if(rs != null)
-			{
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			Database.closeResultSet(rs);
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 		return lGroupID;
@@ -589,6 +579,7 @@ public class Notification
 		long lGroupID = 0;
 		Database database1 = new Database(Config.getDatabaseConfig1());
 		ResultSet rs = null;
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
@@ -603,7 +594,8 @@ public class Notification
 					.on(Config.getTablePrefix()+"api.api_id = "+Config.getTablePrefix()+"client_group.api_id")
 					.where(Config.getTablePrefix()+"api.api_key = '"+apiKey+"' and "+Config.getTablePrefix()+"client_group.group_key = '"+groupKey+"'")
 					.toString();
-			rs = database1.executeQuery(sqlCommand);
+			stmt = database1.getDatabaseConnection().createStatement();
+			rs = stmt.executeQuery(sqlCommand);
 			if(rs.isBeforeFirst())
 			{
 				rs.next();
@@ -612,17 +604,14 @@ public class Notification
 		}
 		catch(SQLException | DatabaseTypeException | ClassNotFoundException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
-			if(rs != null)
-			{
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			Database.closeResultSet(rs);
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 		return lGroupID;
@@ -666,6 +655,8 @@ public class Notification
 		String sqlCommand = "";
 		String auth = "";
 		Database database1 = new Database(Config.getDatabaseConfig1());
+		Statement stmt = null;
+		ResultSet rs = null;
 		try
 		{
 			database1.connect();
@@ -677,7 +668,8 @@ public class Notification
 						.set("need_confirmation = 1")
 						.where("api_id = '"+this.apiID+"' and address = '"+serverAddress+"' ")
 						.toString();
-				database1.execute(sqlCommand);			
+				stmt = database1.getDatabaseConnection().createStatement();
+				stmt.execute(sqlCommand);
 			}
 			else
 			{
@@ -691,8 +683,17 @@ public class Notification
 						.fields("(api_id, address, application_name, application_version, user_agent, first_access, last_access, auth, need_confirmation, blocked, active)")
 						.values("("+this.apiID+", '"+serverAddress+"', '"+applicationName2+"', '"+applicationVersion2+"', '"+userAgent2+"', "+query1.now(6)+", "+query1.now(6)+", '"+auth+"', "+((needConfirmation)?1:0)+", 0, "+((active)?1:0)+")")
 						.toString();
-				database1.execute(sqlCommand);
-				long pusherAddressID = database1.getLastAutoIncrement();
+				stmt = database1.getDatabaseConnection().createStatement();
+				stmt.execute(sqlCommand);
+
+				sqlCommand = query1.newQuery().lastID().alias("last_id").toString();
+
+				Database.closeStatement(stmt);
+				stmt = database1.getDatabaseConnection().createStatement();				
+				rs = stmt.executeQuery(sqlCommand);
+				
+				long pusherAddressID = rs.getLong("last_id");				
+
 				if(needConfirmation && !active)
 				{
 					this.sendMail(pusherAddressID, auth, serverAddress, applicationName, applicationVersion, userAgent, Utility.now("yyyy-MM-dd HH:mm:ss"));
@@ -701,9 +702,14 @@ public class Notification
 		}
 		catch(SQLException | DatabaseTypeException | NoSuchAlgorithmException | NullPointerException | IllegalArgumentException | ClassNotFoundException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
+			Database.closeResultSet(rs);
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 	}
@@ -732,6 +738,7 @@ public class Notification
 		}
 		Database database1 = new Database(Config.getDatabaseConfig1());
 		ResultSet rs = null;
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
@@ -750,7 +757,8 @@ public class Notification
 					.on(Config.getTablePrefix()+"api_user.user_id = "+Config.getTablePrefix()+"user.user_id")
 					.where(Config.getTablePrefix()+"user.active = 1 and "+Config.getTablePrefix()+"api_user.api_id = "+this.apiID+" ")
 					.toString();
-			rs = database1.executeQuery(sqlCommand);
+			stmt = database1.getDatabaseConnection().createStatement();
+			rs = stmt.executeQuery(sqlCommand);
 			String recipient = "";
 			String userFullName = "";
 			String api = "";
@@ -784,17 +792,14 @@ public class Notification
 		}
 		catch(SQLException | DatabaseTypeException | NullPointerException | IllegalArgumentException | MessagingException | ClassNotFoundException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
-			if(rs != null)
-			{
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			Database.closeResultSet(rs);
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 	}
@@ -878,6 +883,7 @@ public class Notification
 		boolean inactiveSource = false;
 		Database database1 = new Database(Config.getDatabaseConfig1());
 		ResultSet rs = null;
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
@@ -887,7 +893,8 @@ public class Notification
 					.from(Config.getTablePrefix()+"pusher_address")
 					.where("api_id = '"+apiID+"' and address = '"+serverAddress+"' ")
 					.toString();
-			rs = database1.executeQuery(sqlCommand);
+			stmt = database1.getDatabaseConnection().createStatement();
+			rs = stmt.executeQuery(sqlCommand);
 			if(rs.isBeforeFirst())
 			{
 				inactiveSource = true;
@@ -895,88 +902,77 @@ public class Notification
 		}
 		catch(SQLException | DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
-			if(rs != null)
-			{
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			Database.closeResultSet(rs);
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 		return inactiveSource;
 	}
-	public JSONObject registerDevice(String body) throws SQLException, JSONException, DatabaseTypeException
+	public JSONObject registerDevice(String body) throws SQLException, DatabaseTypeException
 	{
-		JSONObject jo;
-		jo = new JSONObject(body);
-		return this.registerDevice(jo);
+		return this.registerDevice(new JSONObject(body));
 	}
-	public JSONObject registerDevice(JSONObject jo) throws SQLException, JSONException, DatabaseTypeException
+	public JSONObject registerDevice(JSONObject jo) throws SQLException, DatabaseTypeException
 	{
 		JSONObject response = new JSONObject();
 		Database database1 = new Database(Config.getDatabaseConfig1());
 		ResultSet rs = null;
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
 			QueryBuilder query1 = new QueryBuilder(database1.getDatabaseType());
-			JSONObject data = jo.optJSONObject("data");
+			JSONObject data = jo.optJSONObject(JsonKey.DATA);
 			if(data == null)
 			{
 				data = new JSONObject();
 			}
-			String lDeviceID = data.optString("deviceID", "");
-			try
+			String lDeviceID = data.optString(JsonKey.DEVICE_ID, "");
+
+			String sqlSelect = query1.newQuery()
+					.select(Config.getTablePrefix()+"client.*")
+					.from(Config.getTablePrefix()+"client")
+					.where("device_id = '"+lDeviceID+"' and api_id = "+this.apiID+" ")
+					.toString();
+
+			stmt = database1.getDatabaseConnection().createStatement();
+			rs = stmt.executeQuery(sqlSelect);
+			
+			if(!rs.isBeforeFirst())
 			{
-				String sqlSelect = query1.newQuery()
-						.select(Config.getTablePrefix()+"client.*")
-						.from(Config.getTablePrefix()+"client")
-						.where("device_id = '"+lDeviceID+"' and api_id = "+this.apiID+" ")
+				String time = Utility.now("yyyy-MM-dd HH:mm:ss");
+				String sqlInsert = query1.newQuery()
+						.insert()
+						.into(Config.getTablePrefix()+"client")
+						.fields("(api_id, device_id, last_time, time_create, blocked, active)")
+						.values("('"+this.apiID+"', '"+lDeviceID+"', '"+time+"', '"+time+"', 0, 1)")
 						.toString();
-				rs = database1.executeQuery(sqlSelect);
 				
-				if(!rs.isBeforeFirst())
-				{
-					String time = Utility.now("yyyy-MM-dd HH:mm:ss");
-					String sqlInsert = query1.newQuery()
-							.insert()
-							.into(Config.getTablePrefix()+"client")
-							.fields("(api_id, device_id, last_time, time_create, blocked, active)")
-							.values("('"+this.apiID+"', '"+lDeviceID+"', '"+time+"', '"+time+"', 0, 1)")
-							.toString();
-					database1.execute(sqlInsert);	
-				}
+				Database.closeStatement(stmt);
+				stmt = database1.getDatabaseConnection().createStatement();
+				stmt.execute(sqlInsert);	
 			}
-			catch(SQLException e)
-			{
-				if(Config.isPrintStackTrace())
-				{
-					e.printStackTrace();
-				}
-			}
-			data.put("deviceID", this.deviceID);
+			data.put(JsonKey.DEVICE_ID, this.deviceID);
 			data.put("apiID", this.apiID);
-			response.put("command", "register-device");
-			response.put("data", data);
+			response.put(JsonKey.COMMAND, "register-device");
+			response.put(JsonKey.DATA, data);
 		}
 		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
-			if(rs != null)
-			{
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			Database.closeResultSet(rs);
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 		return response;
@@ -991,42 +987,38 @@ public class Notification
 	{
 		JSONObject response = new JSONObject();
 		Database database1 = new Database(Config.getDatabaseConfig1());
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
 			QueryBuilder query1 = new QueryBuilder(database1.getDatabaseType());
-			JSONObject data = jo.optJSONObject("data");
+			JSONObject data = jo.optJSONObject(JsonKey.DATA);
 			if(data == null)
 			{
 				data = new JSONObject();
 			}
-			String lDeviceID = data.optString("deviceID", "");
-			try
-			{
-				String sqlDelete = query1.newQuery()
-						.delete()
-						.from(Config.getTablePrefix()+"client")
-						.where("device_id = '"+lDeviceID+"' and api_id = "+this.apiID+" ")
-						.toString();
-				database1.execute(sqlDelete);
-			}
-			catch(SQLException e)
-			{
-				if(Config.isPrintStackTrace())
-				{
-					e.printStackTrace();
-				}
-			}
-			data.put("deviceID", this.deviceID);
+			String lDeviceID = data.optString(JsonKey.DEVICE_ID, "");
+			String sqlDelete = query1.newQuery()
+					.delete()
+					.from(Config.getTablePrefix()+"client")
+					.where("device_id = '"+lDeviceID+"' and api_id = "+this.apiID+" ")
+					.toString();
+			stmt = database1.getDatabaseConnection().createStatement();
+			stmt.execute(sqlDelete);
+			data.put(JsonKey.DEVICE_ID, this.deviceID);
 			data.put("apiID", this.apiID);
-			response.put("command", "register-device");
-			response.put("data", data);
+			response.put(JsonKey.COMMAND, "register-device");
+			response.put(JsonKey.DATA, data);
 		}
 		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 		return response;
@@ -1052,9 +1044,9 @@ public class Notification
 	 * @throws SQLException if any SQL errors
 	 * @throws DatabaseTypeException if database type not supported 
 	 */
-	public JSONObject insert(JSONObject request) throws SQLException, JSONException, DatabaseTypeException
+	public JSONObject insert(JSONObject request) throws SQLException, DatabaseTypeException
 	{
-		JSONObject requestData = request.optJSONObject("data");
+		JSONObject requestData = request.optJSONObject(JsonKey.DATA);
 		if(requestData == null)
 		{
 			requestData = new JSONObject();
@@ -1062,6 +1054,7 @@ public class Notification
 		JSONObject response = new JSONObject();
 		Database database1 = new Database(Config.getDatabaseConfig1());
 		ResultSet rs = null;
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
@@ -1073,23 +1066,35 @@ public class Notification
 			JSONObject dataToSent;
 			if(ja.length() > 0)
 			{
-				JSONObject notificationData = requestData.optJSONObject("data");			
+				JSONObject notificationData = requestData.optJSONObject(JsonKey.DATA);			
 				String type = notificationData.optString(JsonKey.TYPE, "");
 				String title = notificationData.optString(JsonKey.TITLE, "");
 				String subtitle = notificationData.optString(JsonKey.SUBTITLE, "");
 				String message = notificationData.optString(JsonKey.MESSAGE, "");
 				String tickerText = notificationData.optString(JsonKey.TICKER_TEXT, "");
-				String clickAction = notificationData.optString("clickAction", "");
-				String vibrate = notificationData.optString("vibrate", "");
-				String color = notificationData.optString("color", "");
-				String sound = notificationData.optString("sound", "");
-				String badge = notificationData.optString("badge", "");
-				String largeIcon = notificationData.optString("largeIcon", "");
-				String smallIcon = notificationData.optString("smallIcon", "");
-				String uri = notificationData.optString("uri", "");
-				String miscData = notificationData.optString("miscData", "");
-				String timeCreate = Utility.now("yyyy-MM-dd HH:mm:ss.SSSSSS");
-				String timeGMT = Utility.now("yyyy-MM-dd HH:mm:ss.SSSSSS", "UTC");
+				String clickAction = notificationData.optString(JsonKey.CLICK_ACTION, "");
+				String vibrate = notificationData.optString(JsonKey.VIBRATE, "");
+				String color = notificationData.optString(JsonKey.COLOR, "");
+				String sound = notificationData.optString(JsonKey.SOUND, "");
+				String badge = notificationData.optString(JsonKey.BADGE, "");
+				String largeIcon = notificationData.optString(JsonKey.LARGE_ICON, "");
+				String smallIcon = notificationData.optString(JsonKey.SMALL_ICON, "");
+				String uri = notificationData.optString(JsonKey.URI, "");
+				String miscData = notificationData.optString(JsonKey.MISC_DATA, "");
+				String timeCreate = "";
+				String timeGMT = "";
+				
+				if(database1.getDatabaseType().equals("mariadb") || database1.getDatabaseType().equals("mysql"))
+				{
+					timeCreate = Utility.now("yyyy-MM-dd HH:mm:ss.SSSSSS");
+					timeGMT = Utility.now("yyyy-MM-dd HH:mm:ss.SSSSSS", "UTC");
+				}
+				else
+				{
+					timeCreate = Utility.now("yyyy-MM-dd HH:mm:ss.SSS");
+					timeGMT = Utility.now("yyyy-MM-dd HH:mm:ss.SSS", "UTC");					
+				}
+				
 				String clientGroupID = notificationData.optString("client_group_id", "");			
 				
 				vibrate = vibrate.replaceAll("[^\\d.]", " ");
@@ -1101,19 +1106,19 @@ public class Notification
 				dataToSent.put(JsonKey.SUBTITLE, subtitle);
 				dataToSent.put(JsonKey.MESSAGE, message);
 				dataToSent.put(JsonKey.TICKER_TEXT, tickerText);
-				dataToSent.put("uri", uri);
-				dataToSent.put("clickAction", clickAction);
-				dataToSent.put("color", color);
-				dataToSent.put("vibrate", vibrate.split(" "));
-				dataToSent.put("sound", sound);
-				dataToSent.put("badge", badge);
-				dataToSent.put("largeIcon", largeIcon);
-				dataToSent.put("smallIcon", smallIcon);
-				dataToSent.put("time", timeCreate);
-				dataToSent.put("timeGMT", timeGMT);
-				dataToSent.put("timeZone", this.timeZoneOffset);
-				dataToSent.put("miscData", miscData);
-				dataToSent.put("channelID", clientGroupID);
+				dataToSent.put(JsonKey.URI, uri);
+				dataToSent.put(JsonKey.CLICK_ACTION, clickAction);
+				dataToSent.put(JsonKey.COLOR, color);
+				dataToSent.put(JsonKey.VIBRATE, vibrate.split(" "));
+				dataToSent.put(JsonKey.SOUND, sound);
+				dataToSent.put(JsonKey.BADGE, badge);
+				dataToSent.put(JsonKey.LARGE_ICON, largeIcon);
+				dataToSent.put(JsonKey.SMALL_ICON, smallIcon);
+				dataToSent.put(JsonKey.TIME, timeCreate);
+				dataToSent.put(JsonKey.TIME_GMT, timeGMT);
+				dataToSent.put(JsonKey.TIME_ZONE, this.timeZoneOffset);
+				dataToSent.put(JsonKey.MISC_DATA, miscData);
+				dataToSent.put(JsonKey.CHANNEL_ID, clientGroupID);
 				type = query1.escapeSQL(type);
 				color = query1.escapeSQL(color);
 				title = query1.escapeSQL(title);
@@ -1149,9 +1154,22 @@ public class Notification
 								.fields("(api_id, client_group_id, device_id, type, title, subtitle, message, ticker_text, uri, click_action, color, vibrate, sound, badge, large_icon, small_icon, misc_data, time_create, time_gmt)")
 								.values("("+this.apiID+", "+this.groupID+", '"+lDeviceID+"', '"+type+"', '"+title+"', '"+subtitle+"', '"+message+"', '"+tickerText+"', '"+uri+"', '"+clickAction+"', '"+color+"', '"+vibrate+"', '"+sound+"', '"+badge+"', '"+largeIcon+"', '"+smallIcon+"', '"+miscData+"', '"+timeCreate+"', '"+timeGMT+"')")
 								.toString();
-						database1.execute(sqlCommand);
-						long notificationID = database1.getLastID();
-						dataToSent.put("id", notificationID);
+						
+						stmt = database1.getDatabaseConnection().createStatement();
+						stmt.execute(sqlCommand);
+
+						sqlCommand = query1.newQuery().lastID().alias("last_id").toString();
+
+						Database.closeStatement(stmt);
+						stmt = database1.getDatabaseConnection().createStatement();				
+						rs = stmt.executeQuery(sqlCommand);
+						
+						long notificationID = rs.getLong("last_id");
+	
+						Database.closeResultSet(rs);
+						Database.closeStatement(stmt);
+
+						dataToSent.put(JsonKey.ID, notificationID);
 						List<Device> deviceList = new ArrayList<>();
 						int deviceOn = 0;
 						try 
@@ -1166,32 +1184,32 @@ public class Notification
 						} 
 						catch (ClientException e) 
 						{
+							/**
+							 * Do nothing
+							 */
 						}
-						jo1.put("id", notificationID);
-						jo1.put("deviceID", lDeviceID);
-						jo1.put("deviceOn", deviceOn);
+						jo1.put(JsonKey.ID, notificationID);
+						jo1.put(JsonKey.DEVICE_ID, lDeviceID);
+						jo1.put(JsonKey.DEVICE_ON, deviceOn);
 						ja1.put(jo1);
 					}
 				}
 			}
 			JSONObject responseData = new JSONObject();
-			responseData.put("notification", ja);
-			response.put("command", "push-notification");
-			response.put("data", responseData);
+			responseData.put(JsonKey.NOTIFICATION, ja);
+			response.put(JsonKey.COMMAND, "push-notification");
+			response.put(JsonKey.DATA, responseData);
 		}
 		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
-			if(rs != null)
-			{
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			Database.closeResultSet(rs);
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 		return response;
@@ -1209,6 +1227,7 @@ public class Notification
 		boolean deviceExist = false;
 		Database database1 = new Database(Config.getDatabaseConfig1());
 		ResultSet rs = null;
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
@@ -1218,7 +1237,8 @@ public class Notification
 				.from(Config.getTablePrefix()+"client")
 				.where("api_id = '"+apiID+"' and device_id = '"+deviceID+"' and active = 1 and blocked = 0")
 				.toString();
-			rs = database1.executeQuery(sqlCommand);
+			stmt = database1.getDatabaseConnection().createStatement();
+			rs = stmt.executeQuery(sqlCommand);
 			if(rs.isBeforeFirst())
 			{
 				deviceExist = true;
@@ -1226,17 +1246,14 @@ public class Notification
 		}
 		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
-			if(rs != null)
-			{
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			Database.closeResultSet(rs);
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 		return deviceExist;
@@ -1260,6 +1277,7 @@ public class Notification
 		JSONArray ja = new JSONArray();
 		Database database1 = new Database(Config.getDatabaseConfig1());
 		ResultSet rs = null;
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
@@ -1275,7 +1293,8 @@ public class Notification
 					.offset(0);
 			}		
 			String sqlCommand = query1.toString();
-			rs = database1.executeQuery(sqlCommand);
+			stmt = database1.getDatabaseConnection().createStatement();
+			rs = stmt.executeQuery(sqlCommand);
 			JSONObject jo;			
 			long notificationID;
 			String type = "";
@@ -1303,12 +1322,12 @@ public class Notification
 					subtitle = rs.getString(DatabaseField.SUBTITLE);
 					message = rs.getString(DatabaseField.MESSAGE);
 					tickerText = rs.getString("ticker_text");
-					uri = rs.getString("uri");
+					uri = rs.getString(DatabaseField.URI);
 					clickAction = rs.getString("click_action");
-					color = rs.getString("color");
-					vibrate = rs.getString("vibrate");
-					sound = rs.getString("sound");
-					badge = rs.getString("badge");
+					color = rs.getString(JsonKey.COLOR);
+					vibrate = rs.getString(DatabaseField.VIBRATE);
+					sound = rs.getString(DatabaseField.SOUND);
+					badge = rs.getString(DatabaseField.BADGE);
 					largeIcon = rs.getString("large_icon");
 					smallIcon = rs.getString("small_icon");
 					miscData = rs.getString("misc_data");
@@ -1322,24 +1341,24 @@ public class Notification
 						time = time.substring(0, time.length()-1);
 					}				
 					jo = new JSONObject();
-					jo.put("id", notificationID);
+					jo.put(JsonKey.ID, notificationID);
 					jo.put(JsonKey.TYPE, type);
 					jo.put(JsonKey.TITLE, title);
 					jo.put(JsonKey.SUBTITLE, subtitle);
 					jo.put(JsonKey.MESSAGE, message);
 					jo.put(JsonKey.TICKER_TEXT, tickerText);
-					jo.put("uri", uri);
-					jo.put("clickAction", clickAction);
-					jo.put("color", color);
-					jo.put("vibrate", vibrate);
-					jo.put("sound", sound);
-					jo.put("badge", badge);
-					jo.put("largeIcon", largeIcon);
-					jo.put("smallIcon", smallIcon);
-					jo.put("miscData", miscData);
-					jo.put("time", time);
-					jo.put("timeGMT", timeGMT);
-					jo.put("timeZone", this.timeZoneOffset);
+					jo.put(JsonKey.URI, uri);
+					jo.put(JsonKey.CLICK_ACTION, clickAction);
+					jo.put(JsonKey.COLOR, color);
+					jo.put(JsonKey.VIBRATE, vibrate);
+					jo.put(JsonKey.SOUND, sound);
+					jo.put(JsonKey.BADGE, badge);
+					jo.put(JsonKey.LARGE_ICON, largeIcon);
+					jo.put(JsonKey.SMALL_ICON, smallIcon);
+					jo.put(JsonKey.MISC_DATA, miscData);
+					jo.put(JsonKey.TIME, time);
+					jo.put(JsonKey.TIME_GMT, timeGMT);
+					jo.put(JsonKey.TIME_ZONE, this.timeZoneOffset);
 					ja.put(jo);
 					this.offlineID.add(String.valueOf(notificationID));
 				}
@@ -1347,17 +1366,14 @@ public class Notification
 		}
 		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
-			if(rs != null)
-			{
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			Database.closeResultSet(rs);
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 		return ja;
@@ -1393,6 +1409,7 @@ public class Notification
 		long clount = 0;
 		Database database1 = new Database(Config.getDatabaseConfig1());
 		ResultSet rs = null;
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
@@ -1402,7 +1419,8 @@ public class Notification
 					.from(Config.getTablePrefix()+"notification")
 					.where("api_id = '"+this.apiID+"' and device_id = '"+this.deviceID+"' and client_group_id = '"+groupID+"' and is_sent = 0")
 					.toString();
-			rs = database1.executeQuery(sqlCommand);
+			stmt = database1.getDatabaseConnection().createStatement();
+			rs = stmt.executeQuery(sqlCommand);
 			if(rs.isBeforeFirst())
 			{
 				rs.next();
@@ -1411,17 +1429,14 @@ public class Notification
 		}
 		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
-			if(rs != null)
-			{
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			Database.closeResultSet(rs);
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 		return clount;
@@ -1449,8 +1464,8 @@ public class Notification
 		for(i = 0; i<j; i++)
 		{
 			jo = data.getJSONObject(i);
-			id = jo.optLong("id", 0);
-			lDeviceID = jo.optString("deviceID", "");
+			id = jo.optLong(JsonKey.ID, 0);
+			lDeviceID = jo.optString(JsonKey.DEVICE_ID, "");
 			if(id != 0)
 			{
 				tmp = this.delete(this.apiID, lDeviceID, this.groupID, id);
@@ -1459,9 +1474,9 @@ public class Notification
 		}			
 		JSONObject responseJSON = new JSONObject();
 		JSONObject responseData = new JSONObject();
-		responseJSON.put("command", "delete-notifivication");
-		responseData.put("notification", result);
-		responseJSON.put("data", responseData);
+		responseJSON.put(JsonKey.COMMAND, "delete-notifivication");
+		responseData.put(JsonKey.NOTIFICATION, result);
+		responseJSON.put(JsonKey.DATA, responseData);
 		return responseJSON;
 	}
 	/**
@@ -1500,6 +1515,7 @@ public class Notification
 		long j;
 		StringBuilder filterID = new StringBuilder();
 		Database database1 = new Database(Config.getDatabaseConfig1());
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
@@ -1515,8 +1531,8 @@ public class Notification
 					}
 					filterID.append(j);				
 					jo = new JSONObject();
-					jo.put("deviceID", deviceID);
-					jo.put("id", j);
+					jo.put(JsonKey.DEVICE_ID, deviceID);
+					jo.put(JsonKey.ID, j);
 					data.put(jo);
 				}
 				String sqlCommand = query1.newQuery()
@@ -1524,16 +1540,21 @@ public class Notification
 						.from(Config.getTablePrefix()+"notification")
 						.where("api_id = '"+apiID+"' and device_id = '"+deviceID+"' and client_group_id = '"+groupID+"' and notification_id in ("+filterID.toString()+") ")
 						.toString();
-				database1.execute(sqlCommand);			
+				stmt = database1.getDatabaseConnection().createStatement();
+				stmt.execute(sqlCommand);	
 				MessengerDelete broadcastCloseLoop = new MessengerDelete(this.apiID, this.deviceID, this.groupID, this.requestID, data, "delete-notification");
 				broadcastCloseLoop.start();
 			}
 		}
 		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 		return data;
@@ -1545,7 +1566,7 @@ public class Notification
 	 * @return JSONArray which is a combination of both inputs
 	 * @throws JSONException if any JSON errors
 	 */
-	public JSONArray concatArray(JSONArray arr1, JSONArray arr2) throws JSONException 
+	public JSONArray concatArray(JSONArray arr1, JSONArray arr2) 
 	{
 	    JSONArray result = new JSONArray();
 	    for (int i = 0; i < arr1.length(); i++) 
@@ -1570,6 +1591,7 @@ public class Notification
 	public void insertDeletionLog(long apiID, long groupID, JSONArray data)
 	{
 		Database database1 = new Database(Config.getDatabaseConfig1());
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
@@ -1583,8 +1605,8 @@ public class Notification
 			for(i = 0; i < length; i++)
 			{
 				jo = data.getJSONObject(i);
-				lDeviceID = jo.optString("deviceID", "");
-				notificationID = jo.optLong("id", 0);
+				lDeviceID = jo.optString(JsonKey.DEVICE_ID, "");
+				notificationID = jo.optLong(JsonKey.ID, 0);
 				lDeviceID = query1.escapeSQL(lDeviceID);
 				sqlCommand = query1.newQuery()
 						.insert()
@@ -1592,14 +1614,20 @@ public class Notification
 						.fields("(api_id, device_id, notification_id, time_delete)")
 						.values("("+apiID+", '"+lDeviceID+"', "+notificationID+", "+query1.now(6)+")")
 						.toString();
-				database1.execute(sqlCommand);	
+				stmt = database1.getDatabaseConnection().createStatement();
+				stmt.execute(sqlCommand);	
+				Database.closeStatement(stmt);
 			}
 		}
 		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 	}
@@ -1632,6 +1660,7 @@ public class Notification
 		JSONArray ja = new JSONArray();
 		ResultSet rs = null;
 		Database database1 = new Database(Config.getDatabaseConfig1());
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
@@ -1649,31 +1678,29 @@ public class Notification
 				.offset(0);
 			}
 			sqlCommand = query1.toString();
-			rs = database1.executeQuery(sqlCommand);
+			stmt = database1.getDatabaseConnection().createStatement();
+			rs = stmt.executeQuery(sqlCommand);
 			if(rs.isBeforeFirst())
 			{
 				while(rs.next())
 				{
 					jo = new JSONObject();
-					jo.put("deviceID", rs.getString("device_id"));
-					jo.put("id", rs.getString("notification_id"));
+					jo.put(JsonKey.DEVICE_ID, rs.getString("device_id"));
+					jo.put(JsonKey.ID, rs.getString("notification_id"));
 					ja.put(jo);
 				}
 			}
 		}
 		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
-			if(rs != null)
-			{
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			Database.closeResultSet(rs);
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 		return ja;
@@ -1693,8 +1720,9 @@ public class Notification
 		this.deviceID = deviceID;
 		this.offlineID = new ArrayList<>();
 		long count = 0;
-		ResultSet rs = null;
 		Database database1 = new Database(Config.getDatabaseConfig1());
+		ResultSet rs = null;
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
@@ -1704,7 +1732,8 @@ public class Notification
 					.from(Config.getTablePrefix()+"trash")
 					.where("api_id = '"+this.apiID+"' and device_id = '"+this.deviceID+"' and client_group_id = '"+groupID+"'")
 					.toString();
-			rs = database1.executeQuery(sqlCommand);
+			stmt = database1.getDatabaseConnection().createStatement();
+			rs = stmt.executeQuery(sqlCommand);
 			if(rs.isBeforeFirst())
 			{
 				rs.next();
@@ -1713,17 +1742,14 @@ public class Notification
 		}
 		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
-			if(rs != null)
-			{
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			Database.closeResultSet(rs);
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 		return count;
@@ -1739,6 +1765,7 @@ public class Notification
 	public void clearDeleteLog(long apiID, String deviceID, long notificationID)
 	{
 		Database database1 = new Database(Config.getDatabaseConfig1());
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
@@ -1750,13 +1777,18 @@ public class Notification
 					.from(Config.getTablePrefix()+"trash")
 					.where("api_id = '"+apiID+"' and device_id = '"+deviceID+"' and notification_id = '"+notificationID+"'")
 					.toString();
-			database1.execute(sqlCommand);	
+			stmt = database1.getDatabaseConnection().createStatement();
+			stmt.execute(sqlCommand);	
 		}
 		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 	}
@@ -1770,34 +1802,41 @@ public class Notification
 	public void clearDeleteLog(long apiID, JSONArray data) throws SQLException, DatabaseTypeException 
 	{
 		Database database1 = new Database(Config.getDatabaseConfig1());
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
 			QueryBuilder query1 = new QueryBuilder(database1.getDatabaseType());
 			String sqlCommand = "";
 			int i;
-			String deviceID = null;
+			String lDeviceID;
 			long notificationID = 0;
 			JSONObject jo;
 			int length = data.length();
 			for(i = 0; i < length; i++)
 			{
 				jo = data.optJSONObject(i);
-				deviceID = jo.optString("deviceID", "");
-				notificationID = jo.optLong("id", 0);
+				lDeviceID = jo.optString(JsonKey.DEVICE_ID, "");
+				notificationID = jo.optLong(JsonKey.ID, 0);
 				sqlCommand = query1.newQuery()
 						.delete()
 						.from(Config.getTablePrefix()+"trash")
-						.where("api_id = '"+this.apiID+"' and device_id = '"+deviceID+"' and notification_id = '"+notificationID+"'")
+						.where("api_id = '"+this.apiID+"' and device_id = '"+lDeviceID+"' and notification_id = '"+notificationID+"'")
 						.toString();
-				database1.execute(sqlCommand);	
+				stmt = database1.getDatabaseConnection().createStatement();
+				stmt.execute(sqlCommand);	
+				Database.closeStatement(stmt);
 			}		
 		}
 		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 	}

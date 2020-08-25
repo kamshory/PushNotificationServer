@@ -3,18 +3,13 @@ package com.planetbiru.pushserver.database;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Base64;
 import java.util.Properties;
 
 import javax.crypto.BadPaddingException;
@@ -24,9 +19,9 @@ import javax.crypto.NoSuchPaddingException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.planetbiru.pushserver.code.ConstantString;
 import com.planetbiru.pushserver.config.Config;
 import com.planetbiru.pushserver.utility.Encryption;
-import com.planetbiru.pushserver.utility.Utility;
 
 /**
  * This class is used to access the databases
@@ -82,7 +77,7 @@ public final class Database {
 	/**
 	 * Database configuration
 	 */
-	private DatabaseConfig databaseConfig = new DatabaseConfig();
+	private DatabaseConfiguration databaseConfig = new DatabaseConfiguration();
 	/**
 	 * Flag whether database is used or not
 	 */
@@ -142,7 +137,7 @@ public final class Database {
 	public void setDatabaseUsed(boolean databaseUsed) {
 		this.databaseUsed = databaseUsed;
 	}
-	public void setDatabaseConfig(DatabaseConfig databaseConfig) {
+	public void setDatabaseConfig(DatabaseConfiguration databaseConfig) {
 		this.databaseConfig = databaseConfig;
 	}
 	/**
@@ -164,7 +159,7 @@ public final class Database {
 	 * Constructor with database configuration
 	 * @param databaseConfig Database configuration
 	 */
-	public Database(DatabaseConfig databaseConfig)
+	public Database(DatabaseConfiguration databaseConfig)
 	{
 		this.databaseConfig = databaseConfig;
 		this.databaseHostName = databaseConfig.getDatabaseHostName();
@@ -175,7 +170,7 @@ public final class Database {
 		this.databaseName = databaseConfig.getDatabaseName();
 		this.databaseUsed  = databaseConfig.isDatabaseUsed();
 	}
-	public DatabaseConfig getDatabaseConfig()
+	public DatabaseConfiguration getDatabaseConfig()
 	{
 		return this.databaseConfig;
 	}
@@ -224,9 +219,9 @@ public final class Database {
 					this.databaseUserName, 
 					this.databaseUserPassword
 					);
-				if(this.databaseConnection != null)
+				if(this.databaseConnection == null)
 				{
-					this.connected = true;
+					this.connected = false;
 				}
 			}		
 			else if(this.databaseType.equals("mysql"))
@@ -240,13 +235,14 @@ public final class Database {
 					this.databaseUserName, 
 					this.databaseUserPassword
 					);	
-				if(this.databaseConnection != null)
+				if(this.databaseConnection == null)
 				{
-					this.connected = true;				
+					this.connected = false;				
 				}
 			}
 			else
 			{
+				this.connected = false;		
 				throw new DatabaseTypeException("Unsupported database type ("+this.databaseType+")");
 			}
 			return true;
@@ -273,13 +269,6 @@ public final class Database {
 			{
 				Thread.sleep(wait);
 				coonected = this.connect();
-				if(!coonected)
-				{
-					if(Config.isDebugMode())
-					{
-						System.out.println("Reconnect to the database server");
-					}
-				}
 			} 
 			catch (InterruptedException e) 
 			{
@@ -322,9 +311,9 @@ public final class Database {
 					}
 					return false;
 				}
-				if(this.databaseConnection != null)
+				if(this.databaseConnection == null)
 				{
-					this.connected = true;
+					this.connected = false;
 				}
 			}	
 			else if(this.databaseType.equals("mysql"))
@@ -349,9 +338,9 @@ public final class Database {
 					}
 					return false;
 				}
-				if(this.databaseConnection != null)
+				if(this.databaseConnection == null)
 				{
-					this.connected = true;				
+					this.connected = false;				
 				}
 			}
 			else
@@ -492,28 +481,28 @@ public final class Database {
 		{
 			return false;
 		}	
-		String databaseType = "";
-		String databaseHostName = "";
-		String databasePortNumber = "";
-		String databaseUserName = "";
-		String databaseUserPassword = "";
-		String databaseName = "";		
-		databaseType = prop.getProperty("DATABASE_TYPE");
-		databaseHostName = prop.getProperty("DATABASE_HOST_NAME");
-		databasePortNumber = prop.getProperty("DATABASE_PORT_NUMBER");
-		databaseUserName = prop.getProperty("DATABASE_USER_NAME");
-		databaseUserPassword = prop.getProperty("DATABASE_USER_PASSWORD");
-		databaseName = prop.getProperty("DATABASE_NAME");
-		if(databasePortNumber.equals(""))
+		String lDatabaseType = "";
+		String lDatabaseHostName = "";
+		String lDatabasePortNumber = "";
+		String lDatabaseUserName = "";
+		String lDatabaseUserPassword = "";
+		String lDatabaseName = "";		
+		lDatabaseType = prop.getProperty(ConstantString.DATABASE_TYPE);
+		lDatabaseHostName = prop.getProperty(ConstantString.DATABASE_HOST_NAME);
+		lDatabasePortNumber = prop.getProperty(ConstantString.DATABASE_PORT_NUMBER);
+		lDatabaseUserName = prop.getProperty(ConstantString.DATABASE_USER_NAME);
+		lDatabaseUserPassword = prop.getProperty(ConstantString.DATABASE_USER_PASSWORD);
+		lDatabaseName = prop.getProperty(ConstantString.DATABASE_NAME);
+		if(lDatabasePortNumber.equals(""))
 		{
-			databasePortNumber = "0";
+			lDatabasePortNumber = "0";
 		}
-		this.databaseType = databaseType.trim();
-		this.databaseHostName = databaseHostName.trim();
-		this.databasePortNumber = Integer.parseInt(databasePortNumber.trim());
-		this.databaseUserName = databaseUserName.trim();
-		this.databaseUserPassword = databaseUserPassword.trim();
-		this.databaseName = databaseName.trim();
+		this.databaseType = lDatabaseType.trim();
+		this.databaseHostName = lDatabaseHostName.trim();
+		this.databasePortNumber = Integer.parseInt(lDatabasePortNumber.trim());
+		this.databaseUserName = lDatabaseUserName.trim();
+		this.databaseUserPassword = lDatabaseUserPassword.trim();
+		this.databaseName = lDatabaseName.trim();
 		return true;
 	}
 	/**
@@ -526,12 +515,12 @@ public final class Database {
 	public boolean setConfigurationString(String configuration) throws JSONException, NumberFormatException
 	{
 		JSONObject json = new JSONObject(configuration);
-		String lDatabaseType = json.optString("DATABASE_TYPE", "");
-		String lDatabaseHostName = json.optString("DATABASE_HOST_NAME", "");
-		String lDatabasePortNumber = json.optString("DATABASE_PORT_NUMBER", "0");
-		String lDatabaseUserName = json.optString("DATABASE_USER_NAME", "");
-		String lDatabaseUserPassword = json.optString("DATABASE_USER_PASSWORD", "");
-		String lDatabaseName = json.optString("DATABASE_NAME", "");
+		String lDatabaseType = json.optString(ConstantString.DATABASE_TYPE, "");
+		String lDatabaseHostName = json.optString(ConstantString.DATABASE_HOST_NAME, "");
+		String lDatabasePortNumber = json.optString(ConstantString.DATABASE_PORT_NUMBER, "0");
+		String lDatabaseUserName = json.optString(ConstantString.DATABASE_USER_NAME, "");
+		String lDatabaseUserPassword = json.optString(ConstantString.DATABASE_USER_PASSWORD, "");
+		String lDatabaseName = json.optString(ConstantString.DATABASE_NAME, "");
 		if(lDatabasePortNumber.equals(""))
 		{
 			lDatabasePortNumber = "0";
@@ -560,7 +549,7 @@ public final class Database {
 	{
 		Encryption decryptor = new Encryption(Config.getEncryptionPassword());
 		String plainConfiguration = decryptor.decrypt(decryptor.base64Decode(configuration), true);
-		JSONObject json = new JSONObject();
+		JSONObject json;
 		if(plainConfiguration != null)
 		{
 			if(plainConfiguration.length() > 10)
@@ -570,12 +559,12 @@ public final class Database {
 					try 
 					{
 						json = new JSONObject(plainConfiguration);
-						String lDatabaseType = json.optString("DATABASE_TYPE", "");
-						String lDatabaseHostName = json.optString("DATABASE_HOST_NAME", "");
-						String lDatabasePortNumber = json.optString("DATABASE_PORT_NUMBER", "0");
-						String lDatabaseUserName = json.optString("DATABASE_USER_NAME", "");
-						String lDatabaseUserPassword = json.optString("DATABASE_USER_PASSWORD", "");
-						String lDatabaseName = json.optString("DATABASE_NAME", "");
+						String lDatabaseType = json.optString(ConstantString.DATABASE_TYPE, "");
+						String lDatabaseHostName = json.optString(ConstantString.DATABASE_HOST_NAME, "");
+						String lDatabasePortNumber = json.optString(ConstantString.DATABASE_PORT_NUMBER, "0");
+						String lDatabaseUserName = json.optString(ConstantString.DATABASE_USER_NAME, "");
+						String lDatabaseUserPassword = json.optString(ConstantString.DATABASE_USER_PASSWORD, "");
+						String lDatabaseName = json.optString(ConstantString.DATABASE_NAME, "");
 						if(lDatabasePortNumber.equals(""))
 						{
 							lDatabasePortNumber = "0";
@@ -624,45 +613,47 @@ public final class Database {
 	 * @throws NoSuchAlgorithmException if algorithm is not found
 	 * @throws InvalidKeyException if key is invalid
 	 */
-	public String getEncryptedConfiguration() throws JSONException, NullPointerException, UnsupportedEncodingException, IllegalBlockSizeException, IllegalArgumentException, BadPaddingException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException
+	public String getEncryptedConfiguration() throws UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException
 	{
 		Encryption encryptor = new Encryption(Config.getEncryptionPassword());
 		JSONObject json = new JSONObject();
-		json.put("DATABASE_TYPE", this.databaseType);
-		json.put("DATABASE_HOST_NAME", this.databaseHostName);
-		json.put("DATABASE_PORT_NUMBER", this.databasePortNumber);
-		json.put("DATABASE_USER_NAME", this.databaseUserName);
-		json.put("DATABASE_USER_PASSWORD", this.databaseUserPassword);
-		json.put("DATABASE_NAME", this.databaseName);
+		json.put(ConstantString.DATABASE_TYPE, this.databaseType);
+		json.put(ConstantString.DATABASE_HOST_NAME, this.databaseHostName);
+		json.put(ConstantString.DATABASE_PORT_NUMBER, this.databasePortNumber);
+		json.put(ConstantString.DATABASE_USER_NAME, this.databaseUserName);
+		json.put(ConstantString.DATABASE_USER_PASSWORD, this.databaseUserPassword);
+		json.put(ConstantString.DATABASE_NAME, this.databaseName);
 		String plainConfiguration = json.toString();
-		String configuration = encryptor.base64Encode(encryptor.encrypt(plainConfiguration, true));
-		return configuration;
+		return encryptor.base64Encode(encryptor.encrypt(plainConfiguration, true));
 	}
 	/**
 	 * Decrypt configuration
 	 * @param configuration Cipher text contains database configuration
 	 * @return JSONObject contains database configurations
+	 * @throws NoSuchPaddingException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws InvalidKeyException 
+	 * @throws UnsupportedEncodingException 
+	 * @throws BadPaddingException 
+	 * @throws IllegalBlockSizeException 
 	 * @throws Exception if any errors
 	 */
-	public JSONObject decryptConfigurationJSON(String configuration) throws Exception, IllegalArgumentException
+	public JSONObject decryptConfigurationJSON(String configuration) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException
 	{
 		Encryption decryptor = new com.planetbiru.pushserver.utility.Encryption(Config.getEncryptionPassword());
 		String plainConfiguration = decryptor.decrypt(configuration, true);
 		JSONObject json = new JSONObject();
 		if(plainConfiguration != null)
 		{
-			if(plainConfiguration.length() > 10)
+			if(plainConfiguration.length() > 10 && plainConfiguration.trim().substring(0, 1).equals("{"))
 			{
-				if(plainConfiguration.trim().substring(0, 1).equals("{"))
+				try 
 				{
-					try 
-					{
-						json = new JSONObject(plainConfiguration);
-					} 
-					catch (Exception e) 
-					{
-						throw new Exception("Invalid database key");
-					}
+					json = new JSONObject(plainConfiguration);
+				} 
+				catch (Exception e) 
+				{
+					throw new IllegalArgumentException("Invalid database key");
 				}
 			}
 		}
@@ -680,9 +671,9 @@ public final class Database {
 	 * @throws IllegalBlockSizeException if block size is invalid
 	 * @throws JSONException if any JSON errors
 	 */
-	public DatabaseConfig decryptConfigurationNative(String configuration) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, IllegalArgumentException, BadPaddingException, UnsupportedEncodingException, JSONException 
+	public DatabaseConfiguration decryptConfigurationNative(String configuration) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, IllegalArgumentException, BadPaddingException, UnsupportedEncodingException, JSONException 
 	{
-		DatabaseConfig databaseConfig = new DatabaseConfig();
+		DatabaseConfiguration lDatabaseConfig = new DatabaseConfiguration();
 		Encryption decryptor = new Encryption(Config.getEncryptionPassword());
 		String plainConfiguration = decryptor.decrypt(configuration, true);
 		JSONObject json;
@@ -699,20 +690,20 @@ public final class Database {
 			String lDatabaseUserName = "";
 			String lDatabaseUserPassword = "";
 			String lDatabaseName = "";		
-			lDatabaseType = json.optString("DATABASE_TYPE", "");
-			lDatabaseHostName = json.optString("DATABASE_HOST_NAME", "");
-			lDatabasePortNumber = json.optString("DATABASE_PORT_NUMBER", "0");
-			lDatabaseUserName = json.optString("DATABASE_USER_NAME", "");
-			lDatabaseUserPassword = json.optString("DATABASE_USER_PASSWORD", "");
-			lDatabaseName = json.optString("DATABASE_NAME", "");						
-			databaseConfig.setDatabaseType(lDatabaseType);
-			databaseConfig.setDatabaseHostName(lDatabaseHostName);
-			databaseConfig.setDatabasePortNumber(Integer.parseInt(lDatabasePortNumber));
-			databaseConfig.setDatabaseUserName(lDatabaseUserName);
-			databaseConfig.setDatabaseUserPassword(lDatabaseUserPassword);
-			databaseConfig.setDatabaseName(lDatabaseName);
+			lDatabaseType = json.optString(ConstantString.DATABASE_TYPE, "");
+			lDatabaseHostName = json.optString(ConstantString.DATABASE_HOST_NAME, "");
+			lDatabasePortNumber = json.optString(ConstantString.DATABASE_PORT_NUMBER, "0");
+			lDatabaseUserName = json.optString(ConstantString.DATABASE_USER_NAME, "");
+			lDatabaseUserPassword = json.optString(ConstantString.DATABASE_USER_PASSWORD, "");
+			lDatabaseName = json.optString(ConstantString.DATABASE_NAME, "");						
+			lDatabaseConfig.setDatabaseType(lDatabaseType);
+			lDatabaseConfig.setDatabaseHostName(lDatabaseHostName);
+			lDatabaseConfig.setDatabasePortNumber(Integer.parseInt(lDatabasePortNumber));
+			lDatabaseConfig.setDatabaseUserName(lDatabaseUserName);
+			lDatabaseConfig.setDatabaseUserPassword(lDatabaseUserPassword);
+			lDatabaseConfig.setDatabaseName(lDatabaseName);
 		}
-		return databaseConfig;
+		return lDatabaseConfig;
 	}
 	/**
 	 * Encrypt database configuration
@@ -731,16 +722,16 @@ public final class Database {
 	 * @throws IllegalBlockSizeException if block size is invalid
 	 * @throws UnsupportedEncodingException id encoding is not supported
 	 */
-	public String encryptConfiguration(String databaseType, String databaseHostName, int databasePortNumber, String databaseUserName, String databaseUserPassword, String databaseName) throws JSONException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, UnsupportedEncodingException, IllegalArgumentException, IllegalBlockSizeException, BadPaddingException
+	public String encryptConfiguration(String databaseType, String databaseHostName, int databasePortNumber, String databaseUserName, String databaseUserPassword, String databaseName) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, UnsupportedEncodingException, IllegalArgumentException, IllegalBlockSizeException, BadPaddingException
 	{
 		Encryption encryptor = new Encryption(Config.getEncryptionPassword());
 		JSONObject json = new JSONObject();
-		json.put("DATABASE_TYPE", databaseType);
-		json.put("DATABASE_HOST_NAME", databaseHostName);
-		json.put("DATABASE_PORT_NUMBER", databasePortNumber);
-		json.put("DATABASE_USER_NAME", databaseUserName);
-		json.put("DATABASE_USER_PASSWORD", databaseUserPassword);
-		json.put("DATABASE_NAME", databaseName);
+		json.put(ConstantString.DATABASE_TYPE, databaseType);
+		json.put(ConstantString.DATABASE_HOST_NAME, databaseHostName);
+		json.put(ConstantString.DATABASE_PORT_NUMBER, databasePortNumber);
+		json.put(ConstantString.DATABASE_USER_NAME, databaseUserName);
+		json.put(ConstantString.DATABASE_USER_PASSWORD, databaseUserPassword);
+		json.put(ConstantString.DATABASE_NAME, databaseName);
 		String plainConfiguration = json.toString();
 		return encryptor.encrypt(plainConfiguration, true);
 	}
@@ -764,14 +755,6 @@ public final class Database {
 	 * Get the database driver type
 	 * @return Database driver type
 	 */
-	public String getDriverType()
-	{
-		return this.databaseType;
-	}
-	/**
-	 * Get the database driver type
-	 * @return Database driver type
-	 */
 	public String getDatabaseType()
 	{
 		return this.databaseType;
@@ -784,58 +767,7 @@ public final class Database {
 	{
 		return this;
 	}
-	/**
-	 * Get Query
-	 * @return Query object
-	 */
-	/**
-	 * Set host name of the database
-	 * @param databaseHostName Host name of the database
-	 */
-	public void setHostName(String databaseHostName)
-	{
-		this.databaseHostName = databaseHostName;
-	}
-	/**
-	 * Return host name of the database 
-	 * @return Database host name
-	 */
-	public String getHostName()
-	{
-		return this.databaseHostName;
-	}
-	/**
-	 * Set port number of the database
-	 * @param databasePortNumber Port number of the database
-	 */
-	public void setPortNumber(int databasePortNumber)
-	{
-		this.databasePortNumber = databasePortNumber;
-	}
-	/**
-	 * Get port number of the database
-	 * @return Database port number
-	 */
-	public int getPortNumber()
-	{
-		return this.databasePortNumber;
-	}
-	/**
-	 * Set username to access the database
-	 * @param databaseUserName Username to access the database
-	 */
-	public void setUserName(String databaseUserName)
-	{
-		this.databaseUserName = databaseUserName;
-	}
-	/**
-	 * Set password to access the database
-	 * @param databaseUserPassword Password to access the database
-	 */
-	public void setUserPassword(String databaseUserPassword)
-	{
-		this.databaseUserPassword = databaseUserPassword;
-	}
+
 	/**
 	 * Set the database name
 	 * @param databaseName Name of the database
@@ -852,379 +784,31 @@ public final class Database {
 	{
 		return this.databaseName;
 	}
-	/**
-	 * Execute query on database and return result set
-	 * @param sqlCommand Query to be executed
-	 * @return ResultSet returned from executeQuery
-	 * @throws SQLException if any SQL errors 
-	 */
-	public ResultSet executeQuery(String sqlCommand) throws SQLException 
-	{
-		Statement db_s;
-		ResultSet db_rs = null;
-		db_s = this.databaseConnection.createStatement();
-		db_rs = db_s.executeQuery(sqlCommand);
-		return db_rs;		
-	}
-	/**
-	 * Execute query on database and return result set
-	 * @param query Query to be executed
-	 * @return ResultSet returned from executeQuery
-	 * @throws SQLException if any SQL errors 
-	 */
-	public ResultSet executeQuery(QueryBuilder query) throws SQLException
-	{
-		Statement db_s;
-		ResultSet db_rs;
-		db_s = this.databaseConnection.createStatement();
-		db_rs = db_s.executeQuery(query.toString());
-		return db_rs;	
-	}
-	/**
-	 * Execute query on database
-	 * @param sqlCommand Query to be executed
-	 * @return true or false
-	 * @throws SQLException if any SQL errors 
-	 */
-	public boolean execute(String sqlCommand) throws SQLException
-	{
-		PreparedStatement db_ps;
-		db_ps = this.databaseConnection.prepareStatement(sqlCommand);
-		return db_ps.execute();			
-	}
-	/**
-	 * Execute query on database
-	 * @param query Query to be executed
-	 * @return true or false
-	 * @throws SQLException if any SQL errors
-	 */
-	public boolean execute(QueryBuilder query) throws SQLException
-	{
-		PreparedStatement db_ps;
-		db_ps = this.databaseConnection.prepareStatement(query.toString());
-		return db_ps.execute();					
-	}
-	/**
-	 * Lock table
-	 * @param tableList Table name followed by the operation to be locked
-	 * @return true if success and false if failed
-	 * @throws SQLException if any SQL errors 
-	 * @throws DatabaseTypeException if database type not supported 
-	 */
-	public boolean lockTable(String tableList) throws SQLException, DatabaseTypeException
-	{
-		QueryBuilder query1 = new QueryBuilder(this.databaseType);
-		return this.execute(query1.lockTable(tableList));
-	}
-	/**
-	 * Lock tables
-	 * @param tableList Table name followed by the operation to be locked
-	 * @return true if success and false if failed
-	 * @throws SQLException if any SQL errors 
-	 * @throws DatabaseTypeException if database type not supported 
-	 */
-	public boolean lockTables(String tableList) throws SQLException, DatabaseTypeException
-	{
-		QueryBuilder query1 = new QueryBuilder(this.databaseType);
-		return this.execute(query1.lockTables(tableList));
-	}
-	/**
-	 * Unlock tables
-	 * @return true if success and false if failed
-	 * @throws SQLException if any SQL errors 
-	 * @throws DatabaseTypeException if database type not supported 
-	 */
-	public boolean unlockTables() throws SQLException, DatabaseTypeException
-	{
-		QueryBuilder query1 = new QueryBuilder(this.databaseType);
-		return this.execute(query1.unlockTables());
-	}
-	/**
-	 * Check the database connection by executing simple SQL
-	 * @return true if success and false if failed
-	 */
-	public boolean checkConnection()
-	{
-		String sqlCommand = "select 1 as test";
-		int test = 0;
-		ResultSet ldb_rs;
-		try
-		{
-			ldb_rs = this.executeQuery(sqlCommand);
-			if(ldb_rs.isBeforeFirst())
-			{
-				if(ldb_rs.next())
-				{
-					test = ldb_rs.getInt("test");
-					if(test == 1)
-					{						
-						return true;
-					}
-					else
-					{
-						return false;
-					}
-				}
-				else
-				{
-					return false;
-				}
-			}
-			else
-			{
-				return false;
-			}
-		}
-		catch(SQLException e)
-		{
-			if(Config.isPrintStackTrace())
-			{
-				e.printStackTrace();
-			}
-			return false;
-		}
-	}
-	/**
-	 * Get last auto increment 
-	 * @return Last auto increment from current connection
-	 * @throws SQLException if any SQL errors
-	 */
-	public long getLastID() throws SQLException
-	{
-		String sqlCommand = "";
-		if(this.databaseType.equals("mysql"))
-		{
-			sqlCommand = "select last_insert_id() as last_id\r\n";
-		}
-		if(this.databaseType.equals("postgresql"))
-		{
-			sqlCommand = "select lastval() as last_id\r\n";
-		}
-		ResultSet ldb_rs;
-		ldb_rs = this.executeQuery(sqlCommand);
-		if(ldb_rs.isBeforeFirst())
-		{
-			ldb_rs.next();
-			return ldb_rs.getLong("last_id");
-		}
-		return 0;
-	}
-	/**
-	 * Get last auto increment 
-	 * @return Last auto increment from current connection
-	 * @throws SQLException if any SQL errors 
-	 * @throws DatabaseTypeException if database type not supported 
-	 */
-	public long getLastAutoIncrement() throws SQLException, DatabaseTypeException
-	{
-		QueryBuilder query1 = new QueryBuilder(this.databaseType);
-		String sqlCommand = query1.lastID().alias("last_id").toString();
-		ResultSet ldb_rs;
-		ldb_rs = this.executeQuery(sqlCommand);
-		if(ldb_rs.isBeforeFirst())
-		{
-			ldb_rs.next();
-			return ldb_rs.getLong("last_id");
-		}
-		else
-		{
-			return 0;
-		}
-	}
-	/**
-	 * Execute start transaction query
-	 * @return true is success and false if failed
-	 * @throws SQLException if any SQL errors 
-	 * @throws DatabaseTypeException if database type not supported 
-	 */
-	public boolean startTransaction() throws SQLException, DatabaseTypeException
-	{
-		QueryBuilder query1 = new QueryBuilder(this.databaseType);
-		this.execute(query1.startTransaction());
-		return true;
-	}
-	/**
-	 * Execute commit query
-	 * @return true is success and false if failed
-	 * @throws SQLException if any SQL errors 
-	 * @throws DatabaseTypeException if database type not supported 
-	 */
-	public boolean commit() throws SQLException, DatabaseTypeException
-	{
-		QueryBuilder query1 = new QueryBuilder(this.databaseType);
-		this.execute(query1.commit());
-		return true;
-	}
-	/**
-	 * Execute rollback query
-	 * @return true is success and false if failed
-	 * @throws SQLException if any SQL errors 
-	 * @throws DatabaseTypeException if database type not supported 
-	 */
-	public boolean rollback() throws SQLException, DatabaseTypeException
-	{
-		QueryBuilder query1 = new QueryBuilder(this.databaseType);
-		this.execute(query1.rollback());
-		return true;
-	}
-	/**
-	 * Generate SHA-256 hash code from a string
-	 * @param input Input string
-	 * @return SHA-256 hash code
-	 * @throws NoSuchAlgorithmException if algorithm not found
-	 */
-	public static String sha256(String input) throws NoSuchAlgorithmException
-	{
-		String output = "";
-		if(input == null)
-		{
-			input = "";
-		}
-		MessageDigest digest = MessageDigest.getInstance("SHA-256");
-		byte[] encodedhash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
-		output = Database.bytesToHex(encodedhash);
-		return output;
-	}
-	/**
-	 * Generate SHA-1 hash code from a string
-	 * @param input Input string
-	 * @return SHA-1 hash code
-	 * @throws NoSuchAlgorithmException if algorithm not found
-	 */
-	public static String sha1(String input) throws NoSuchAlgorithmException
-	{
-		String output = "";
-		if(input == null)
-		{
-			input = "";
-		}
-		MessageDigest digest = MessageDigest.getInstance("SHA-1");
-		byte[] encodedhash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
-		output = Database.bytesToHex(encodedhash);
-		return output;
-	}
-	/**
-	 * Generate MD5 hash code from a string
-	 * @param input Input string
-	 * @return MD5 hash code
-	 * @throws NoSuchAlgorithmException if algorithm is not found
-	 */
-	public static String md5(String input) throws NoSuchAlgorithmException
-	{
-		String output = "";
-		if(input == null)
-		{
-			input = "";
-		}
-		MessageDigest digest = MessageDigest.getInstance("MD5");
-		byte[] encodedhash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
-		output = Database.bytesToHex(encodedhash);
-		return output;
-	}
-	/**
-	 * Convert byte to hexadecimal number
-	 * @param hash Byte to be converted
-	 * @return String containing hexadecimal number
-	 */
-	public static String bytesToHex(byte[] hash) 
-	{
-	    StringBuffer hexString = new StringBuffer();
-	    for (int i = 0; i < hash.length; i++) 
-	    {
-	    	String hex = Integer.toHexString(0xff & hash[i]);
-	    	if(hex.length() == 1) hexString.append('0');
-	    	{
-	    		hexString.append(hex);
-	    	}
-	    }
-	    return hexString.toString();
-	}
-	/**
-	 * Encode string with base 64 encoding
-	 * @param input String to be encoded
-	 * @return Encoded string
-	 */
-	public static String base64Encode(String input)
-	{
-		byte[] encodedBytes = Base64.getEncoder().encode(input.getBytes());
-		String output = new String(encodedBytes);
-		return output;
-	}
-	/**
-	 * Decode string with base 64 encoding
-	 * @param input String to be decoded
-	 * @return Decoded string
-	 */
-	public static String base64Decode(String input)
-	{
-		byte[] decodedBytes = Base64.getDecoder().decode(input.getBytes());
-		String output = new String(decodedBytes);
-		return output;
-	}
+
 	/**
 	 * Overrides <strong>toString</strong> method to convert object to JSON String. This method is useful to debug or show value of each properties of the object.
 	 */
-	public String toString()
-	{
-		Field[] fields = this.getClass().getDeclaredFields();
-		int i, max = fields.length;
-		String fieldName = "";
-		String fieldType = "";
-		String ret = "";
-		String value = "";
-		boolean skip = false;
-		int j = 0;
-		for(i = 0; i < max; i++)
+	
+	public static void closeResultSet(ResultSet rs) {
+		if(rs != null)
 		{
-			fieldName = fields[i].getName().toString();
-			fieldType = fields[i].getType().toString();
-			if(i == 0)
-			{
-				ret += "{";
-			}
-			if(fieldType.equals("int") || fieldType.equals("long") || fieldType.equals("float") || fieldType.equals("double") || fieldType.equals("boolean"))
-			{
-				try 
-				{
-					value = fields[i].get(this).toString();
-				}  
-				catch (Exception e) 
-				{
-					value = "0";
-				}
-				skip = false;
-			}
-			else if(fieldType.contains("String"))
-			{
-				try 
-				{
-					value = "\""+Utility.escapeJSON((String) fields[i].get(this))+"\"";
-				} 
-				catch (Exception e) 
-				{
-					value = "\""+"\"";
-				}
-				skip = false;
-			}
-			else
-			{
-				value = "\""+"\"";
-				skip = true;
-			}
-			if(!skip)
-			{
-				if(j > 0)
-				{
-					ret += ",";
-				}
-				j++;
-				ret += "\r\n\t\""+fieldName+"\":"+value;
-			}
-			if(i == max-1)
-			{
-				ret += "\r\n}";
+			try {
+				rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
 			}
 		}
-		return ret;
+		
+	}
+	public static void closeStatement(Statement stmt) {
+		if(stmt != null)
+		{
+			try {
+				stmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
 	}
 }

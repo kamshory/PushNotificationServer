@@ -7,6 +7,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -18,10 +19,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.planetbiru.code.ResponseCode;
 import com.planetbiru.pushserver.client.Client;
 import com.planetbiru.pushserver.client.ClientException;
 import com.planetbiru.pushserver.client.Device;
+import com.planetbiru.pushserver.code.ResponseCode;
 import com.planetbiru.pushserver.config.Config;
 import com.planetbiru.pushserver.database.Database;
 import com.planetbiru.pushserver.database.QueryBuilder;
@@ -578,6 +579,7 @@ public class NotificationHandler extends Thread
 	private void updateDeviceToken(long apiID, String deviceID, long groupID, String token, String address, String time)
 	{
 		Database database1 = new Database(Config.getDatabaseConfig1());
+		Statement stmt = null;
 		try
 		{		
 			database1.connect();
@@ -615,13 +617,15 @@ public class NotificationHandler extends Thread
 					.set("connection = '"+connection+"', last_token = '"+token+"', last_ip = '"+address+"', last_time = '"+time+"' ")
 					.where("device_id = '"+deviceID+"' and api_id = "+apiID+" ")
 					.toString();
-			database1.execute(sqlUpdate);
+			stmt = database1.getDatabaseConnection().createStatement();
+			stmt.execute(sqlUpdate);
 		}
 		catch(SQLException | ClassNotFoundException | DatabaseTypeException | NullPointerException | IllegalArgumentException e)
 		{
 			
 		}
 		finally {
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 		
@@ -870,6 +874,7 @@ public class NotificationHandler extends Thread
 		boolean success = false;
 		ResultSet rs = null;
 		Database database1 = new Database(Config.getDatabaseConfig1());
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
@@ -883,7 +888,8 @@ public class NotificationHandler extends Thread
 					.from(Config.getTablePrefix()+"client")
 					.where("device_id = '"+deviceID+"' and api_id = "+this.apiID+" ")
 					.toString();
-			rs = database1.executeQuery(sqlSelect);
+			stmt = database1.getDatabaseConnection().createStatement();
+			rs = stmt.executeQuery(sqlSelect);
 			if(!rs.isBeforeFirst())
 			{
 				String slqInsert = query1.newQuery()
@@ -892,7 +898,9 @@ public class NotificationHandler extends Thread
 						.fields("(device_id, api_id, last_token, last_time, last_ip, time_create)")
 						.values("('"+deviceID+"', "+this.apiID+", '"+lToken+"', now(), '"+address+"', now())")
 						.toString();
-				database1.execute(slqInsert);				
+				Database.closeStatement(stmt);
+				stmt = database1.getDatabaseConnection().createStatement();
+				stmt.execute(slqInsert);
 				success = true;
 				this.sendQuestion();
 			}
@@ -906,14 +914,8 @@ public class NotificationHandler extends Thread
 			
 		}
 		finally {
-			if(rs != null)
-			{
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			Database.closeResultSet(rs);
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 		return success;
@@ -931,6 +933,7 @@ public class NotificationHandler extends Thread
 		boolean success = false;
 		ResultSet rs = null;
 		Database database1 = new Database(Config.getDatabaseConfig1());
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
@@ -941,7 +944,8 @@ public class NotificationHandler extends Thread
 					.from(Config.getTablePrefix()+"client")
 					.where("device_id = '"+deviceID+"' and api_id = "+this.apiID+" ")
 					.toString();
-			rs = database1.executeQuery(sqlSelect);
+			stmt = database1.getDatabaseConnection().createStatement();
+			rs = stmt.executeQuery(sqlSelect);
 			if(rs.isBeforeFirst())
 			{
 				String slqDelete = query1.newQuery()
@@ -949,7 +953,9 @@ public class NotificationHandler extends Thread
 						.from(Config.getTablePrefix()+"client")
 						.where("device_id = '"+deviceID+"' and api_id = "+this.apiID+" ")
 						.toString();
-				database1.execute(slqDelete);
+				Database.closeStatement(stmt);
+				stmt = database1.getDatabaseConnection().createStatement();
+				stmt.execute(slqDelete);
 				success = true;
 			}
 			else
@@ -962,14 +968,8 @@ public class NotificationHandler extends Thread
 			
 		}
 		finally {
-			if(rs != null)
-			{
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			Database.closeResultSet(rs);
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 		return success;
@@ -982,8 +982,8 @@ public class NotificationHandler extends Thread
 	 */
 	private void markAsSent(List<String> ids) throws SQLException, DatabaseTypeException 
 	{
-		ResultSet rs = null;
 		Database database1 = new Database(Config.getDatabaseConfig1());
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
@@ -1006,7 +1006,8 @@ public class NotificationHandler extends Thread
 						.set("is_sent = 1, time_sent = now()")
 						.where("notification_id in ("+offline.toString()+")")
 						.toString();
-				database1.execute(sqlCommand);
+				stmt = database1.getDatabaseConnection().createStatement();
+				stmt.execute(sqlCommand);
 			}		
 		}
 		catch(SQLException | ClassNotFoundException | DatabaseTypeException | NullPointerException | IllegalArgumentException e)
@@ -1014,14 +1015,7 @@ public class NotificationHandler extends Thread
 			
 		}
 		finally {
-			if(rs != null)
-			{
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 	}
