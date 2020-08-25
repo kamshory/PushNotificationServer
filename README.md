@@ -31,13 +31,6 @@ User can modify the mail template. See file *mail-template.html*
 
 HTTP and HTTPS port is different. So pusher can choose one of them.
 
-If you won't to use port 80 and 443 for any reason, you can user proxy to redirect the push. Source code to create proxy can be found at 
-https://github.com/kamshory/PHPProxyServer
-
-To get notification sender, please visit https://github.com/kamshory/PushNotificationSender
-
-To get notification client, please visit https://github.com/kamshory/PushNotificationClient
-
 ## Plan
 
 | Features                         	| Free 	| Premium 	|
@@ -361,4 +354,135 @@ For more information, visit https://dzone.com/articles/understand-java-keytool-k
 Another way to create keystore is by using KeyStore Explorer. KeyStore Explorer is an open source GUI replacement for the Java command-line utilities keytool and jarsigner. KeyStore Explorer presents their functionality, and more, via an intuitive graphical user interface. 
 
 Download KeyStore Explorer from https://keystore-explorer.org/
+
+# API Documentation
+
+Assume that:
+
+- Domain : yourdomain.tld
+- Pusher Port (Accessed by Your Application Server) : 8080
+- Notification Port (Accessed by Mobile Devices) : 9090
+
+## Authorization
+
+```php
+$YourAPIKey = "PLANETBIRU";
+$YourAPIPusherPassword = "PASSWORD123";
+
+$UnixTimestamp = time(0);
+$YourToken = sha1($UnixTimestamp . $YourAPIKey);
+$YourSignature = sha1(sha1($YourAPIPusherPassword)."-".$YourToken."-".$YourAPIKey); 
+```
+
+
+## Send Notification From Application Server
+
+```http
+POST /pusher HTTP/1.1
+Host: yourdomain.tld:8080
+Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup
+X-Application-Name: Your Application Name
+X-Application-Version: Your Application Version
+Content-Type: application/json
+
+{
+    "command":"push-notification",
+    "data":{
+        "deviceIDs":["DeviceID1", "DeviceID2", "DeviceID3"],
+        "data"{
+                "message": "Notification message".
+                "title": "Title",
+                "subtitle": "Subtitle",
+                "tickerText": "Ticker text",
+                "uri": "http://yourdomain.tld/your-path?args1=val1&args2=val2",
+                "clickAction": "open-url",
+                "type": "info",
+                "miscData": {},
+                "color": "#FF5599",
+                "vibrate": [200, 0, 200, 400, 0],
+                "sound": "sound1.wav",
+                "badge": "badge.png",
+                "largeIcon": "large_icon.png",
+                "smallIcon": "small_icon.png"
+        }
+    }
+}
+
+```
+
+## Delete Sent Notification From Application Server
+
+```http
+POST /remover HTTP/1.1
+Host: yourdomain.tld:8080
+Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup
+X-Application-Name: Your Application Name
+X-Application-Version: Your Application Version
+Content-Type: application/json
+
+{
+    "command":"remove-notification",
+    "data":{
+        "id":[1, 2, 3, 4]
+    }
+}
+
+```
+
+## Create Group
+
+```http
+POST /create-group HTTP/1.1
+Host: yourdomain.tld:8080
+Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup
+X-Application-Name: Your Application Name
+X-Application-Version: Your Application Version
+Content-Type: application/json
+
+{
+    "command":"remove-notification",
+    "data":{
+        "id":[1, 2, 3, 4]
+    }
+}
+
+```
+
+## Register Device
+
+```http
+POST /register-device HTTP/1.1
+Host: yourdomain.tld:8080
+Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup
+X-Application-Name: Your Application Name
+X-Application-Version: Your Application Version
+Content-Type: application/json
+
+{
+    "command":"remove-notification",
+    "data":{
+        "id":[1, 2, 3, 4]
+    }
+}
+
+```
+
+## Unregister Device
+
+```http
+POST /unregister-device HTTP/1.1
+Host: yourdomain.tld:8080
+Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup
+X-Application-Name: Your Application Name
+X-Application-Version: Your Application Version
+Content-Type: application/json
+
+{
+    "command":"remove-notification",
+    "data":{
+        "id":[1, 2, 3, 4]
+    }
+}
+
+```
 
