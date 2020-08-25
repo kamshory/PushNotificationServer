@@ -164,11 +164,13 @@ MAIL_PASSWORD                = {mail-pass}
 TABLE_PREFIX must be appropriate with the table name. For example, the table name listed bellow:
 
 - push_api
+- push_api_user
 - push_client
 - push_client_group
 - push_notification
 - push_pusher_address
 - push_trash
+- push_user
 
 So the TABLE_PREFIX  will be **push_**. You can change the TABLE_PREFIX according to your table name. With the TABLE_PREFIX, you can integrate the push notification server database with your own application.
 
