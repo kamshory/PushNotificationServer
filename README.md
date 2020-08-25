@@ -422,7 +422,7 @@ Content-Type: application/json
 ```http
 POST /remover HTTP/1.1
 Host: yourdomain.tld:8080
-Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup
+Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup&integrity=DataIntegrity
 X-Application-Name: Your Application Name
 X-Application-Version: Your Application Version
 Content-Type: application/json
@@ -441,7 +441,7 @@ Content-Type: application/json
 ```http
 POST /create-group HTTP/1.1
 Host: yourdomain.tld:8080
-Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup
+Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup&integrity=DataIntegrity
 X-Application-Name: Your Application Name
 X-Application-Version: Your Application Version
 Content-Type: application/json
@@ -460,7 +460,7 @@ Content-Type: application/json
 ```http
 POST /register-device HTTP/1.1
 Host: yourdomain.tld:8080
-Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup
+Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup&integrity=DataIntegrity
 X-Application-Name: Your Application Name
 X-Application-Version: Your Application Version
 Content-Type: application/json
@@ -479,7 +479,7 @@ Content-Type: application/json
 ```http
 POST /unregister-device HTTP/1.1
 Host: yourdomain.tld:8080
-Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup
+Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup&integrity=DataIntegrity
 X-Application-Name: Your Application Name
 X-Application-Version: Your Application Version
 Content-Type: application/json
