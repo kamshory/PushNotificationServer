@@ -7,6 +7,8 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import com.planetbiru.pushserver.config.Config;
+
 /**
  * Process killer to kill current service. 
  * On Windows, it will kill Java. 
@@ -206,7 +208,10 @@ public class ProcessKiller {
 			} 
 			catch (Exception e) 
 			{
-			    e.printStackTrace();
+				if(Config.isPrintStackTrace())
+			    {
+					e.printStackTrace();
+			    }
 			}
 		}
 		return true;

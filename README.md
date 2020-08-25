@@ -6,6 +6,8 @@ Push Notification is a notification that is forcibly sent by the server to the c
 
 The notification server can be part of the application server and can also be provided by third parties.
 
+Currently, there are many companies that provide push notification services, both free and paid. Some people choose to use their own push notification server for various reasons. If you are among those who want to have their own push notifications that you can install on your online and offline networks, then this application might be for you.
+
 The application server must know the device ID of each user. When the application server sends notifications to users, the application server sends notifications to the notification server that is addressed to the user's device.
 
 When the pusher address filter is applied, the pusher address must be registered in the database in order to send notifications to the destination device. When a new address tries to send a notification, the server records the new address and sends an email to the administrator to approve the address. If the address is approved by the administrator, pusher can send notifications accordingly. This address can be activated and deactivated at any time.
@@ -13,6 +15,7 @@ When the pusher address filter is applied, the pusher address must be registered
 User can modify the mail template. See file *mail-template.html*
 
 ## Features
+
 1. Unlimited Notification
 2. Notification Group
 3. Device Registration

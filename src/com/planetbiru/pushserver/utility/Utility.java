@@ -33,6 +33,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
@@ -1042,5 +1043,25 @@ public class Utility {
 		byte[] decodedBytes = Base64.getDecoder().decode(input.getBytes());
 		return new String(decodedBytes);
 	}
-	
+	/**
+	 * Concatenate two arrays of JSONArray
+	 * @param arr1 First JSONArray 
+	 * @param arr2 Second JSONArray
+	 * @return JSONArray which is a combination of both inputs
+	 * @throws JSONException if any JSON errors
+	 */
+	public static JSONArray concatArray(JSONArray arr1, JSONArray arr2) 
+	{
+	    JSONArray result = new JSONArray();
+	    for (int i = 0; i < arr1.length(); i++) 
+	    {
+	        result.put(arr1.get(i));
+	    }
+	    for (int i = 0; i < arr2.length(); i++) 
+	    {
+	        result.put(arr2.get(i));
+	    }
+	    return result;
+	}
+
 }

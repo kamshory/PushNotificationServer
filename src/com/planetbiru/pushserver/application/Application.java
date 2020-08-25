@@ -106,35 +106,13 @@ public class Application
     	
     	if(action.equals("stop"))
     	{
-    		try 
-    		{
-				Application.killProcess(pathName);
-			} 
-    		catch (IOException e) 
-    		{
-    			logger.info("Can not kill the process. {}\r\nPlease try again", e.getMessage());
-				if(Config.isPrintStackTrace())
-				{
-					e.printStackTrace();
-				}
-			}
+    		Application.killProcess(pathName);
     	}
     	else
     	{
     		if(action.equals("stop-other"))
         	{
-        		try 
-        		{
-    				Application.killProcess(pathName, true);
-    			} 
-        		catch (IOException e) 
-        		{
-        			logger.info("Can not kill the process. {}\r\nPlease try again", e.getMessage());
-    				if(Config.isPrintStackTrace())
-    				{
-    					e.printStackTrace();
-    				}
-    			}
+        		Application.killProcess(pathName, true);
         		try 
         		{
 					Thread.sleep(Config.getWaitFreeUpPort());
@@ -183,20 +161,17 @@ public class Application
 			
 			try {
 				databaseValid = Application.checkDatabases();
-			} catch (IndexOutOfBoundsException e2) {
-				logger.error("Database exists but errors occured while access it.");
-				e2.printStackTrace();
 			} catch (DatabaseTypeException e2) {
-				logger.error("Database exists but errors occured while access it.");
+				logger.error("Database type is not supported.");
 				e2.printStackTrace();
 			} catch (SQLException e2) {
 				logger.error("Database exists but errors occured while access it.");
 				e2.printStackTrace();
 			} catch (TableNotFoundException e2) {
-				logger.error("Database exists but errors occured while access it.");
+				logger.error("Database exists but there is missing table.");
 				e2.printStackTrace();
 			} catch (DatabaseFunctionFoundException e2) {
-				logger.error("Database exists but errors occured while access it.");
+				logger.error("Database exists but there is missing function.");
 				e2.printStackTrace();
 			}
 			
@@ -238,16 +213,9 @@ public class Application
 								requestHandlerHTTPS.start();
 								logger.info("SSL Service for pusher is started");
 							} 
-						    catch (NoSuchAlgorithmException | CertificateException | UnrecoverableKeyException | KeyManagementException e) 
+						    catch (NoSuchAlgorithmException | CertificateException | UnrecoverableKeyException | KeyManagementException | KeyStoreException e) 
 						    {
 						    	if(Config.isPrintStackTrace())
-								{
-						    		e.printStackTrace();
-								}
-							} 						
-							catch (KeyStoreException e) 
-							{
-								if(Config.isPrintStackTrace())
 								{
 						    		e.printStackTrace();
 								}
@@ -431,10 +399,8 @@ public class Application
 	 * @throws DatabaseFunctionFoundException if function is not exists
 	 */
 	public static boolean checkFunctions() throws DatabaseFunctionFoundException
-	{
-		
+	{		
 		boolean valid = false;
-
 		Database database1 = new Database(Config.getDatabaseConfig1());
 		ResultSet rs = null;
 		Statement stmt = null;
@@ -491,9 +457,8 @@ public class Application
 	/**
 	 * Kill process
 	 * @param path File path
-	 * @throws IOException if any IO errors
 	 */
-	public static void killProcess(String path) throws IOException
+	public static void killProcess(String path)
 	{
 		ProcessKiller killer = new ProcessKiller(path);
 		killer.stop();
@@ -502,9 +467,8 @@ public class Application
 	 * Kill process
 	 * @param path File path
 	 * @param exceptThis Except this
-	 * @throws IOException if any IO errors
 	 */
-	public static void killProcess(String path, boolean exceptThis) throws IOException
+	public static void killProcess(String path, boolean exceptThis)
 	{		
 		ProcessKiller killer = new ProcessKiller(path, exceptThis);
 		killer.stop();
