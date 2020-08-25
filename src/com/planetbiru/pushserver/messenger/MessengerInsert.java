@@ -6,6 +6,7 @@ import java.net.SocketException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -217,6 +218,7 @@ public class MessengerInsert extends Thread
 	public void markAsSent(long notificationID) throws SQLException, DatabaseTypeException 
 	{
 		Database database1 = new Database(Config.getDatabaseConfig1());
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
@@ -226,7 +228,8 @@ public class MessengerInsert extends Thread
 					.set("is_sent = 1, time_sent = now()")
 					.where("notification_id = "+notificationID)
 					.toString();
-			database1.execute(sqlCommand);	
+			stmt = database1.getDatabaseConnection().createStatement();
+			stmt.execute(sqlCommand);
 		}
 		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException e)
 		{
@@ -236,6 +239,7 @@ public class MessengerInsert extends Thread
 			}
 		}
 		finally {
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 

@@ -14,6 +14,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 import javax.crypto.BadPaddingException;
@@ -90,7 +91,7 @@ public class Application
     	{
     		if(args[0].contains("-h") || args[0].contains("--help"))
     		{
-	    		logger.info("Push Notification Server version "+Config.getVersion()+"\r\n");	    		
+	    		logger.info("Push Notification Server version {}\r\n", Config.getVersion());	    		
 	    		logger.info("|-----------------------------|--------------------------------------|");
 	    		logger.info("| Argument                    | Meaning                              |");
 	    		logger.info("|-----------------------------|--------------------------------------|");
@@ -342,7 +343,7 @@ public class Application
 	 * @throws IndexOutOfBoundsException if out of bound
 	 * @throws TableNotFoundException if required table is not exists
 	 */
-	public static boolean checkTables() throws DatabaseTypeException, SQLException, IndexOutOfBoundsException, TableNotFoundException
+	public static boolean checkTables() throws DatabaseTypeException, SQLException, TableNotFoundException
 	{
 		String prefix = Config.getTablePrefix().trim();
 		ArrayList<String> tables = new ArrayList<>();
@@ -359,6 +360,7 @@ public class Application
 
 		Database database1 = new Database(Config.getDatabaseConfig1());
 		ResultSet rs = null;
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
@@ -372,7 +374,8 @@ public class Application
 						.from("pg_catalog.pg_tables")
 						.where("schemaname != 'pg_catalog' and schemaname != 'information_schema'")
 						.toString();
-				rs = database1.executeQuery(sqlCommand);
+				stmt  = database1.getDatabaseConnection().createStatement();
+				rs = stmt.executeQuery(sqlCommand);
 				if(rs.isBeforeFirst())
 				{
 					while(rs.next())
@@ -387,7 +390,8 @@ public class Application
 				sqlCommand = query1.newQuery("show tables")
 						.toString();
 				
-				rs = database1.executeQuery(sqlCommand);
+				stmt = database1.getDatabaseConnection().createStatement();
+				rs = stmt.executeQuery(sqlCommand);
 				if(rs.isBeforeFirst())
 				{
 					while(rs.next())
@@ -412,17 +416,14 @@ public class Application
 		}
 		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
-			if(rs != null)
-			{
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			Database.closeResultSet(rs);
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 		return valid;
@@ -439,13 +440,14 @@ public class Application
 	 * @throws TableNotFoundException if table is not exists
 	 * @throws DatabaseFunctionFoundException if function is not exists
 	 */
-	public static boolean checkFunctions()
+	public static boolean checkFunctions() throws DatabaseFunctionFoundException
 	{
 		
 		boolean valid = false;
 
 		Database database1 = new Database(Config.getDatabaseConfig1());
 		ResultSet rs = null;
+		Statement stmt = null;
 		try
 		{
 			database1.connect();
@@ -454,12 +456,17 @@ public class Application
 			sqlCommand = query1.newQuery()
 					.select("sha1('123') as result")
 					.toString();
-			rs = database1.executeQuery(sqlCommand);
+			stmt = database1.getDatabaseConnection().createStatement();
+			rs = stmt.executeQuery(sqlCommand);
 			if(rs.isBeforeFirst())
 			{
 				rs.next();
 				String val = rs.getString("result");
 				valid = (val.length() > 20);
+			}
+			else
+			{
+				throw new DatabaseFunctionFoundException("Function sha1 not found");
 			}
 		}
 		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
@@ -470,14 +477,8 @@ public class Application
 			}
 		}
 		finally {
-			if(rs != null)
-			{
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			Database.closeResultSet(rs);
+			Database.closeStatement(stmt);
 			database1.disconnect();
 		}
 		return valid;	

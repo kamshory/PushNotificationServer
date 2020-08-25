@@ -13,10 +13,13 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import org.json.JSONException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.planetbiru.pushserver.application.Application;
+import com.planetbiru.pushserver.code.ConstantString;
 import com.planetbiru.pushserver.database.Database;
-import com.planetbiru.pushserver.database.DatabaseConfig;
+import com.planetbiru.pushserver.database.DatabaseConfiguration;
 import com.planetbiru.pushserver.utility.Encryption;
 
 /**
@@ -25,7 +28,8 @@ import com.planetbiru.pushserver.utility.Encryption;
  *
  */
 public class Config {
-	private static final String applicationName = "Planet Notif";
+	private static Logger logger = LoggerFactory.getLogger(Config.class);
+	private static String applicationName = "Planet Notif";
 	/**
 	 * Create encrypted database configuration
 	 */
@@ -84,15 +88,15 @@ public class Config {
 	/**
 	 * Primary database configuration
 	 */
-	private static DatabaseConfig databaseConfig1 = new DatabaseConfig();
+	private static DatabaseConfiguration databaseConfig1 = new DatabaseConfiguration();
 	/**
 	 * Secondary database configuration
 	 */
-	private static DatabaseConfig databaseConfig2 = new DatabaseConfig();
+	private static DatabaseConfiguration databaseConfig2 = new DatabaseConfiguration();
 	/**
 	 * Tertiary database configuration
 	 */
-	private static DatabaseConfig databaseConfig3 = new DatabaseConfig();
+	private static DatabaseConfiguration databaseConfig3 = new DatabaseConfiguration();
 	/**
 	 * Properties
 	 */
@@ -327,22 +331,22 @@ public class Config {
 	public static void setConnectionPerPush(boolean connectionPerPush) {
 		Config.connectionPerPush = connectionPerPush;
 	}
-	public static DatabaseConfig getDatabaseConfig1() {
+	public static DatabaseConfiguration getDatabaseConfig1() {
 		return databaseConfig1;
 	}
-	public static void setDatabaseConfig1(DatabaseConfig databaseConfig1) {
+	public static void setDatabaseConfig1(DatabaseConfiguration databaseConfig1) {
 		Config.databaseConfig1 = databaseConfig1;
 	}
-	public static DatabaseConfig getDatabaseConfig2() {
+	public static DatabaseConfiguration getDatabaseConfig2() {
 		return databaseConfig2;
 	}
-	public static void setDatabaseConfig2(DatabaseConfig databaseConfig2) {
+	public static void setDatabaseConfig2(DatabaseConfiguration databaseConfig2) {
 		Config.databaseConfig2 = databaseConfig2;
 	}
-	public static DatabaseConfig getDatabaseConfig3() {
+	public static DatabaseConfiguration getDatabaseConfig3() {
 		return databaseConfig3;
 	}
-	public static void setDatabaseConfig3(DatabaseConfig databaseConfig3) {
+	public static void setDatabaseConfig3(DatabaseConfiguration databaseConfig3) {
 		Config.databaseConfig3 = databaseConfig3;
 	}
 	public static Properties getProperties() {
@@ -590,12 +594,12 @@ public class Config {
 	 * @throws IllegalBlockSizeException if block size is invalid
 	 * @throws BadPaddingException if padding is invalid
 	 */
-	public static boolean loadInternalConfig(String configPath) throws InvalidKeyException, NumberFormatException, JSONException, NoSuchAlgorithmException, NoSuchPaddingException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException
+	public static boolean loadInternalConfig(String configPath) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException
 	{
 		 Properties properties = Config.getConfiguration(configPath);
 		 return Config.init(properties);
 	}
-	public static boolean loadExternalConfig(String configPath) throws InvalidKeyException, NumberFormatException, JSONException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException
+	public static boolean loadExternalConfig(String configPath) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException
 	{
 		 Properties properties = Config.getConfigurationExternal(configPath);
 		 return Config.init(properties);
@@ -615,18 +619,18 @@ public class Config {
 			try 
 			{
 				prop.load(inputStream);
-				System.out.println("Load configuration from "+configPath);
+				logger.info("Load configuration from {}", configPath);
 			} 
 			catch (IOException e) 
 			{
-				System.out.println("Unable to load configuration from "+configPath+" because an error occured.");
+				logger.info("Unable to load configuration from {} because an error occured.", configPath);
 				e.printStackTrace();	
 				return null;
 			}
 		} 
 		else 
 		{
-			System.out.println("Unable to load configuration from "+configPath+" because file not found.");
+			logger.info("Unable to load configuration from {} because file not found.", configPath);
 			return null;
 		}	
 		return prop;
@@ -645,12 +649,12 @@ public class Config {
 	    {
 	        input = new FileInputStream(configPath);
 	        propertis.load(input);
-	        System.out.println("Load configuration from "+configPath);
+	        logger.info("Load configuration from {}", configPath);
 	    } 
 	    catch (IOException e) 
 	    {
 	        e.printStackTrace();
-	        System.out.println("Unable to load configuration from "+configPath+".");
+	        logger.info("Unable to load configuration from {}", configPath);
 	    } 
 	    finally 
 	    {
@@ -682,13 +686,13 @@ public class Config {
 	 * @throws BadPaddingException if padding is invalid
 	 * @throws UnsupportedEncodingException if encoding is not supported
 	 */
-	private static boolean init(Properties properties) throws InvalidKeyException, IllegalArgumentException, NumberFormatException, JSONException, NoSuchAlgorithmException, NoSuchPaddingException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException
+	private static boolean init(Properties properties) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException
 	{
 		Config.properties = properties;
 	
 		String database1Type   	     = "";
 		String database1HostName     = "";
-		String database1PortNumber   = "3306";
+		String database1PortNumber   = "";
 		String database1UserName     = "";
 		String database1UserPassword = "";
 		String database1Name         = "";
@@ -696,7 +700,7 @@ public class Config {
 		
 		String database2Type   	     = "";
 		String database2HostName     = "";
-		String database2PortNumber   = "3306";
+		String database2PortNumber   = "";
 		String database2UserName     = "";
 		String database2UserPassword = "";
 		String database2Name         = "";
@@ -704,7 +708,7 @@ public class Config {
 		
 		String database3Type   	     = "";
 		String database3HostName     = "";
-		String database3PortNumber   = "3306";
+		String database3PortNumber   = "";
 		String database3UserName     = "";
 		String database3UserPassword = "";
 		String database3Name         = "";
@@ -712,16 +716,16 @@ public class Config {
 		
 
 
-		database1Used 			       = Config.properties.getProperty("DATABASE1_USED", "TRUE");
-		database2Used 			       = Config.properties.getProperty("DATABASE2_USED", "FALSE");
-		database3Used 			       = Config.properties.getProperty("DATABASE3_USED", "FALSE");
+		database1Used 			       = Config.properties.getProperty("DATABASE1_USED", ConstantString.TRUE);
+		database2Used 			       = Config.properties.getProperty("DATABASE2_USED", ConstantString.FALSE);
+		database3Used 			       = Config.properties.getProperty("DATABASE3_USED", ConstantString.FALSE);
 
-		Config.databaseConfig1.setDatabaseUsed(database1Used.equals("TRUE"));
-		Config.databaseConfig2.setDatabaseUsed(database2Used.equals("TRUE"));
-		Config.databaseConfig3.setDatabaseUsed(database3Used.equals("TRUE"));
+		Config.databaseConfig1.setDatabaseUsed(database1Used.equals(ConstantString.TRUE));
+		Config.databaseConfig2.setDatabaseUsed(database2Used.equals(ConstantString.TRUE));
+		Config.databaseConfig3.setDatabaseUsed(database3Used.equals(ConstantString.TRUE));
 		
-		Config.developmentMode = (Config.properties.getProperty("DEVELOPMENT_MODE", "FALSE").equals("TRUE"))?true:false;
-		Config.createConfiguration = (Config.properties.getProperty("CREATE_CONFIGURATION", "FALSE").equals("TRUE"))?true:false;
+		Config.developmentMode = (Config.properties.getProperty("DEVELOPMENT_MODE", ConstantString.FALSE).equals(ConstantString.TRUE));
+		Config.createConfiguration = (Config.properties.getProperty("CREATE_CONFIGURATION", ConstantString.FALSE).equals(ConstantString.TRUE));
 		// Free version begin
 		Config.developmentMode = true;
 		// Free version end
@@ -753,7 +757,7 @@ public class Config {
 			
 			if(database1Type.equals("") || database1HostName.equals("") || database1PortNumber.equals("") || database1UserName.equals("") || database1Name.equals(""))
 			{
-				System.err.println("Invalid database configuration");
+				logger.error("Invalid database configuration");
 			}
 
 			if(Config.createConfiguration)
@@ -766,18 +770,18 @@ public class Config {
 				Config.keystorePasswordEncrypted = en.encrypt(Config.keystorePassword, true);
 				Config.mailPasswordEncrypted     = en.encrypt(Config.mailPassword, true);
 				
-				System.out.println();
-				System.out.println("DATABASE1_CONFIGURATION      = "+configuration1);
-				System.out.println("DATABASE2_CONFIGURATION      = "+configuration2);
-				System.out.println("DATABASE3_CONFIGURATION      = "+configuration3);
-				System.out.println("KEYSTORE_PASSWORD_ENCRYPTED  = "+Config.keystorePasswordEncrypted);
-				System.out.println("MAIL_PASSWORD_ENCRYPTED      = "+Config.mailPasswordEncrypted);
-				System.out.println();
+				logger.info("");
+				logger.info("DATABASE1_CONFIGURATION      = {}", configuration1);
+				logger.info("DATABASE2_CONFIGURATION      = {}", configuration2);
+				logger.info("DATABASE3_CONFIGURATION      = {}", configuration3);
+				logger.info("KEYSTORE_PASSWORD_ENCRYPTED  = {}", Config.keystorePasswordEncrypted);
+				logger.info("MAIL_PASSWORD_ENCRYPTED      = {}", Config.mailPasswordEncrypted);
+				logger.info("");
 				System.exit(0);
 			}				
-			Config.databaseConfig1.initConfig(database1Type, database1HostName, Integer.parseInt(database1PortNumber), database1UserName, database1UserPassword, database1Name, database1Used.equals("TRUE"));
-			Config.databaseConfig2.initConfig(database2Type, database2HostName, Integer.parseInt(database2PortNumber), database2UserName, database2UserPassword, database2Name, database2Used.equals("TRUE"));
-			Config.databaseConfig3.initConfig(database1Type, database3HostName, Integer.parseInt(database3PortNumber), database3UserName, database3UserPassword, database1Name, database3Used.equals("TRUE"));
+			Config.databaseConfig1.initConfig(database1Type, database1HostName, Integer.parseInt(database1PortNumber), database1UserName, database1UserPassword, database1Name, database1Used.equals(ConstantString.TRUE));
+			Config.databaseConfig2.initConfig(database2Type, database2HostName, Integer.parseInt(database2PortNumber), database2UserName, database2UserPassword, database2Name, database2Used.equals(ConstantString.TRUE));
+			Config.databaseConfig3.initConfig(database1Type, database3HostName, Integer.parseInt(database3PortNumber), database3UserName, database3UserPassword, database1Name, database3Used.equals(ConstantString.TRUE));
 		}
 		else
 		{
@@ -785,9 +789,9 @@ public class Config {
 			Config.databaseConfig2 = Config.databaseConfig2.decryptConfigurationNative(properties.getOrDefault("DATABASE2_CONFIGURATION", "{}").toString());
 			Config.databaseConfig3 = Config.databaseConfig3.decryptConfigurationNative(properties.getOrDefault("DATABASE3_CONFIGURATION", "{}").toString());
 			
-			Config.databaseConfig1.setDatabaseUsed(database1Used.equals("TRUE"));
-			Config.databaseConfig2.setDatabaseUsed(database2Used.equals("TRUE"));
-			Config.databaseConfig3.setDatabaseUsed(database3Used.equals("TRUE"));
+			Config.databaseConfig1.setDatabaseUsed(database1Used.equals(ConstantString.TRUE));
+			Config.databaseConfig2.setDatabaseUsed(database2Used.equals(ConstantString.TRUE));
+			Config.databaseConfig3.setDatabaseUsed(database3Used.equals(ConstantString.TRUE));
 			
 			Config.keystorePasswordEncrypted    = Config.properties.getProperty("KEYSTORE_PASSWORD_ENCRYPTED", "");
 			Config.mailPasswordEncrypted        = Config.properties.getOrDefault("MAIL_PASSWORD_ENCRYPTED", "").toString().trim();
@@ -804,16 +808,16 @@ public class Config {
 		Config.notificationPortSSL       = Integer.parseInt(Config.properties.getOrDefault("NOTIFICATION_PORT_HTTPS", "93").toString().trim());
 		Config.pusherPort                = Integer.parseInt(Config.properties.getOrDefault("PUSHER_PORT_HTTP", "94").toString().trim());
 		Config.pusherPortSSL             = Integer.parseInt(Config.properties.getOrDefault("PUSHER_PORT_HTTPS", "95").toString().trim());
-		Config.pusherSSLEnabled          = Config.properties.getOrDefault("PUSHER_HTTPS_ENABLED", "FALSE").toString().trim().equalsIgnoreCase("TRUE");
-		Config.notificationSSLEnabled    = Config.properties.getOrDefault("NOTIFICATION_HTTPS_ENABLED", "FALSE").toString().trim().equalsIgnoreCase("TRUE");
+		Config.pusherSSLEnabled          = Config.properties.getOrDefault("PUSHER_HTTPS_ENABLED", ConstantString.FALSE).toString().trim().equalsIgnoreCase(ConstantString.TRUE);
+		Config.notificationSSLEnabled    = Config.properties.getOrDefault("NOTIFICATION_HTTPS_ENABLED", ConstantString.FALSE).toString().trim().equalsIgnoreCase(ConstantString.TRUE);
 		
-		Config.keystoreFile              = Config.properties.getOrDefault("KEYSTORE_PATH", "TRUE").toString().trim();
-		Config.connectionPerPush         = Config.properties.getOrDefault("DATABASE_CONNECTION_PER_PUSH", "TRUE").toString().trim().equalsIgnoreCase("TRUE");
-		Config.printStackTrace           = Config.properties.getOrDefault("PRINT_STACK_TRACE", "FALSE").toString().trim().equalsIgnoreCase("TRUE");
-		Config.debugMode                 = Config.properties.getOrDefault("DEBUG_MODE", "FALSE").toString().trim().equalsIgnoreCase("TRUE");
-		Config.developmentMode           = Config.properties.getOrDefault("DEVELOPMENT_MODE", "FALSE").toString().trim().equalsIgnoreCase("TRUE");
-		Config.filterSource              = Config.properties.getOrDefault("FILTER_SOURCE", "TRUE").toString().trim().equalsIgnoreCase("TRUE");
-		Config.groupCreationApproval     = Config.properties.getOrDefault("GROUP_CREATION_APPROVAL", "TRUE").toString().trim().equalsIgnoreCase("TRUE");
+		Config.keystoreFile              = Config.properties.getOrDefault("KEYSTORE_PATH", ConstantString.TRUE).toString().trim();
+		Config.connectionPerPush         = Config.properties.getOrDefault("DATABASE_CONNECTION_PER_PUSH", ConstantString.TRUE).toString().trim().equalsIgnoreCase(ConstantString.TRUE);
+		Config.printStackTrace           = Config.properties.getOrDefault("PRINT_STACK_TRACE", ConstantString.FALSE).toString().trim().equalsIgnoreCase(ConstantString.TRUE);
+		Config.debugMode                 = Config.properties.getOrDefault("DEBUG_MODE", ConstantString.FALSE).toString().trim().equalsIgnoreCase(ConstantString.TRUE);
+		Config.developmentMode           = Config.properties.getOrDefault("DEVELOPMENT_MODE", ConstantString.FALSE).toString().trim().equalsIgnoreCase(ConstantString.TRUE);
+		Config.filterSource              = Config.properties.getOrDefault("FILTER_SOURCE", ConstantString.TRUE).toString().trim().equalsIgnoreCase(ConstantString.TRUE);
+		Config.groupCreationApproval     = Config.properties.getOrDefault("GROUP_CREATION_APPROVAL", ConstantString.TRUE).toString().trim().equalsIgnoreCase(ConstantString.TRUE);
 		Config.inspectionInterval        = Long.parseLong(Config.properties.getOrDefault("INTERVAL_INSPECTION", "1800000").toString().trim());
 		Config.gcInterval                = Integer.parseInt(Config.properties.getOrDefault("INTERVAL_GARBAGE_COLLECTION", "59000").toString().trim());	
 		Config.limitNotification         = Long.parseLong(Config.properties.getOrDefault("LIMIT_NOTIFICATION", "50").toString().trim());
@@ -825,12 +829,12 @@ public class Config {
 		Config.waitForAnswer             = Integer.parseInt(Config.properties.getOrDefault("WAIT_FOR_ANSWER", "30000").toString().trim());			
 		Config.deleteNotifSent           = Integer.parseInt(Config.properties.getOrDefault("DELETE_NOTIF_SENT", "3").toString().trim());	
 		Config.deleteNotifNotSent        = Integer.parseInt(Config.properties.getOrDefault("DELETE_NOTIF_NOT_SENT", "10").toString().trim());	
-		Config.contentSecure             = Config.properties.getOrDefault("CONTENT_SECURE", "FALSE").toString().trim().equalsIgnoreCase("TRUE");
+		Config.contentSecure             = Config.properties.getOrDefault("CONTENT_SECURE", ConstantString.FALSE).toString().trim().equalsIgnoreCase(ConstantString.TRUE);
 		Config.redirectHome              = Config.properties.getOrDefault("REDIRECT_HOME", "https://www.planetbiru.com").toString().trim();		
 		
 		Config.mailHost                  = Config.properties.getOrDefault("MAIL_HOST", "localhost").toString().trim();	
 		Config.mailPort                  = Integer.parseInt(Config.properties.getOrDefault("MAIL_PORT", "25").toString().trim());	
-		Config.mailUseAuth               = Config.properties.getOrDefault("MAIL_USE_AUTH", "FALSE").toString().trim().equalsIgnoreCase("TRUE");
+		Config.mailUseAuth               = Config.properties.getOrDefault("MAIL_USE_AUTH", ConstantString.FALSE).toString().trim().equalsIgnoreCase(ConstantString.TRUE);
 		Config.mailUsername              = Config.properties.getOrDefault("MAIL_USERNAME", "").toString().trim();
 		
 		Config.mailSubject               = Config.properties.getOrDefault("MAIL_SUBJECT", "Pusher Address Confirmation").toString().trim();

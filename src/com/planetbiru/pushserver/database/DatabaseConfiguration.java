@@ -9,19 +9,17 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.planetbiru.pushserver.config.Config;
 import com.planetbiru.pushserver.utility.Encryption;
-import com.planetbiru.pushserver.utility.Utility;
 
 /**
  * Database configuration instead of JSONObject
  * @author Kamshory, MT
  *
  */
-public class DatabaseConfig {
+public class DatabaseConfiguration {
 	/**
 	 * Database driver.
 	 * Supported database type are: mysql, mariadb, postgresql
@@ -62,7 +60,7 @@ public class DatabaseConfig {
 	 * @param databaseUsed Database usage
 	 * @return DatabaseConfiguration object
 	 */
-	public DatabaseConfig initConfig(String databaseType, String databaseHostName, int databasePortNumber, String databaseUserName, String databaseUserPassword, String databaseName, boolean databaseUsed)
+	public DatabaseConfiguration initConfig(String databaseType, String databaseHostName, int databasePortNumber, String databaseUserName, String databaseUserPassword, String databaseName, boolean databaseUsed)
 	{
 		this.setDatabaseType(databaseType);
 		this.setDatabaseHostName(databaseHostName);
@@ -84,39 +82,38 @@ public class DatabaseConfig {
 	 * @throws NoSuchAlgorithmException if algorithm is not found
 	 * @throws InvalidKeyException if key is invalid
 	 */
-	public DatabaseConfig decryptConfigurationNative(String configuration) throws JSONException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, InvalidKeyException, IllegalArgumentException, NoSuchAlgorithmException, NoSuchPaddingException
+	public DatabaseConfiguration decryptConfigurationNative(String configuration) throws IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException
 	{
-		DatabaseConfig databaseConfig = new DatabaseConfig();
+		DatabaseConfiguration databaseConfig = new DatabaseConfiguration();
 		Encryption decryptor = new Encryption(Config.getEncryptionPassword());
 		String plainConfiguration = decryptor.decrypt(configuration, true);
 		JSONObject json;
-		if(plainConfiguration != null)
+		if(configuration == null)
 		{
-			if(plainConfiguration.length() > 10 && plainConfiguration.trim().substring(0, 1).equals("{"))
-			{
-				json = new JSONObject(plainConfiguration);
-				
-				
-				String lDatabaseType = "";
-				String lDatabaseHostName = "";
-				String lDatabasePortNumber = "";
-				String lDatabaseUserName = "";
-				String lDatabaseUserPassword = "";
-				String lDatabaseName = "";		
-				lDatabaseType = json.optString("DATABASE_TYPE", "");
-				lDatabaseHostName = json.optString("DATABASE_HOST_NAME", "");
-				lDatabasePortNumber = json.optString("DATABASE_PORT_NUMBER", "0");
-				lDatabaseUserName = json.optString("DATABASE_USER_NAME", "");
-				lDatabaseUserPassword = json.optString("DATABASE_USER_PASSWORD", "");
-				lDatabaseName = json.optString("DATABASE_NAME", "");
-				
-				databaseConfig.setDatabaseType(lDatabaseType);
-				databaseConfig.setDatabaseHostName(lDatabaseHostName);
-				databaseConfig.setDatabasePortNumber(Integer.parseInt(lDatabasePortNumber));
-				databaseConfig.setDatabaseUserName(lDatabaseUserName);
-				databaseConfig.setDatabaseUserPassword(lDatabaseUserPassword);
-				databaseConfig.setDatabaseName(lDatabaseName);
-			}
+			return databaseConfig;
+		}
+		if(plainConfiguration.length() > 10 && plainConfiguration.trim().substring(0, 1).equals("{"))
+		{
+			json = new JSONObject(plainConfiguration);
+			String lDatabaseType = "";
+			String lDatabaseHostName = "";
+			String lDatabasePortNumber = "";
+			String lDatabaseUserName = "";
+			String lDatabaseUserPassword = "";
+			String lDatabaseName = "";		
+			lDatabaseType = json.optString("DATABASE_TYPE", "");
+			lDatabaseHostName = json.optString("DATABASE_HOST_NAME", "");
+			lDatabasePortNumber = json.optString("DATABASE_PORT_NUMBER", "0");
+			lDatabaseUserName = json.optString("DATABASE_USER_NAME", "");
+			lDatabaseUserPassword = json.optString("DATABASE_USER_PASSWORD", "");
+			lDatabaseName = json.optString("DATABASE_NAME", "");
+			
+			databaseConfig.setDatabaseType(lDatabaseType);
+			databaseConfig.setDatabaseHostName(lDatabaseHostName);
+			databaseConfig.setDatabasePortNumber(Integer.parseInt(lDatabasePortNumber));
+			databaseConfig.setDatabaseUserName(lDatabaseUserName);
+			databaseConfig.setDatabaseUserPassword(lDatabaseUserPassword);
+			databaseConfig.setDatabaseName(lDatabaseName);
 		}
 		return databaseConfig;
 	}
@@ -125,67 +122,29 @@ public class DatabaseConfig {
 	 */
 	public String toString()
 	{
+		JSONObject result = new JSONObject();
 		Field[] fields = this.getClass().getDeclaredFields();
 		int i;
 		int max = fields.length;
 		String fieldName = "";
 		String fieldType = "";
-		String ret = "";
-		String value = "";
-		boolean skip = false;
-		int j = 0;
 		for(i = 0; i < max; i++)
 		{
 			fieldName = fields[i].getName();
 			fieldType = fields[i].getType().toString();
-			if(i == 0)
-			{
-				ret += "{";
-			}
-			if(fieldType.equals("int") || fieldType.equals("long") || fieldType.equals("float") || fieldType.equals("double") || fieldType.equals("boolean"))
+			if(fieldType.equals("int") || fieldType.equals("long") || fieldType.equals("float") || fieldType.equals("double") || fieldType.equals("boolean") || fieldType.contains("String"))
 			{
 				try 
 				{
-					value = fields[i].get(this).toString();
+					result.put(fieldName, fields[i].get(this).toString());
 				}  
 				catch (Exception e) 
 				{
-					value = "0";
+					result.put(fieldName, "");
 				}
-				skip = false;
-			}
-			else if(fieldType.contains("String"))
-			{
-				try 
-				{
-					value = "\""+Utility.escapeJSON((String) fields[i].get(this))+"\"";
-				} 
-				catch (Exception e) 
-				{
-					value = "\""+"\"";
-				}
-				skip = false;
-			}
-			else
-			{
-				value = "\""+"\"";
-				skip = true;
-			}
-			if(!skip)
-			{
-				if(j > 0)
-				{
-					ret += ",";
-				}
-				j++;
-				ret += "\r\n\t\""+fieldName+"\":"+value;
-			}
-			if(i == max-1)
-			{
-				ret += "\r\n}";
 			}
 		}
-		return ret;
+		return result.toString(4);
 	}
 	public String getDatabaseHostName() {
 		return databaseHostName;
