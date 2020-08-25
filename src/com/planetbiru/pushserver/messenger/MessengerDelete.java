@@ -110,9 +110,6 @@ public class MessengerDelete extends Thread
 	 * @param requestID Request ID
 	 * @param groupID Group ID
 	 * @param data Data to send to the client
-	 * @param database1 Database 1
-	 * @param database2 Database 2
-	 * @param database3 Database 3
 	 * @param command Command
 	 */
 	public MessengerDelete(long apiID, String deviceID, long groupID, long requestID, JSONArray data, String command)
@@ -132,9 +129,6 @@ public class MessengerDelete extends Thread
 	 * @param apiID API ID
 	 * @param groupID Group ID
 	 * @param data Data to sent to the client
-	 * @throws JSONException if any JSON errors
-	 * @throws SQLException if any SQL errors
-	 * @throws DatabaseTypeException if database type not supported 
 	 */
 	public void inserDeleteHistory(Notification notification, long apiID, long groupID, JSONArray data) 
 	{
@@ -143,6 +137,7 @@ public class MessengerDelete extends Thread
 	/**
 	 * Override run method
 	 */
+	@Override
 	public void run()
 	{
 		Notification notification = new Notification();

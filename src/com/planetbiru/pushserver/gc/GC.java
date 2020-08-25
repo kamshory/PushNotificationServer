@@ -19,15 +19,12 @@ public class GC extends Thread
 {
 	/**
 	 * Constructor with database initialization
-	 * @param databaseConfig1 Primary database configuration
-	 * @param databaseConfig2 Secondary database configuration
-	 * @param databaseConfig3 Tertiary database configuration
-	 * @throws DatabaseTypeException if database type is not supported
-	 * @throws SQLException if any SQL errors
-	 * @throws ClassNotFoundException if class not found
 	 */
 	public GC()
 	{
+		/**
+		 * Default constructor
+		 */
 	}
 	/**
 	 * Override run method

@@ -56,9 +56,7 @@ public class PusherHandler implements HttpHandler
 	}
 	/**
 	 * Constructor for single database connection
-	 * @param database1 Primary Database object
-	 * @param database2 Secondary Database object
-	 * @param database3 Tertiary Database object
+	 * @param command Command
 	 */
 	public PusherHandler(String command)
 	{

@@ -12,7 +12,7 @@ public class WelcomeHandler implements HttpHandler
 	private String path;
 	/**
 	 * Default constructor
-	 * @param path 
+	 * @param path Context path
 	 */
 	public WelcomeHandler(String path)
 	{

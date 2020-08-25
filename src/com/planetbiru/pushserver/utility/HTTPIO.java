@@ -129,6 +129,7 @@ public class HTTPIO
 	/**
 	 * Send HTTP response without body to client
 	 * @param httpExchange HTTP exchange
+	 * @param responseHeaders Response headers
 	 * @param responseCode Response code
 	 * @throws IOException IO exception
 	 */
@@ -154,6 +155,7 @@ public class HTTPIO
 	 * Send HTTP response with body to client
 	 * @param httpExchange HTTP exchange
 	 * @param responseCode Response code
+	 * @param responseHeaders Response headers
 	 * @param response Response body to the client
 	 * @throws IOException if any IO errors
 	 */

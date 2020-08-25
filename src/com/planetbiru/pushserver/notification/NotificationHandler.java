@@ -104,9 +104,6 @@ public class NotificationHandler extends Thread
 	 * Constructor with client socket, request ID, and database object 
 	 * @param socket Client socket accepted 
 	 * @param requestID Request ID. It will be auto increment
-	 * @param database1 Primary Database object
-	 * @param database2 Secondary Database object
-	 * @param database3 Tertiary Database object
 	 */
 	public NotificationHandler(Socket socket, long requestID)
 	{
@@ -353,6 +350,7 @@ public class NotificationHandler extends Thread
 	 * @throws InvalidKeyException if invalid key
 	 * @throws BadPaddingException if cipher text not multiply of 16 character
 	 * @throws IllegalBlockSizeException if cipher text not multiply of 16 character
+	 * @throws SocketException if any socket errors
 	 */
 	public void downloadLastNotification() throws JSONException, SQLException, IOException, SocketException, DatabaseTypeException, InvalidKeyException, IllegalArgumentException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException
 	{
@@ -380,7 +378,6 @@ public class NotificationHandler extends Thread
 	}
 	/**
 	 * Download last notification deletion log
-	 * @throws JSONException if any JSON errors
 	 * @throws SQLException if any SQL errors
 	 * @throws IOException if any IO errors
 	 * @throws DatabaseTypeException if database type not supported 
@@ -389,8 +386,9 @@ public class NotificationHandler extends Thread
 	 * @throws InvalidKeyException if key is invalid
 	 * @throws BadPaddingException if cipher text size not multiply of 16 bytes
 	 * @throws IllegalBlockSizeException if cipher text size not multiply of 16 bytes
+	 * @throws SocketException if any socket errors
 	 */
-	public void downloadLastDeleteLog() throws JSONException, SQLException, IOException, SocketException, DatabaseTypeException, InvalidKeyException, IllegalArgumentException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException
+	public void downloadLastDeleteLog() throws SQLException, IOException, SocketException, DatabaseTypeException, InvalidKeyException, IllegalArgumentException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException
 	{
 		SocketIO socketIO = new SocketIO(this.getSocket());
 		Notification notification = new Notification(this.requestID);

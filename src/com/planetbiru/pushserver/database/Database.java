@@ -626,17 +626,17 @@ public final class Database {
 		String plainConfiguration = json.toString();
 		return encryptor.base64Encode(encryptor.encrypt(plainConfiguration, true));
 	}
+
 	/**
-	 * Decrypt configuration
-	 * @param configuration Cipher text contains database configuration
-	 * @return JSONObject contains database configurations
-	 * @throws NoSuchPaddingException 
-	 * @throws NoSuchAlgorithmException 
-	 * @throws InvalidKeyException 
-	 * @throws UnsupportedEncodingException 
-	 * @throws BadPaddingException 
-	 * @throws IllegalBlockSizeException 
-	 * @throws Exception if any errors
+	 * Decrypt database configuration
+	 * @param configuration Database configuration
+	 * @return configuration Cipher text contains database configuration
+	 * @throws InvalidKeyException if encryption key is invalid
+	 * @throws NoSuchAlgorithmException if algorithm is not found
+	 * @throws NoSuchPaddingException if padding not found
+	 * @throws IllegalBlockSizeException if block size is not present
+	 * @throws BadPaddingException if padding is invalid
+	 * @throws UnsupportedEncodingException if encoding is not supported
 	 */
 	public JSONObject decryptConfigurationJSON(String configuration) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException
 	{
@@ -669,9 +669,8 @@ public final class Database {
 	 * @throws UnsupportedEncodingException if encoding is not supported
 	 * @throws BadPaddingException if padding is invalid
 	 * @throws IllegalBlockSizeException if block size is invalid
-	 * @throws JSONException if any JSON errors
 	 */
-	public DatabaseConfiguration decryptConfigurationNative(String configuration) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, IllegalArgumentException, BadPaddingException, UnsupportedEncodingException, JSONException 
+	public DatabaseConfiguration decryptConfigurationNative(String configuration) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, IllegalArgumentException, BadPaddingException, UnsupportedEncodingException 
 	{
 		DatabaseConfiguration lDatabaseConfig = new DatabaseConfiguration();
 		Encryption decryptor = new Encryption(Config.getEncryptionPassword());
@@ -786,9 +785,9 @@ public final class Database {
 	}
 
 	/**
-	 * Overrides <strong>toString</strong> method to convert object to JSON String. This method is useful to debug or show value of each properties of the object.
+	 * Close ResultSet
+	 * @param rs ResultSet to be closed
 	 */
-	
 	public static void closeResultSet(ResultSet rs) {
 		if(rs != null)
 		{
@@ -800,6 +799,11 @@ public final class Database {
 		}
 		
 	}
+
+	/**
+	 * Close Statement
+	 * @param stmt Statement to be closed
+	 */
 	public static void closeStatement(Statement stmt) {
 		if(stmt != null)
 		{
