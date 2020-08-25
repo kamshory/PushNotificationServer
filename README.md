@@ -372,9 +372,16 @@ $YourAPIPusherPassword = "PASSWORD123";
 $UnixTimestamp = time(0);
 $YourToken = sha1($UnixTimestamp . $YourAPIKey);
 $YourSignature = sha1(sha1($YourAPIPusherPassword)."-".$YourToken."-".$YourAPIKey); 
+
+$YourAPIKey = urlencode($YourAPIKey);
+$YourToken = urlencode($YourToken);
+$YourSignature = urlencode($YourSignature);
+$UnixTimestamp = urlencode($UnixTimestamp);
+$YourGroup = urlencode($YourGroup);
+
 ```
 
-Note: Encode YourAPIKey, YourToken, YourSignature, UnixTimestamp and YourGroup with URL Encode.
+Note: Encode YourAPIKey, YourToken, YourSignature, UnixTimestamp and YourGroup with URL Encode before send it.
 
 ## Send Notification From Application Server
 
