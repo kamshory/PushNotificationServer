@@ -30,12 +30,6 @@ public class PusherHandler implements HttpHandler
 	 */
 	private String command = "push-notification";
 	
-	public String getCommand() {
-		return command;
-	}
-	public void setCommand(String command) {
-		this.command = command;
-	}
 	/**
 	 * Constructor for single database connection
 	 * @param command Command
@@ -150,7 +144,7 @@ public class PusherHandler implements HttpHandler
 	 * @throws JSONException if any JSON errors
 	 * @throws DatabaseTypeException if database type not supported 
 	 */
-	public JSONObject insert(Notification notification, String body) throws JSONException, SQLException, DatabaseTypeException
+	private JSONObject insert(Notification notification, String body) throws JSONException, SQLException, DatabaseTypeException
 	{
 		return notification.insert(body);
 	}
@@ -160,7 +154,7 @@ public class PusherHandler implements HttpHandler
 	 * @param body String contains data sent by the application
 	 * @return JSONObject contains notification ID and destination device ID
 	 */
-	public JSONObject delete(Notification notification, String body)
+	private JSONObject delete(Notification notification, String body)
 	{
 		return notification.delete(body);
 	}
@@ -201,7 +195,7 @@ public class PusherHandler implements HttpHandler
 	 * @throws MessagingException if any errors occurred while send message
 	 * @throws NoSuchAlgorithmException if algorithm is not found
 	 */
-	public JSONObject createGroup(Notification notification, String body, String remoteAddress, String applicationName, String applicationVersion, String userAgent) throws SQLException, DatabaseTypeException, AddressException, NullPointerException, IllegalArgumentException, MessagingException, NoSuchAlgorithmException
+	private JSONObject createGroup(Notification notification, String body, String remoteAddress, String applicationName, String applicationVersion, String userAgent) throws SQLException, DatabaseTypeException, AddressException, NullPointerException, IllegalArgumentException, MessagingException, NoSuchAlgorithmException
 	{
 		return notification.createGroup(body, remoteAddress, applicationName, applicationVersion, userAgent);
 	}

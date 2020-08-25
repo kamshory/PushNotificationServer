@@ -379,8 +379,74 @@ $YourAPIKey = urlencode($YourAPIKey);
 $YourGroup = urlencode($YourGroup);
 ```
 
-RequestBody must be similar with request body sent by application server.. Missing or adding whitespace will
+## Create Group
 
+Before application send notification, user must create a notification user group on push notification server. Notification user group usefull if application has more than one level user that receive push notification. Aplication must send device ID and notification user group when it send notification.
+
+```http
+POST /create-group HTTP/1.1
+Host: yourdomain.tld:8080
+Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup
+X-Integrity: DataIntegrity
+X-Application-Name: Your Application Name
+X-Application-Version: Your Application Version
+Content-Type: application/json
+
+{
+    "command": "create-group",
+    "data": {
+        "groupKey": "GR1",
+        "groupName": "Group 1",
+        "groupDescription": "This is the description of the group 1"
+    }
+}
+
+```
+
+## Register Device
+
+Before application send notification, user must register user device. Application must save the user's device on its database. When aplication send notification for any user, aplication must send it to all user devices. Aplication must send device ID and notification user group when it send notification. If device ID not registered on the group, push notification server will ignore the notification without push it to the device or save it into the database.
+
+
+```http
+POST /register-device HTTP/1.1
+Host: yourdomain.tld:8080
+Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup
+X-Integrity: DataIntegrity
+X-Application-Name: Your Application Name
+X-Application-Version: Your Application Version
+Content-Type: application/json
+
+{
+    "command": "register-device",
+    "data": {
+        "deviceID": "1345632163"
+    }
+}
+
+```
+
+## Unregister Device
+
+When the user has ended using the application and no longer wants to receive notifications, the user must unregister the device. This action will remove the device on user notification group. Application must also remove the pair or user ID, group and device ID on its database.
+
+```http
+POST /unregister-device HTTP/1.1
+Host: yourdomain.tld:8080
+Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup
+X-Integrity: DataIntegrity
+X-Application-Name: Your Application Name
+X-Application-Version: Your Application Version
+Content-Type: application/json
+
+{
+    "command": "unregister-device",
+    "data": {
+        "deviceID": "1345632163"
+    }
+}
+
+```
 
 ## Send Notification From Application Server
 
@@ -437,64 +503,3 @@ Content-Type: application/json
 }
 
 ```
-
-## Create Group
-
-```http
-POST /create-group HTTP/1.1
-Host: yourdomain.tld:8080
-Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup
-X-Integrity: DataIntegrity
-X-Application-Name: Your Application Name
-X-Application-Version: Your Application Version
-Content-Type: application/json
-
-{
-    "command": "create-group",
-    "data": {
-        "id": [1, 2, 3, 4]
-    }
-}
-
-```
-
-## Register Device
-
-```http
-POST /register-device HTTP/1.1
-Host: yourdomain.tld:8080
-Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup
-X-Integrity: DataIntegrity
-X-Application-Name: Your Application Name
-X-Application-Version: Your Application Version
-Content-Type: application/json
-
-{
-    "command": "register-device",
-    "data": {
-        "id": [1, 2, 3, 4]
-    }
-}
-
-```
-
-## Unregister Device
-
-```http
-POST /unregister-device HTTP/1.1
-Host: yourdomain.tld:8080
-Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup
-X-Integrity: DataIntegrity
-X-Application-Name: Your Application Name
-X-Application-Version: Your Application Version
-Content-Type: application/json
-
-{
-    "command": "unregister-device",
-    "data": {
-        "id": [1, 2, 3, 4]
-    }
-}
-
-```
-
