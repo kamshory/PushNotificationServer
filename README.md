@@ -387,9 +387,9 @@ Content-Type: application/json
 
 {
     "command":"push-notification",
-    "data":{
-        "deviceIDs":["DeviceID1", "DeviceID2", "DeviceID3"],
-        "data"{
+    "data": {
+        "deviceIDs": ["DeviceID1", "DeviceID2", "DeviceID3"],
+        "data": {
                 "message": "Notification message".
                 "title": "Title",
                 "subtitle": "Subtitle",
@@ -422,8 +422,8 @@ Content-Type: application/json
 
 {
     "command":"remove-notification",
-    "data":{
-        "id":[1, 2, 3, 4]
+    "data": {
+        "id": [1, 2, 3, 4]
     }
 }
 
@@ -441,8 +441,8 @@ Content-Type: application/json
 
 {
     "command":"remove-notification",
-    "data":{
-        "id":[1, 2, 3, 4]
+    "data": {
+        "id": [1, 2, 3, 4]
     }
 }
 
@@ -460,8 +460,8 @@ Content-Type: application/json
 
 {
     "command":"remove-notification",
-    "data":{
-        "id":[1, 2, 3, 4]
+    "data": {
+        "id": [1, 2, 3, 4]
     }
 }
 
