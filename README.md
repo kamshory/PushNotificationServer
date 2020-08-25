@@ -374,6 +374,7 @@ $YourToken = sha1($UnixTimestamp . $YourAPIKey);
 $YourSignature = sha1(sha1($YourAPIPusherPassword)."-".$YourToken."-".$YourAPIKey); 
 ```
 
+Note: Encode YourAPIKey, YourToken, YourSignature, UnixTimestamp and YourGroup with URL Encode.
 
 ## Send Notification From Application Server
 
@@ -409,8 +410,6 @@ Content-Type: application/json
 }
 
 ```
-
-Note: Encode YourAPIKey, YourToken, YourSignature, UnixTimestamp and YourGroup with URL Encode.
 
 ## Delete Sent Notification From Application Server
 
