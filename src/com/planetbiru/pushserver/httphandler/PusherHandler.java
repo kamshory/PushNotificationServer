@@ -26,32 +26,14 @@ import com.sun.net.httpserver.HttpHandler;
 public class PusherHandler implements HttpHandler 
 {
 	/**
-	 * Data
+	 * Command
 	 */
-	private JSONObject data;
-	/**
-	 * Flag whether database connection is per push or not
-	 */
-	private boolean connectionPerPush = false;
 	private String command = "push-notification";
 	
-	public JSONObject getData() {
-		return data;
-	}
-	public void setData(JSONObject data) {
-		this.data = data;
-	}
-	public boolean isConnectionPerPush() {
-		return connectionPerPush;
-	}
-	public void setConnectionPerPush(boolean connectionPerPush) {
-		this.connectionPerPush = connectionPerPush;
-	}
-	
-	public String getAction() {
+	public String getCommand() {
 		return command;
 	}
-	public void setAction(String command) {
+	public void setCommand(String command) {
 		this.command = command;
 	}
 	/**
@@ -61,11 +43,9 @@ public class PusherHandler implements HttpHandler
 	public PusherHandler(String command)
 	{
 		this.command = command;
-		this.connectionPerPush = false;
 	}
-	/**
-	 * Override handle method
-	 */
+
+	@Override
 	public void handle(HttpExchange httpExchange) throws IOException 
 	{
 		Headers requestHeaders = httpExchange.getRequestHeaders();		
@@ -178,20 +158,29 @@ public class PusherHandler implements HttpHandler
 	 * Delete notifications
 	 * @param notification Notification object
 	 * @param body String contains data sent by the application
-	 * @return JSONArray contains notification ID and destination device ID
-	 * @throws SQLException if any SQL errors
-	 * @throws JSONException if any JSON errors
-	 * @throws DatabaseTypeException if database type not supported 
+	 * @return JSONObject contains notification ID and destination device ID
 	 */
-	public JSONObject delete(Notification notification, String body) throws SQLException, JSONException, DatabaseTypeException
+	public JSONObject delete(Notification notification, String body)
 	{
 		return notification.delete(body);
 	}
-	private JSONObject registerDevice(Notification notification, String body) throws JSONException, SQLException, DatabaseTypeException
+	/**
+	 * Register device
+	 * @param notification Notification object
+	 * @param body String contains data sent by the application
+	 * @return JSONObject contains registered device ID
+	 */
+	private JSONObject registerDevice(Notification notification, String body)
 	{
 		return notification.registerDevice(body);
 	}
-	private JSONObject unregisterDevice(Notification notification, String body) throws JSONException, SQLException, DatabaseTypeException
+	/**
+	 * Unregister device
+	 * @param notification Notification object
+	 * @param body String contains data sent by the application
+	 * @return JSONObject contains unregistered device ID
+	 */
+	private JSONObject unregisterDevice(Notification notification, String body)
 	{
 		return notification.unregisterDevice(body);
 	}
@@ -204,7 +193,6 @@ public class PusherHandler implements HttpHandler
 	 * @param applicationVersion Application name of the pusher
 	 * @param userAgent User agent of the pusher
 	 * @return JSONObject contains group creation information
-	 * @throws JSONException if any JSON errors
 	 * @throws SQLException if any SQL errors
 	 * @throws DatabaseTypeException if database type is not found
 	 * @throws AddressException if any invalid address
@@ -213,7 +201,7 @@ public class PusherHandler implements HttpHandler
 	 * @throws MessagingException if any errors occurred while send message
 	 * @throws NoSuchAlgorithmException if algorithm is not found
 	 */
-	public JSONObject createGroup(Notification notification, String body, String remoteAddress, String applicationName, String applicationVersion, String userAgent) throws JSONException, SQLException, DatabaseTypeException, AddressException, NullPointerException, IllegalArgumentException, MessagingException, NoSuchAlgorithmException
+	public JSONObject createGroup(Notification notification, String body, String remoteAddress, String applicationName, String applicationVersion, String userAgent) throws SQLException, DatabaseTypeException, AddressException, NullPointerException, IllegalArgumentException, MessagingException, NoSuchAlgorithmException
 	{
 		return notification.createGroup(body, remoteAddress, applicationName, applicationVersion, userAgent);
 	}

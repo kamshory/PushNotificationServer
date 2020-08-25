@@ -1,6 +1,5 @@
 package com.planetbiru.pushserver.database;
 
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -225,24 +224,22 @@ public class QueryBuilder
 	 * @throws NullPointerException if any null pointer
 	 * @throws DatabaseTypeException if database type is not supported
 	 */
-	@SuppressWarnings("rawtypes")
 	public QueryBuilder dataInsert(Map <String, String> data) throws DatabaseTypeException
 	{
-		Iterator<?> it = data.entrySet().iterator();
 		String field = "";
 		String value = "";
 		String[] fields = new String[data.size()];
 		String[] values = new String[data.size()];
 		int i = 0;
-	    while (it.hasNext()) 
-	    {
-	        Map.Entry pair = (Map.Entry)it.next();
-	        field = pair.getKey().toString();
-	        value = pair.getValue().toString();
+		
+		
+		for (Map.Entry<String, String> pair : data.entrySet()) {
+	        field = pair.getKey();
+	        value = pair.getValue();
 	        value = this.escapeSQL(value);
 	        fields[i] = field;
 	        values[i] = "'"+value+"'";
-	    }
+		}
 	    this.fields("("+String.join(", ", fields)+")");
 	    this.values("("+String.join(", ", values)+")");
 		return this;
@@ -253,22 +250,18 @@ public class QueryBuilder
 	 * @return QueryBuilder object
 	 * @throws DatabaseTypeException if database type is not supported
 	 */
-	@SuppressWarnings("rawtypes")
 	public QueryBuilder dataUpdate(Map <String, String> data) throws DatabaseTypeException
 	{
-		Iterator<?> it = data.entrySet().iterator();
 		String field = "";
 		String value = "";
 		String[] fields = new String[data.size()];
 		int i = 0;
-	    while (it.hasNext()) 
-	    {
-	        Map.Entry pair = (Map.Entry)it.next();
-	        field = pair.getKey().toString();
-	        value = pair.getValue().toString();
+		for (Map.Entry<String, String> pair : data.entrySet()) {
+	        field = pair.getKey();
+	        value = pair.getValue();
 	        value = this.escapeSQL(value);
 	        fields[i] = field+" = "+"'"+value+"'";
-	    }
+		}
 	    this.set(String.join(", ", fields));
 		return this;
 	}
