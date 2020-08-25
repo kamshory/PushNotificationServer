@@ -390,7 +390,7 @@ Content-Type: application/json
     "data": {
         "deviceIDs": ["DeviceID1", "DeviceID2", "DeviceID3"],
         "data": {
-                "message": "Notification message".
+                "message": "Notification message",
                 "title": "Title",
                 "subtitle": "Subtitle",
                 "tickerText": "Ticker text",
@@ -421,7 +421,7 @@ X-Application-Version: Your Application Version
 Content-Type: application/json
 
 {
-    "command":"remove-notification",
+    "command": "remove-notification",
     "data": {
         "id": [1, 2, 3, 4]
     }
@@ -440,7 +440,7 @@ X-Application-Version: Your Application Version
 Content-Type: application/json
 
 {
-    "command":"remove-notification",
+    "command": "create-group",
     "data": {
         "id": [1, 2, 3, 4]
     }
@@ -459,7 +459,7 @@ X-Application-Version: Your Application Version
 Content-Type: application/json
 
 {
-    "command":"remove-notification",
+    "command": "register-device",
     "data": {
         "id": [1, 2, 3, 4]
     }
@@ -478,9 +478,9 @@ X-Application-Version: Your Application Version
 Content-Type: application/json
 
 {
-    "command":"remove-notification",
-    "data":{
-        "id":[1, 2, 3, 4]
+    "command": "unregister-device",
+    "data": {
+        "id": [1, 2, 3, 4]
     }
 }
 
