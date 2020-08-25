@@ -238,16 +238,9 @@ public class Application
 								requestHandlerHTTPS.start();
 								logger.info("SSL Service for pusher is started");
 							} 
-						    catch (NoSuchAlgorithmException | CertificateException | UnrecoverableKeyException | KeyManagementException e) 
+						    catch (NoSuchAlgorithmException | CertificateException | UnrecoverableKeyException | KeyManagementException | KeyStoreException e) 
 						    {
 						    	if(Config.isPrintStackTrace())
-								{
-						    		e.printStackTrace();
-								}
-							} 						
-							catch (KeyStoreException e) 
-							{
-								if(Config.isPrintStackTrace())
 								{
 						    		e.printStackTrace();
 								}
@@ -431,10 +424,8 @@ public class Application
 	 * @throws DatabaseFunctionFoundException if function is not exists
 	 */
 	public static boolean checkFunctions() throws DatabaseFunctionFoundException
-	{
-		
+	{		
 		boolean valid = false;
-
 		Database database1 = new Database(Config.getDatabaseConfig1());
 		ResultSet rs = null;
 		Statement stmt = null;
@@ -491,9 +482,8 @@ public class Application
 	/**
 	 * Kill process
 	 * @param path File path
-	 * @throws IOException if any IO errors
 	 */
-	public static void killProcess(String path) throws IOException
+	public static void killProcess(String path)
 	{
 		ProcessKiller killer = new ProcessKiller(path);
 		killer.stop();
@@ -502,9 +492,8 @@ public class Application
 	 * Kill process
 	 * @param path File path
 	 * @param exceptThis Except this
-	 * @throws IOException if any IO errors
 	 */
-	public static void killProcess(String path, boolean exceptThis) throws IOException
+	public static void killProcess(String path, boolean exceptThis)
 	{		
 		ProcessKiller killer = new ProcessKiller(path, exceptThis);
 		killer.stop();
