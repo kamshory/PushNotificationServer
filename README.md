@@ -410,6 +410,8 @@ Content-Type: application/json
 
 ```
 
+Note: Encode YourAPIKey, YourToken, YourSignature, UnixTimestamp and YourGroup with URL Encode.
+
 ## Delete Sent Notification From Application Server
 
 ```http
