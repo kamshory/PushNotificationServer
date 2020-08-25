@@ -74,73 +74,80 @@ public class Notification
 	 * Time zone offset of the PushServer. Pusher not necessary to send the local time. All the notification time use the local time of the PushServer
 	 */
 	private long timeZoneOffset = 0;
+	/**
+	 * Request ID
+	 */
 	private long requestID = 0;
 	/**
 	 * Cache to store pusher source
 	 */
 	private static List<String> cachePusherSource = new ArrayList<>();
-	
-	
-	
+
+	/**
+	 * Get device ID
+	 * @return Device ID
+	 */
 	public String getDeviceID() {
 		return deviceID;
 	}
+	/**
+	 * Set device ID
+	 * @param deviceID Device ID
+	 */
 	public void setDeviceID(String deviceID) {
 		this.deviceID = deviceID;
 	}
+	/**
+	 * Get group ID
+	 * @return Group ID
+	 */
 	public long getGroupID() {
 		return groupID;
 	}
+	/**
+	 * Set group ID
+	 * @param groupID Group ID
+	 */
 	public void setGroupID(long groupID) {
 		this.groupID = groupID;
 	}
+	/**
+	 * Get API ID
+	 * @return API ID
+	 */
 	public long getApiID() {
 		return apiID;
 	}
+	/**
+	 * Set API ID
+	 * @param apiID API ID
+	 */
 	public void setApiID(long apiID) {
 		this.apiID = apiID;
 	}
+	/**
+	 * Get offline device ID
+	 * @return Device ID list
+	 */
 	public List<String> getOfflineID() {
 		return offlineID;
 	}
-	public void setOfflineID(List<String> offlineID) {
-		this.offlineID = offlineID;
-	}
+	/**
+	 * Get hash client password
+	 * @return Hash client password
+	 */
 	public String getHashPasswordClient() {
 		return hashPasswordClient;
 	}
-	public void setHashPasswordClient(String hashPasswordClient) {
-		this.hashPasswordClient = hashPasswordClient;
-	}
+	/**
+	 * Get hash pusher password 
+	 * @return Hash pusher password
+	 */
 	public String getHashPasswordPusher() {
 		return hashPasswordPusher;
 	}
-	public void setHashPasswordPusher(String hashPasswordPusher) {
-		this.hashPasswordPusher = hashPasswordPusher;
-	}
-	public TimeZone getTimeZone() {
-		return timeZone;
-	}
-	public void setTimeZone(TimeZone timeZone) {
-		this.timeZone = timeZone;
-	}
-	public long getTimeZoneOffset() {
-		return timeZoneOffset;
-	}
-	public void setTimeZoneOffset(long timeZoneOffset) {
-		this.timeZoneOffset = timeZoneOffset;
-	}
-	public long getRequestID() {
-		return requestID;
-	}
-	public void setRequestID(long requestID) {
-		this.requestID = requestID;
-	}
 	public static List<String> getCachePusherSource() {
 		return cachePusherSource;
-	}
-	public static void setCachePusherSource(List<String> cachePusherSource) {
-		Notification.cachePusherSource = cachePusherSource;
 	}
 	/**
 	 * Constructor with database object from the "main"
@@ -441,13 +448,11 @@ public class Notification
 						if(!Config.isGroupCreationApproval())
 						{
 							this.addPusherAddress(remoteAddress, applicationName, applicationVersion, userAgent, false, true);
-						}					
-						
+						}											
 						JSONObject jdata = new JSONObject();
 						jdata.put("groupName", groupName);
 						jdata.put("groupKey", groupKey);
-						jdata.put("groupID", lGroupID);
-						
+						jdata.put("groupID", lGroupID);						
 						jo.put(JsonKey.SUCCESS, true);
 						jo.put(JsonKey.MESSAGE, "");
 						jo.put(JsonKey.DATA, jdata);
@@ -853,11 +858,21 @@ public class Notification
 		}
 		return inactiveSource;
 	}
-	public JSONObject registerDevice(String body) throws SQLException, DatabaseTypeException
+	/**
+	 * Register device
+	 * @param body Request body
+	 * @return Response to client
+	 */
+	public JSONObject registerDevice(String body)
 	{
 		return this.registerDevice(new JSONObject(body));
 	}
-	public JSONObject registerDevice(JSONObject jo) throws SQLException, DatabaseTypeException
+	/**
+	 * Register device
+	 * @param requestJSON Request JSON
+	 * @return Response to client
+	 */
+	public JSONObject registerDevice(JSONObject requestJSON)
 	{
 		JSONObject response = new JSONObject();
 		Database database1 = new Database(Config.getDatabaseConfig1());
@@ -867,7 +882,7 @@ public class Notification
 		{
 			database1.connect();
 			QueryBuilder query1 = new QueryBuilder(database1.getDatabaseType());
-			JSONObject data = jo.optJSONObject(JsonKey.DATA);
+			JSONObject data = requestJSON.optJSONObject(JsonKey.DATA);
 			if(data == null)
 			{
 				data = new JSONObject();
@@ -902,7 +917,7 @@ public class Notification
 			response.put(JsonKey.COMMAND, "register-device");
 			response.put(JsonKey.DATA, data);
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -990,10 +1005,8 @@ public class Notification
 	 * Insert notification
 	 * @param request JSONObject of the notification. Pusher only send one notification message to PushServer but possible to send it to several devices
 	 * @return JSONObject contains notification ID and destination device ID
-	 * @throws SQLException if any SQL errors
-	 * @throws DatabaseTypeException if database type not supported 
 	 */
-	public JSONObject insert(JSONObject request) throws SQLException, DatabaseTypeException
+	public JSONObject insert(JSONObject request)
 	{
 		JSONObject requestData = request.optJSONObject(JsonKey.DATA);
 		if(requestData == null)
@@ -1149,7 +1162,7 @@ public class Notification
 			response.put(JsonKey.COMMAND, "push-notification");
 			response.put(JsonKey.DATA, responseData);
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -1405,7 +1418,7 @@ public class Notification
 			if(id != 0)
 			{
 				tmp = this.delete(this.apiID, lDeviceID, this.groupID, id);
-				result = this.concatArray(result, tmp);
+				result = Utility.concatArray(result, tmp);
 			}
 		}			
 		JSONObject responseJSON = new JSONObject();
@@ -1488,26 +1501,6 @@ public class Notification
 			database1.disconnect();
 		}
 		return data;
-	}
-	/**
-	 * Concatenate two arrays of JSONArray
-	 * @param arr1 First JSONArray 
-	 * @param arr2 Second JSONArray
-	 * @return JSONArray which is a combination of both inputs
-	 * @throws JSONException if any JSON errors
-	 */
-	public JSONArray concatArray(JSONArray arr1, JSONArray arr2) 
-	{
-	    JSONArray result = new JSONArray();
-	    for (int i = 0; i < arr1.length(); i++) 
-	    {
-	        result.put(arr1.get(i));
-	    }
-	    for (int i = 0; i < arr2.length(); i++) 
-	    {
-	        result.put(arr2.get(i));
-	    }
-	    return result;
 	}
 	/**
 	 * Insert notification deletion log to be sent to its device

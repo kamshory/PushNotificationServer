@@ -106,35 +106,13 @@ public class Application
     	
     	if(action.equals("stop"))
     	{
-    		try 
-    		{
-				Application.killProcess(pathName);
-			} 
-    		catch (IOException e) 
-    		{
-    			logger.info("Can not kill the process. {}\r\nPlease try again", e.getMessage());
-				if(Config.isPrintStackTrace())
-				{
-					e.printStackTrace();
-				}
-			}
+    		Application.killProcess(pathName);
     	}
     	else
     	{
     		if(action.equals("stop-other"))
         	{
-        		try 
-        		{
-    				Application.killProcess(pathName, true);
-    			} 
-        		catch (IOException e) 
-        		{
-        			logger.info("Can not kill the process. {}\r\nPlease try again", e.getMessage());
-    				if(Config.isPrintStackTrace())
-    				{
-    					e.printStackTrace();
-    				}
-    			}
+        		Application.killProcess(pathName, true);
         		try 
         		{
 					Thread.sleep(Config.getWaitFreeUpPort());
@@ -183,20 +161,17 @@ public class Application
 			
 			try {
 				databaseValid = Application.checkDatabases();
-			} catch (IndexOutOfBoundsException e2) {
-				logger.error("Database exists but errors occured while access it.");
-				e2.printStackTrace();
 			} catch (DatabaseTypeException e2) {
-				logger.error("Database exists but errors occured while access it.");
+				logger.error("Database type is not supported.");
 				e2.printStackTrace();
 			} catch (SQLException e2) {
 				logger.error("Database exists but errors occured while access it.");
 				e2.printStackTrace();
 			} catch (TableNotFoundException e2) {
-				logger.error("Database exists but errors occured while access it.");
+				logger.error("Database exists but there is missing table.");
 				e2.printStackTrace();
 			} catch (DatabaseFunctionFoundException e2) {
-				logger.error("Database exists but errors occured while access it.");
+				logger.error("Database exists but there is missing function.");
 				e2.printStackTrace();
 			}
 			
