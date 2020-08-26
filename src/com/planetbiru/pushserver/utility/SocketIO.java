@@ -39,8 +39,6 @@ public class SocketIO
 	 */
 	private String rawRequestHeader = "";
 	
-	
-	
 	public Socket getSocket() {
 		return socket;
 	}

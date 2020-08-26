@@ -61,6 +61,9 @@ public class Mail
 	 * SMTP Password
 	 */
 	private String password = "";
+	/**
+	 * Main server port
+	 */
 	private int port = 25;
 	
 	
@@ -95,20 +98,18 @@ public class Mail
 	/**
 	 * Set FROM address
 	 * @param address Email address
-	 * @throws AddressException if any invalid address
 	 * @throws MessagingException if any errors occurred while send message
 	 */
-	public void setFrom(String address) throws AddressException, MessagingException
+	public void setFrom(String address) throws MessagingException
 	{
 		this.from = address;
 	}
 	/**
 	 * Set TO address
 	 * @param address Email address
-	 * @throws AddressException if any invalid address
 	 * @throws MessagingException if any errors occurred while send message
 	 */
-	public void setTo(String address) throws AddressException, MessagingException
+	public void setTo(String address) throws MessagingException
 	{
 		this.to = address;
 	}
@@ -118,7 +119,7 @@ public class Mail
 	 * @throws AddressException if any invalid address
 	 * @throws MessagingException if any errors occurred while send message
 	 */
-	public void setCC(String address) throws AddressException, MessagingException
+	public void setCC(String address) throws MessagingException
 	{
 		this.cc = address;
 		this.message.setRecipient(Message.RecipientType.CC, new InternetAddress(address));
@@ -126,10 +127,9 @@ public class Mail
 	/**
 	 * Set BCC address
 	 * @param address Email address
-	 * @throws AddressException if any invalid address
 	 * @throws MessagingException if any errors occurred while send message
 	 */
-	public void setBCC(String address) throws AddressException, MessagingException
+	public void setBCC(String address) throws MessagingException
 	{
 		this.bcc  = address;
 		this.message.setRecipient(Message.RecipientType.BCC, new InternetAddress(address));
@@ -140,10 +140,9 @@ public class Mail
 	 * @param text Message
 	 * @param type Mime type
 	 * @return true if success and false if failed
-	 * @throws AddressException if any invalid address
 	 * @throws MessagingException if any errors occurred while send message
 	 */
-	public boolean send(String subject, String text, String type) throws AddressException, MessagingException
+	public boolean send(String subject, String text, String type) throws MessagingException
 	{
 		this.message.setFrom(new InternetAddress(this.from));
 		this.message.addRecipient(Message.RecipientType.TO, new InternetAddress(this.to));
@@ -163,14 +162,7 @@ public class Mail
 	    Matcher regMatcher;
         regexPattern = Pattern.compile("^[(a-zA-Z-0-9-\\_\\+\\.)]+@[(a-z-A-z)]+\\.[(a-zA-z)]{2,3}$");
         regMatcher = regexPattern.matcher(emailAddress);
-        if(regMatcher.matches()) 
-        {
-            return true;
-        }
-        else 
-        {
-            return false;
-        }
+        return regMatcher.matches();
 	}
 	private class SMTPAuthenticator extends javax.mail.Authenticator 
     {
@@ -181,6 +173,8 @@ public class Mail
     		this.username = user;
     		this.password = password;
     	}
+    	
+    	@Override
         public PasswordAuthentication getPasswordAuthentication() 
         {
            return new PasswordAuthentication(this.username, this.password);

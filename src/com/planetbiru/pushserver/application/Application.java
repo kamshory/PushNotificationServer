@@ -387,8 +387,8 @@ public class Application
 			}
 		}
 		finally {
-			Database.closeResultSet(rs);
-			Database.closeStatement(stmt);
+			Utility.closeResource(rs);
+			Utility.closeResource(stmt);
 			database1.disconnect();
 		}
 		return valid;
@@ -433,8 +433,8 @@ public class Application
 			}
 		}
 		finally {
-			Database.closeResultSet(rs);
-			Database.closeStatement(stmt);
+			Utility.closeResource(rs);
+			Utility.closeResource(stmt);
 			database1.disconnect();
 		}
 		return valid;	

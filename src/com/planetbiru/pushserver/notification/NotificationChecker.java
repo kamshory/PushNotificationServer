@@ -23,13 +23,9 @@ import com.planetbiru.pushserver.database.DatabaseTypeException;
 public class NotificationChecker extends Thread
 {
 	/**
-	 * Client socket
-	 */
-	public Socket socket = new Socket();
-	/**
 	 * Interval
 	 */
-	public long interval = 3600000;
+	private long interval = 3600000;
 	/**
 	 * Notification handler. The object is carried when constructor is invoked
 	 */
@@ -48,13 +44,13 @@ public class NotificationChecker extends Thread
 	 */
 	public NotificationChecker(Socket socket, NotificationHandler notificationHandler, long interval)
 	{
-		this.socket = socket;
 		this.interval = interval;
 		this.notificationHandler = notificationHandler;
 	}
 	/**
 	 * Override run method
 	 */
+	@Override
 	public void run()
 	{
 		while(this.notificationHandler.isRunning())
@@ -63,80 +59,22 @@ public class NotificationChecker extends Thread
 			{
 				this.notificationHandler.downloadLastNotification();
 				this.notificationHandler.downloadLastDeleteLog();
-			} 
-			catch (IOException e) 
-			{
-				if(Config.isPrintStackTrace()) 
-				{
-					e.printStackTrace();
-				}
-			}
-			catch (SQLException e) 
-			{
-				if(Config.isPrintStackTrace()) 
-				{
-					e.printStackTrace();
-				}
-			} 
-			catch (DatabaseTypeException e) 
-			{
-				if(Config.isPrintStackTrace())
-				{
-					e.printStackTrace();
-				}
-			} 
-			catch (InvalidKeyException e) 
-			{
-				if(Config.isPrintStackTrace())
-				{
-					e.printStackTrace();
-				}
-			} 
-			catch (NoSuchAlgorithmException e) 
-			{
-				if(Config.isPrintStackTrace())
-				{
-					e.printStackTrace();
-				}
-			} 
-			catch (NoSuchPaddingException e) 
-			{
-				if(Config.isPrintStackTrace())
-				{
-					e.printStackTrace();
-				}
-			} 
-			catch (IllegalBlockSizeException e) 
-			{
-				if(Config.isPrintStackTrace())
-				{
-					e.printStackTrace();
-				}
-			} 
-			catch(JSONException e)
-			{
-				if(Config.isPrintStackTrace())
-				{
-					e.printStackTrace();
-				}
-			}
-			catch(BadPaddingException e) 
-			{
-				if(Config.isPrintStackTrace())
-				{
-					e.printStackTrace();
-				}
-			}
-			try 
-			{
 				Thread.sleep(this.interval);
 			} 
+			catch (IOException | SQLException | DatabaseTypeException | InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | JSONException e) 
+			{
+				if(Config.isPrintStackTrace()) 
+				{
+					e.printStackTrace();
+				}
+			}
 			catch (InterruptedException e) 
 			{
 				if(Config.isPrintStackTrace()) 
 				{
 					e.printStackTrace();
 				}
+				Thread.currentThread().interrupt();
 			}
 		}
 	}	

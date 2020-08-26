@@ -3,9 +3,11 @@ package com.planetbiru.pushserver.utility;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.planetbiru.pushserver.config.Config;
 
@@ -17,6 +19,7 @@ import com.planetbiru.pushserver.config.Config;
  *
  */
 public class ProcessKiller {
+	private Logger logger = LoggerFactory.getLogger(ProcessKiller.class);
 	/**
 	 * Image name of this application
 	 */
@@ -84,7 +87,7 @@ public class ProcessKiller {
         int processToKill = 0;
  		if(operatingSystem.contains("windows"))
 		{
-			commandLine = String.format("wmic process get processid,creationdate,name,commandline /format:csv");
+			commandLine = "wmic process get processid,creationdate,name,commandline /format:csv";
 			try
 	        {            
 				Runtime rt = Runtime.getRuntime();
@@ -134,11 +137,11 @@ public class ProcessKiller {
 		        }
 	        	for(i = 0; i < processToKill; i++)
 	        	{
-	        		pid = processList.get(i).toString();
+	        		pid = processList.get(i);
 		            String commandLine2 = "taskkill /PID "+pid+" /F";
 	    			Runtime rt2 = Runtime.getRuntime();
 			        rt2.exec(commandLine2);
-			        System.out.println("Killing PID "+pid);
+			        logger.info("Killing PID {}", pid);
 	        	}
 	        } 
 			catch (Throwable t)
@@ -150,7 +153,7 @@ public class ProcessKiller {
 		{
 			try 
 			{
-				commandLine = String.format("ps -ef --sort=start_time");
+				commandLine = "ps -ef --sort=start_time";
 				try
 		        {            
 					Runtime rt = Runtime.getRuntime();
@@ -194,11 +197,11 @@ public class ProcessKiller {
 			        }
 		        	for(i = 0; i < processToKill; i++)
 		        	{
-		        		pid = processList.get(i).toString();
+		        		pid = processList.get(i);
 	        			String commandLine2 = "kill -9 "+pid+"";
 	        			Runtime rt2 = Runtime.getRuntime();
 	    		        rt2.exec(commandLine2);
-	    		        System.out.println("Killing PID "+pid);
+	    		        logger.info("Killing PID {}", pid);
 		        	}
 		        } 
 				catch (Throwable t)
@@ -215,71 +218,5 @@ public class ProcessKiller {
 			}
 		}
 		return true;
-	}
-	/**
-	 * Overrides <strong>toString</strong> method to convert object to JSON String. This method is useful to debug or show value of each properties of the object.
-	 */
-	public String toString()
-	{
-		Field[] fields = this.getClass().getDeclaredFields();
-		int i, max = fields.length;
-		String fieldName = "";
-		String fieldType = "";
-		String ret = "";
-		String value = "";
-		boolean skip = false;
-		int j = 0;
-		for(i = 0; i < max; i++)
-		{
-			fieldName = fields[i].getName().toString();
-			fieldType = fields[i].getType().toString();
-			if(i == 0)
-			{
-				ret += "{";
-			}
-			if(fieldType.equals("int") || fieldType.equals("long") || fieldType.equals("float") || fieldType.equals("double") || fieldType.equals("boolean"))
-			{
-				try 
-				{
-					value = fields[i].get(this).toString();
-				}  
-				catch (Exception e) 
-				{
-					value = "0";
-				}
-				skip = false;
-			}
-			else if(fieldType.contains("String"))
-			{
-				try 
-				{
-					value = "\""+Utility.escapeJSON((String) fields[i].get(this))+"\"";
-				} 
-				catch (Exception e) 
-				{
-					value = "\""+"\"";
-				}
-				skip = false;
-			}
-			else
-			{
-				value = "\""+"\"";
-				skip = true;
-			}
-			if(!skip)
-			{
-				if(j > 0)
-				{
-					ret += ",";
-				}
-				j++;
-				ret += "\r\n\t\""+fieldName+"\":"+value;
-			}
-			if(i == max-1)
-			{
-				ret += "\r\n}";
-			}
-		}
-		return ret;
 	}
 }

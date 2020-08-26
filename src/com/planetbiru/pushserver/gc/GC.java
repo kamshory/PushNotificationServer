@@ -74,7 +74,7 @@ public class GC extends Thread
 			}
 		}
 		finally {
-			Database.closeStatement(stmt);
+			Utility.closeResource(stmt);
 			database1.disconnect();
 		}
 	}
@@ -111,7 +111,7 @@ public class GC extends Thread
 			}
 		}
 		finally {
-			Database.closeStatement(stmt);
+			Utility.closeResource(stmt);
 			database1.disconnect();
 		}
 	}

@@ -1,6 +1,8 @@
 package com.planetbiru.pushserver.utility;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Cache {
@@ -25,6 +27,10 @@ public class Cache {
 	 */
 	private static long cacheAPIMax = 200;
 	
+	/**
+	 * Cache to store pusher source
+	 */
+	private static List<String> cachePusherSource = new ArrayList<>();
 	
 	
 	public static Map<String, Boolean> getCacheDeviceID() {
@@ -50,6 +56,12 @@ public class Cache {
 	}
 	public static void setCacheAPIMax(long cacheAPIMax) {
 		Cache.cacheAPIMax = cacheAPIMax;
+	}
+	public static List<String> getCachePusherSource() {
+		return cachePusherSource;
+	}
+	public static void setCachePusherSource(List<String> cachePusherSource) {
+		Cache.cachePusherSource = cachePusherSource;
 	}
 	/**
 	 * Check whether device registered or not
@@ -117,4 +129,5 @@ public class Cache {
 			Cache.cacheDeviceID.put(address+"_"+apiKey, true);
 		}
 	}
+	
 }

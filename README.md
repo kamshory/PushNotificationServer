@@ -31,13 +31,6 @@ User can modify the mail template. See file *mail-template.html*
 
 HTTP and HTTPS port is different. So pusher can choose one of them.
 
-If you won't to use port 80 and 443 for any reason, you can user proxy to redirect the push. Source code to create proxy can be found at 
-https://github.com/kamshory/PHPProxyServer
-
-To get notification sender, please visit https://github.com/kamshory/PushNotificationSender
-
-To get notification client, please visit https://github.com/kamshory/PushNotificationClient
-
 ## Plan
 
 | Features                         	| Free 	| Premium 	|
@@ -164,11 +157,13 @@ MAIL_PASSWORD                = {mail-pass}
 TABLE_PREFIX must be appropriate with the table name. For example, the table name listed bellow:
 
 - push_api
+- push_api_user
 - push_client
 - push_client_group
 - push_notification
 - push_pusher_address
 - push_trash
+- push_user
 
 So the TABLE_PREFIX  will be **push_**. You can change the TABLE_PREFIX according to your table name. With the TABLE_PREFIX, you can integrate the push notification server database with your own application.
 
@@ -360,3 +355,151 @@ Another way to create keystore is by using KeyStore Explorer. KeyStore Explorer 
 
 Download KeyStore Explorer from https://keystore-explorer.org/
 
+# API Documentation
+
+Assume that:
+
+- Domain : yourdomain.tld
+- Pusher Port (Accessed by Your Application Server) : 8080
+- Notification Port (Accessed by Mobile Devices) : 9090
+
+## Authorization
+
+```php
+$YourAPIKey = "PLANETBIRU";
+$YourAPIPusherPassword = "PASSWORD123";
+$CanonicalRequestBody = str_replace(array("\r", "\n", "\t", " "), "", $RequestBody);
+
+$UnixTimestamp = time(0);
+$YourToken = sha1($UnixTimestamp . $YourAPIKey);
+$YourSignature = sha1(sha1($YourAPIPusherPassword)."-".$YourToken."-".$YourAPIKey); 
+$DataIntegrity = sha1(sha1($YourAPIPusherPassword)."-".$YourToken."-".$CanonicalRequestBody); 
+
+$YourAPIKey = urlencode($YourAPIKey);
+$YourGroup = urlencode($YourGroup);
+```
+
+## Create Group
+
+Before application send notification, user must create a notification user group on push notification server. Notification user group usefull if application has more than one level user that receive push notification. Aplication must send device ID and notification user group when it send notification.
+
+```http
+POST /create-group HTTP/1.1
+Host: yourdomain.tld:8080
+Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup
+X-Integrity: DataIntegrity
+X-Application-Name: Your Application Name
+X-Application-Version: Your Application Version
+Content-Type: application/json
+
+{
+    "command": "create-group",
+    "data": {
+        "groupKey": "GR1",
+        "groupName": "Group 1",
+        "groupDescription": "This is the description of the group 1"
+    }
+}
+
+```
+
+## Register Device
+
+Before application send notification, user must register user device. Application must save the user's device on its database. When aplication send notification for any user, aplication must send it to all user devices. Aplication must send device ID and notification user group when it send notification. If device ID not registered on the group, push notification server will ignore the notification without push it to the device or save it into the database.
+
+
+```http
+POST /register-device HTTP/1.1
+Host: yourdomain.tld:8080
+Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup
+X-Integrity: DataIntegrity
+X-Application-Name: Your Application Name
+X-Application-Version: Your Application Version
+Content-Type: application/json
+
+{
+    "command": "register-device",
+    "data": {
+        "deviceID": "1345632163"
+    }
+}
+
+```
+
+## Unregister Device
+
+When the user has ended using the application and no longer wants to receive notifications, the user must unregister the device. This action will remove the device on user notification group. Application must also remove the pair or user ID, group and device ID on its database.
+
+```http
+POST /unregister-device HTTP/1.1
+Host: yourdomain.tld:8080
+Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup
+X-Integrity: DataIntegrity
+X-Application-Name: Your Application Name
+X-Application-Version: Your Application Version
+Content-Type: application/json
+
+{
+    "command": "unregister-device",
+    "data": {
+        "deviceID": "1345632163"
+    }
+}
+
+```
+
+## Send Notification From Application Server
+
+```http
+POST /pusher HTTP/1.1
+Host: yourdomain.tld:8080
+Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup
+X-Integrity: DataIntegrity
+X-Application-Name: Your Application Name
+X-Application-Version: Your Application Version
+Content-Type: application/json
+
+{
+    "command":"push-notification",
+    "data": {
+        "deviceIDs": ["DeviceID1", "DeviceID2", "DeviceID3"],
+        "data": {
+                "message": "Notification message",
+                "title": "Title",
+                "subtitle": "Subtitle",
+                "tickerText": "Ticker text",
+                "uri": "http://yourdomain.tld/your-path?args1=val1&args2=val2",
+                "clickAction": "open-url",
+                "type": "info",
+                "miscData": {},
+                "color": "#FF5599",
+                "vibrate": [200, 0, 200, 400, 0],
+                "sound": "sound1.wav",
+                "badge": "badge.png",
+                "largeIcon": "large_icon.png",
+                "smallIcon": "small_icon.png"
+        }
+    }
+}
+
+```
+
+## Delete Sent Notification From Application Server
+
+```http
+POST /remover HTTP/1.1
+Host: yourdomain.tld:8080
+Autorization: Bearer key=YourAPIKey&token=YourToken&hash=YourSignature&time=UnixTimestamp&group=YourGroup
+X-Integrity: DataIntegrity
+X-Application-Name: Your Application Name
+X-Application-Version: Your Application Version
+Content-Type: application/json
+
+{
+    "command": "remove-notification",
+    "data": {
+        "id": [1, 2, 3, 4]
+    }
+}
+
+```

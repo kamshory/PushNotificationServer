@@ -40,12 +40,16 @@ public class GCManager extends Thread
 					gc.start();
 				}
 			} 
-			catch (InterruptedException | IllegalArgumentException e) 
+			catch (IllegalArgumentException e) 
 			{
 				if(Config.isPrintStackTrace())
 				{
 					e.printStackTrace();
 				}
+			}
+			catch(InterruptedException e)
+			{
+				Thread.currentThread().interrupt();
 			}
 		}
 	}

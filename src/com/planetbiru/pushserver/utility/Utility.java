@@ -1,15 +1,18 @@
 package com.planetbiru.pushserver.utility;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -23,23 +26,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TimeZone;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-
 import com.planetbiru.pushserver.code.ConstantString;
 import com.planetbiru.pushserver.config.Config;
 
@@ -84,7 +74,8 @@ public class Utility {
 		String key2 = "";
 		key = key.trim();
 		
-		String key3, key4;
+		String key3;
+		String key4;
 		String spliter = delimiter;
 		if(spliter.equals(":"))
 		{
@@ -171,9 +162,8 @@ public class Utility {
 	 * Parse query string into JSON object
 	 * @param query Query string
 	 * @return JSONObject contains query parsed
-	 * @throws JSONException if any JSON errors
 	 */
-    public static Map<String, String> parseQuery(String query) throws JSONException
+    public static Map<String, String> parseQuery(String query)
     {
     	Map<String, String> queryString = new HashMap<>();
     	if(query == null)
@@ -215,9 +205,8 @@ public class Utility {
      * Build query string
      * @param query JSONObject contains query information
      * @return Clear query string
-     * @throws JSONException if any JSON errors
      */
-    public static String buildQuery(JSONObject query) throws JSONException
+    public static String buildQuery(JSONObject query)
     {
     	StringBuilder result = new StringBuilder();
     	
@@ -242,7 +231,12 @@ public class Utility {
     	}
     	return result.toString();
     }
-    public static String buildQuery(Map<String, String> query) throws NullPointerException
+    /**
+     * Build query
+     * @param query Map&lt;String, String&gt; contains key pair data
+     * @return URL encode query
+     */
+    public static String buildQuery(Map<String, String> query)
     {
     	StringBuilder result = new StringBuilder();
     	int i = 0;
@@ -421,9 +415,6 @@ public class Utility {
 		{
 			output = input.replace("\"", "\\\"");
 		}
-		else
-		{		
-		}
 		return output;
 	}
 	/**
@@ -466,38 +457,13 @@ public class Utility {
      	return ret;
     }
     
-    public static Document loadXMLFromString(String xml) throws Exception
-    {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        InputSource is = new InputSource(new StringReader(xml));
-        return builder.parse(is);
-    }
-    
-    public static String prettyFormat(String input, int indent) throws TransformerException 
-    {
-    	String output = "";
-        Source xmlInput = new StreamSource(new StringReader(input));
-        StringWriter stringWriter = new StringWriter();
-        StreamResult xmlOutput = new StreamResult(stringWriter);
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        transformerFactory.setAttribute("indent-number", indent);
-        Transformer transformer = transformerFactory.newTransformer(); 
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        transformer.transform(xmlInput, xmlOutput);
-        output = xmlOutput.getWriter().toString();
-        output = output.replaceAll("\\?\\>\\<", "?>\r\n<");
-        return output;
-    }
-
-    
-	public static String jsonToXML(JSONObject jsonObject) throws JSONException
+ 	public static String jsonToXML(JSONObject jsonObject)
 	{
 		String xml = "";
 		xml = XML.toString(jsonObject);
 		return xml;
 	}
-	public static JSONObject xmlToJSON(String xml) throws JSONException
+	public static JSONObject xmlToJSON(String xml)
 	{
 		return XML.toJSONObject(xml);
 	}
@@ -623,7 +589,7 @@ public class Utility {
 	 * @param format Date time format
 	 * @return String contains current date time
 	 */
-	public static String date(String format) throws NullPointerException, IllegalArgumentException
+	public static String date(String format)
 	{
 		String result = "";
 		SimpleDateFormat dateFormat = new SimpleDateFormat(format);
@@ -637,7 +603,7 @@ public class Utility {
 	 * @param date Date time
 	 * @return String contains current date time
 	 */
-	public static String date(String format, Date date) throws NullPointerException, IllegalArgumentException
+	public static String date(String format, Date date)
 	{
 		String result = "";
 		SimpleDateFormat dateFormat = new SimpleDateFormat(format);
@@ -650,7 +616,7 @@ public class Utility {
 	 * @param time Unix Timestamp
 	 * @return String contains current date time
 	 */
-	public static String date(String format, long time) throws NullPointerException, IllegalArgumentException
+	public static String date(String format, long time)
 	{
 		String result = "";
 		SimpleDateFormat dateFormat = new SimpleDateFormat(format);
@@ -717,7 +683,7 @@ public class Utility {
 	 * @return SHA-256 hash code
 	 * @throws NoSuchAlgorithmException if algorithm not found
 	 */
-	public static String sha256(String input) throws NoSuchAlgorithmException, NullPointerException
+	public static String sha256(String input) throws NoSuchAlgorithmException
 	{
 		String output = "";
 		if(input == null)
@@ -735,7 +701,7 @@ public class Utility {
 	 * @return SHA-1 hash code
 	 * @throws NoSuchAlgorithmException if algorithm not found
 	 */
-	public static String sha1(String input) throws NoSuchAlgorithmException, NullPointerException
+	public static String sha1(String input) throws NoSuchAlgorithmException
 	{
 		String output = "";
 		if(input == null)
@@ -753,7 +719,7 @@ public class Utility {
 	 * @return MD5 hash code
 	 * @throws NoSuchAlgorithmException if algorithm not found
 	 */
-	public static String md5(String input) throws NoSuchAlgorithmException, NullPointerException
+	public static String md5(String input) throws NoSuchAlgorithmException
 	{
 		String output = "";
 		if(input == null)
@@ -770,7 +736,7 @@ public class Utility {
 	 * @param hash Byte to be converted
 	 * @return String containing hexadecimal number
 	 */
-	public static String bytesToHex(byte[] hash) throws NullPointerException
+	public static String bytesToHex(byte[] hash)
 	{
 		if(hash == null)
 		{
@@ -788,7 +754,7 @@ public class Utility {
 	    }
 	    return hexString.toString();
 	}
-	public static String now() throws NullPointerException, IllegalArgumentException
+	public static String now()
 	{
 		String result = "";
 		DateFormat dateFormat = new SimpleDateFormat(ConstantString.DATE_TIME_FORMAT_SQL);
@@ -801,7 +767,7 @@ public class Utility {
 	 * @param precission Decimal precission
 	 * @return Current time with format yyyy-MM-dd
 	 */
-	public static String now(int precission) throws NullPointerException, IllegalArgumentException
+	public static String now(int precission)
 	{
 		if(precission > 6)
 		{
@@ -843,7 +809,7 @@ public class Utility {
 	    result = dateFormat.format(dateObject)+"."+decimal;
 		return result;
 	}
-	public static String now(int precission, String timezone) throws NullPointerException, IllegalArgumentException
+	public static String now(int precission, String timezone)
 	{
 		if(precission > 6)
 		{
@@ -886,7 +852,7 @@ public class Utility {
 	    result = dateFormat.format(dateObject)+"."+decimal;
 		return result;
 	}
-	public static String now3() throws NullPointerException, IllegalArgumentException
+	public static String now3()
 	{
 		String result = "";
 		long miliSecond = System.nanoTime() % 1000;
@@ -895,7 +861,7 @@ public class Utility {
 	    result = dateFormat.format(dateObject)+"."+miliSecond;
 		return result;
 	}
-	public static String now6() throws NullPointerException, IllegalArgumentException
+	public static String now6()
 	{
 		String result = "";
 		long microSecond = System.nanoTime() % 1000000;
@@ -909,7 +875,7 @@ public class Utility {
 	 * @param format Time format
 	 * @return Current time with specified format
 	 */
-	public static String now(String format) throws NullPointerException, IllegalArgumentException
+	public static String now(String format)
 	{
 		String result = "";
 		DateFormat dateFormat = new SimpleDateFormat(format);
@@ -917,7 +883,7 @@ public class Utility {
 	    result = dateFormat.format(dateObject);
 		return result;
 	}
-	public static String now(String format, String timezone) throws NullPointerException, IllegalArgumentException
+	public static String now(String format, String timezone)
 	{
 		String result = "";
 		DateFormat dateFormat = new SimpleDateFormat(format);
@@ -957,7 +923,7 @@ public class Utility {
 			val = (int) (inp) % 36;
 			chr = key.substring(val, val+1);
 			inp = inp/36;
-			ret = chr+ret;
+			ret = String.format("%s%s", chr, ret);
 		}
 		if(ret.substring(0, 1).equals("0"))
 		{
@@ -978,7 +944,7 @@ public class Utility {
 			val = inp.mod(div).intValue();
 			chr = key.substring(val, val+1);
 			inp = inp.divide(div);
-			ret = chr+ret;
+			ret = String.format("%s%s", chr, ret);
 		}
 		if(ret.substring(0, 1).equals("0"))
 		{
@@ -1063,5 +1029,81 @@ public class Utility {
 	    }
 	    return result;
 	}
+	/**
+	 * Close resource
+	 * @param fileReader File reader to be closed
+	 */
+	public static void closeResource(FileReader fileReader) {
+		if(fileReader != null)
+		{
+			try
+			{
+				fileReader.close();
+			}
+			catch(Exception e)
+			{
+				if(Config.isPrintStackTrace())
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	/**
+	 * Close resource
+	 * @param bufferedReader Buffered reader to be closed
+	 */
+	public static void closeResource(BufferedReader bufferedReader) {
+		if(bufferedReader != null)
+		{
+			try
+			{
+				bufferedReader.close();
+			}
+			catch(Exception e)
+			{
+				if(Config.isPrintStackTrace())
+				{
+					e.printStackTrace();
+				}
+			}
+		}	
+	}
+	/**
+	 * Close resource
+	 * @param rs ResultSet to be closed
+	 */
+	public static void closeResource(ResultSet rs) {
+		if(rs != null)
+		{
+			try {
+				rs.close();
+			} catch (SQLException e) {
+				if(Config.isPrintStackTrace())
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+		
+	}
 
+	/**
+	 * Close resource
+	 * @param stmt Statement to be closed
+	 */
+	public static void closeResource(Statement stmt) {
+		if(stmt != null)
+		{
+			try {
+				stmt.close();
+			} catch (SQLException e) {
+				if(Config.isPrintStackTrace())
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+		
+	}
 }

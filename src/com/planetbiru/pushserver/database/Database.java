@@ -7,9 +7,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Properties;
 
 import javax.crypto.BadPaddingException;
@@ -782,37 +780,5 @@ public final class Database {
 	public String getDatabaseName()
 	{
 		return this.databaseName;
-	}
-
-	/**
-	 * Close ResultSet
-	 * @param rs ResultSet to be closed
-	 */
-	public static void closeResultSet(ResultSet rs) {
-		if(rs != null)
-		{
-			try {
-				rs.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-		
-	}
-
-	/**
-	 * Close Statement
-	 * @param stmt Statement to be closed
-	 */
-	public static void closeStatement(Statement stmt) {
-		if(stmt != null)
-		{
-			try {
-				stmt.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-		
 	}
 }

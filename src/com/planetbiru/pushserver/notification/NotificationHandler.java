@@ -20,7 +20,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.planetbiru.pushserver.client.Client;
-import com.planetbiru.pushserver.client.ClientException;
 import com.planetbiru.pushserver.client.Device;
 import com.planetbiru.pushserver.code.ResponseCode;
 import com.planetbiru.pushserver.config.Config;
@@ -30,7 +29,6 @@ import com.planetbiru.pushserver.database.DatabaseTypeException;
 import com.planetbiru.pushserver.evaluator.ConnectionEvaluator;
 import com.planetbiru.pushserver.evaluator.SocketkBreaker;
 import com.planetbiru.pushserver.utility.Encryption;
-import com.planetbiru.pushserver.utility.QueryParserException;
 import com.planetbiru.pushserver.utility.SocketIO;
 import com.planetbiru.pushserver.utility.Utility;
 
@@ -121,21 +119,7 @@ public class NotificationHandler extends Thread
 		{
 			this.acceptRequest();
 		} 
-		catch (QueryParserException e) 
-		{
-			if(Config.isPrintStackTrace())
-			{
-				e.printStackTrace();
-			}
-		}
 		catch(NoSuchAlgorithmException e)
-		{
-			if(Config.isPrintStackTrace())
-			{
-				e.printStackTrace();
-			}
-		} 
-		catch (JSONException e) 
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -162,12 +146,10 @@ public class NotificationHandler extends Thread
 	}
 	/**
 	 * Process the request
-	 * @throws QueryParserException if any errors while parse the query string
 	 * @throws NoSuchAlgorithmException  if algorithm is not found
 	 * @throws NotificationException if notification data is invalid
-	 * @throws JSONException if any JSON errors
 	 */
-	private void acceptRequest() throws QueryParserException, NoSuchAlgorithmException, NotificationException, JSONException
+	private void acceptRequest() throws NoSuchAlgorithmException, NotificationException
 	{
 		SocketIO socketIO = new SocketIO(this.getSocket());
 		SocketkBreaker socketkBreaker = new SocketkBreaker(this, Config.getWaitForAnswer());
@@ -341,6 +323,7 @@ public class NotificationHandler extends Thread
 	}
 	/**
 	 * Download notification that sent while PushClient is offline
+	 * @throws IllegalArgumentException if parameter is invalid 
 	 * @throws JSONException if any JSON errors
 	 * @throws SQLException if any SQL errors
 	 * @throws IOException if any IO errors
@@ -352,7 +335,7 @@ public class NotificationHandler extends Thread
 	 * @throws IllegalBlockSizeException if cipher text not multiply of 16 character
 	 * @throws SocketException if any socket errors
 	 */
-	public void downloadLastNotification() throws JSONException, SQLException, IOException, SocketException, DatabaseTypeException, InvalidKeyException, IllegalArgumentException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException
+	public void downloadLastNotification() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalArgumentException, SocketException, IOException, SQLException, DatabaseTypeException, IllegalBlockSizeException, BadPaddingException
 	{
 		SocketIO socketIO = new SocketIO(this.getSocket());
 		Notification notification = new Notification(this.requestID);
@@ -590,19 +573,12 @@ public class NotificationHandler extends Thread
 		
 			int connection = 0;
 			List<Device> cons;
-			try 
+			cons = Client.get(deviceID, apiID, groupID);
+			if(cons != null)
 			{
-				cons = Client.get(deviceID, apiID, groupID);
-				if(cons != null)
-				{
-					connection = cons.size();			
-				}
-				else
-				{
-					connection = 1;
-				}
-			} 
-			catch (ClientException e) 
+				connection = cons.size();			
+			}
+			else
 			{
 				connection = 1;
 			}
@@ -623,7 +599,7 @@ public class NotificationHandler extends Thread
 			
 		}
 		finally {
-			Database.closeStatement(stmt);
+			Utility.closeResource(stmt);
 			database1.disconnect();
 		}
 		
@@ -729,45 +705,45 @@ public class NotificationHandler extends Thread
 	{
 		JSONObject jo;
 		jo = new JSONObject(body);
-		String deviceID = jo.optString("deviceID", "");
+		String lDeviceID = jo.optString("deviceID", "");
 		String command = Utility.getFirst(headers, "Command");
 		boolean success = false;
 		if(command.compareToIgnoreCase("register-device") == 0)
 		{
 			try
 			{
-				success = this.registerDevice(deviceID);
+				success = this.registerDevice(lDeviceID);
 				if(success)
 				{
-					this.onRegisterDeviceSuccess(deviceID, ResponseCode.REGISTRATION_DEVICE_SUCCESS, "Register device success");
+					this.onRegisterDeviceSuccess(lDeviceID, ResponseCode.REGISTRATION_DEVICE_SUCCESS, "Register device success");
 				}
 				else
 				{
-					this.onRegisterDeviceError(deviceID, ResponseCode.DEVICE_ALREADY_EXISTS, "Failed", "Fail to register device");
+					this.onRegisterDeviceError(lDeviceID, ResponseCode.DEVICE_ALREADY_EXISTS, "Failed", "Fail to register device");
 				}
 			}
 			catch(NotificationException e1)
 			{
-				this.onRegisterDeviceError(deviceID, ResponseCode.INTERNAL_SERVER_ERROR, "Failed", e1.getMessage());
+				this.onRegisterDeviceError(lDeviceID, ResponseCode.INTERNAL_SERVER_ERROR, "Failed", e1.getMessage());
 			}
 		}
 		else if(command.compareToIgnoreCase("unregister-device") == 0)
 		{
 			try
 			{
-				success = this.unregisterDevice(deviceID);
+				success = this.unregisterDevice(lDeviceID);
 				if(success)
 				{
-					this.onUnregisterDeviceSuccess(deviceID, ResponseCode.UNREGISTRATION_DEVICE_SUCCESS, "Unregister device success");
+					this.onUnregisterDeviceSuccess(lDeviceID, ResponseCode.UNREGISTRATION_DEVICE_SUCCESS, "Unregister device success");
 				}
 				else
 				{
-					this.onUnregisterDeviceError(deviceID, ResponseCode.DEVICE_NOT_EXISTS, "Failed", "Fail to unregister device");
+					this.onUnregisterDeviceError(lDeviceID, ResponseCode.DEVICE_NOT_EXISTS, "Failed", "Fail to unregister device");
 				}
 			}
 			catch(NotificationException e1)
 			{
-				this.onUnregisterDeviceError(deviceID, ResponseCode.INTERNAL_SERVER_ERROR, "Failed", e1.getMessage());
+				this.onUnregisterDeviceError(lDeviceID, ResponseCode.INTERNAL_SERVER_ERROR, "Failed", e1.getMessage());
 			}
 		}
 		else if(command.compareToIgnoreCase("answer") == 0)
@@ -896,7 +872,7 @@ public class NotificationHandler extends Thread
 						.fields("(device_id, api_id, last_token, last_time, last_ip, time_create)")
 						.values("('"+deviceID+"', "+this.apiID+", '"+lToken+"', now(), '"+address+"', now())")
 						.toString();
-				Database.closeStatement(stmt);
+				Utility.closeResource(stmt);
 				stmt = database1.getDatabaseConnection().createStatement();
 				stmt.execute(slqInsert);
 				success = true;
@@ -912,8 +888,8 @@ public class NotificationHandler extends Thread
 			
 		}
 		finally {
-			Database.closeResultSet(rs);
-			Database.closeStatement(stmt);
+			Utility.closeResource(rs);
+			Utility.closeResource(stmt);
 			database1.disconnect();
 		}
 		return success;
@@ -951,7 +927,7 @@ public class NotificationHandler extends Thread
 						.from(Config.getTablePrefix()+"client")
 						.where("device_id = '"+deviceID+"' and api_id = "+this.apiID+" ")
 						.toString();
-				Database.closeStatement(stmt);
+				Utility.closeResource(stmt);
 				stmt = database1.getDatabaseConnection().createStatement();
 				stmt.execute(slqDelete);
 				success = true;
@@ -966,8 +942,8 @@ public class NotificationHandler extends Thread
 			
 		}
 		finally {
-			Database.closeResultSet(rs);
-			Database.closeStatement(stmt);
+			Utility.closeResource(rs);
+			Utility.closeResource(stmt);
 			database1.disconnect();
 		}
 		return success;
@@ -1013,7 +989,7 @@ public class NotificationHandler extends Thread
 			
 		}
 		finally {
-			Database.closeStatement(stmt);
+			Utility.closeResource(stmt);
 			database1.disconnect();
 		}
 	}

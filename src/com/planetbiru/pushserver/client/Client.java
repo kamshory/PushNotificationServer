@@ -44,19 +44,14 @@ public class Client
 	 * @param apiID API ID
 	 * @param groupID Group ID
 	 * @return Array list contains device
-	 * @throws ClientException if any errors
 	 */
-	public static List<Device> get(String deviceID, long apiID, long groupID) throws ClientException
+	public static List<Device> get(String deviceID, long apiID, long groupID)
 	{
-		List<Device> deviceList;
+		List<Device> deviceList = new ArrayList<>();
 		String key = deviceID+"_"+apiID+"_"+groupID;
 		if(Client.deviceList.containsKey(key))
 		{
 			deviceList = Client.deviceList.get(key);
-		}
-		else
-		{
-			throw new ClientException(ConstantString.DEVICE_NOT_FOUND);
 		}
 		return deviceList;
 
