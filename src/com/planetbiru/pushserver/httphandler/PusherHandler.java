@@ -91,6 +91,10 @@ public class PusherHandler implements HttpHandler
 					{
 						responseJSON = this.createGroup(notification, body, remoteAddress, applicationName, applicationVersion, userAgent);
 					}
+					else if(this.command.equals("create-api"))
+					{
+						responseJSON = this.createAPI(notification, body, remoteAddress, applicationName, applicationVersion, userAgent);
+					}
 					String response = responseJSON.toString();	
 					HTTPIO.sendHTTPResponse(httpExchange, responseHeaders, HttpURLConnection.HTTP_OK, response);
 				}
@@ -138,8 +142,9 @@ public class PusherHandler implements HttpHandler
 	 * @return JSONArray contains notification ID and destination device ID
 	 * @throws SQLException if any SQL errors
 	 * @throws DatabaseTypeException if database type not supported 
+	 * @throws JSONException 
 	 */
-	private JSONObject insert(Notification notification, String body) throws SQLException, DatabaseTypeException
+	private JSONObject insert(Notification notification, String body) throws SQLException, DatabaseTypeException, JSONException
 	{
 		return notification.insert(body);
 	}
@@ -148,8 +153,9 @@ public class PusherHandler implements HttpHandler
 	 * @param notification Notification object
 	 * @param body String contains data sent by the application
 	 * @return JSONObject contains notification ID and destination device ID
+	 * @throws JSONException 
 	 */
-	private JSONObject delete(Notification notification, String body)
+	private JSONObject delete(Notification notification, String body) throws JSONException
 	{
 		return notification.delete(body);
 	}
@@ -158,8 +164,9 @@ public class PusherHandler implements HttpHandler
 	 * @param notification Notification object
 	 * @param body String contains data sent by the application
 	 * @return JSONObject contains registered device ID
+	 * @throws JSONException 
 	 */
-	private JSONObject registerDevice(Notification notification, String body)
+	private JSONObject registerDevice(Notification notification, String body) throws JSONException
 	{
 		return notification.registerDevice(body);
 	}
@@ -168,8 +175,9 @@ public class PusherHandler implements HttpHandler
 	 * @param notification Notification object
 	 * @param body String contains data sent by the application
 	 * @return JSONObject contains unregistered device ID
+	 * @throws JSONException 
 	 */
-	private JSONObject unregisterDevice(Notification notification, String body)
+	private JSONObject unregisterDevice(Notification notification, String body) throws JSONException
 	{
 		return notification.unregisterDevice(body);
 	}
@@ -182,9 +190,24 @@ public class PusherHandler implements HttpHandler
 	 * @param applicationVersion Application name of the pusher
 	 * @param userAgent User agent of the pusher
 	 * @return JSONObject contains group creation information
+	 * @throws JSONException 
 	 */
-	private JSONObject createGroup(Notification notification, String body, String remoteAddress, String applicationName, String applicationVersion, String userAgent)
+	private JSONObject createGroup(Notification notification, String body, String remoteAddress, String applicationName, String applicationVersion, String userAgent) throws JSONException
 	{
 		return notification.createGroup(body, remoteAddress, applicationName, applicationVersion, userAgent);
+	}
+	/**
+	 * Create API
+	 * @param notification Notification object
+	 * @param body Data sent by pusher
+	 * @param remoteAddress Remote address
+	 * @param applicationName Application version of the pusher
+	 * @param applicationVersion Application name of the pusher
+	 * @param userAgent User agent of the pusher
+	 * @return JSONObject contains group creation information
+	 */
+	private JSONObject createAPI(Notification notification, String body, String remoteAddress, String applicationName, String applicationVersion, String userAgent)
+	{
+		return notification.createAPI(body, remoteAddress, applicationName, applicationVersion, userAgent);
 	}
 }

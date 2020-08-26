@@ -1,11 +1,11 @@
 package com.planetbiru.pushserver.database;
 
 @SuppressWarnings("serial")
-public class DatabaseFunctionFoundException extends Exception {
+public class DatabaseFunctionException extends Exception {
 	/**
 	 * Default constructor
 	 */
-	public DatabaseFunctionFoundException() 
+	public DatabaseFunctionException() 
 	{ 
 		super(); 
 	}
@@ -13,7 +13,7 @@ public class DatabaseFunctionFoundException extends Exception {
 	 * Constructor with the message
 	 * @param message Message
 	 */
-	public DatabaseFunctionFoundException(String message) 
+	public DatabaseFunctionException(String message) 
 	{ 
 		super(message); 
 	}
@@ -22,7 +22,7 @@ public class DatabaseFunctionFoundException extends Exception {
 	 * @param message Message
 	 * @param cause Cause
 	 */
-	public DatabaseFunctionFoundException(String message, Throwable cause) 
+	public DatabaseFunctionException(String message, Throwable cause) 
 	{ 
 		super(message, cause); 
 	}
@@ -30,7 +30,7 @@ public class DatabaseFunctionFoundException extends Exception {
 	 * Constructor with cause
 	 * @param cause Cause
 	 */
-	public DatabaseFunctionFoundException(Throwable cause) 
+	public DatabaseFunctionException(Throwable cause) 
 	{ 
 		super(cause); 
 	}

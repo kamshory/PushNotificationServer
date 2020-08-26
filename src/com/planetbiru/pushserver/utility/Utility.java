@@ -217,15 +217,22 @@ public class Utility {
     	while( keys.hasNext() ) 
     	{
     	    key = (String) keys.next();
-			if(query.get(key) instanceof JSONObject) 
-			{
-				value = query.optString(key, "");
-				value = Utility.urlEncode(value);
-				if(i > 0)
+			try {
+				if(query.get(key) instanceof JSONObject) 
 				{
-					result.append("&");
+					value = query.optString(key, "");
+					value = Utility.urlEncode(value);
+					if(i > 0)
+					{
+						result.append("&");
+					}
+					result.append((key+"="+value));
 				}
-				result.append((key+"="+value));
+			} 
+			catch (JSONException e) {
+				if(Config.isPrintStackTrace())
+				
+					e.printStackTrace();
 			}
 			i++;
     	}
@@ -457,13 +464,13 @@ public class Utility {
      	return ret;
     }
     
- 	public static String jsonToXML(JSONObject jsonObject)
+ 	public static String jsonToXML(JSONObject jsonObject) throws JSONException
 	{
 		String xml = "";
 		xml = XML.toString(jsonObject);
 		return xml;
 	}
-	public static JSONObject xmlToJSON(String xml)
+	public static JSONObject xmlToJSON(String xml) throws JSONException
 	{
 		return XML.toJSONObject(xml);
 	}
@@ -1016,7 +1023,7 @@ public class Utility {
 	 * @return JSONArray which is a combination of both inputs
 	 * @throws JSONException if any JSON errors
 	 */
-	public static JSONArray concatArray(JSONArray arr1, JSONArray arr2) 
+	public static JSONArray concatArray(JSONArray arr1, JSONArray arr2) throws JSONException 
 	{
 	    JSONArray result = new JSONArray();
 	    for (int i = 0; i < arr1.length(); i++) 

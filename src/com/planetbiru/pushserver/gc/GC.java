@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
 
+import com.planetbiru.pushserver.code.ConstantString;
 import com.planetbiru.pushserver.config.Config;
 import com.planetbiru.pushserver.database.Database;
 import com.planetbiru.pushserver.database.QueryBuilder;
@@ -56,8 +57,8 @@ public class GC extends Thread
 			long dayInMS = 86400000;		
 			String expireSent = "";
 			String expireCreate = "";		
-			expireSent = Utility.date("yyyy-MM-dd HH:mm:ss", new Date(System.currentTimeMillis() - (Config.getDeleteNotifSent() * dayInMS)));
-			expireCreate = Utility.date("yyyy-MM-dd HH:mm:ss", new Date(System.currentTimeMillis() - (Config.getDeleteNotifNotSent() * dayInMS)));		
+			expireSent = Utility.date(ConstantString.DATE_TIME_FORMAT_SQL, new Date(System.currentTimeMillis() - (Config.getDeleteNotifSent() * dayInMS)));
+			expireCreate = Utility.date(ConstantString.DATE_TIME_FORMAT_SQL, new Date(System.currentTimeMillis() - (Config.getDeleteNotifNotSent() * dayInMS)));		
 			sqlCommand = query1.newQuery()
 					.delete()
 					.from(Config.getTablePrefix()+"notification")
@@ -93,12 +94,12 @@ public class GC extends Thread
 			QueryBuilder query1 = new QueryBuilder(database1.getDatabaseType());
 			String sqlCommand;
 			long dayInMS = 86400000;		
-			String expireCreate = "";		
-			expireCreate = Utility.date("yyyy-MM-dd HH:mm:ss", new Date(System.currentTimeMillis() - (Config.getDeleteNotifNotSent() * dayInMS)));		
+			String timeDelete = "";		
+			timeDelete = Utility.date(ConstantString.DATE_TIME_FORMAT_SQL, new Date(System.currentTimeMillis() - (Config.getDeleteNotifNotSent() * dayInMS)));		
 			sqlCommand = query1.newQuery()
 					.delete()
 					.from(Config.getTablePrefix()+"trash")
-					.where("time_delete < '"+expireCreate+"' ")
+					.where("time_delete < '"+timeDelete+"' ")
 					.toString();
 			stmt = database1.getDatabaseConnection().createStatement();
 			stmt.execute(sqlCommand);

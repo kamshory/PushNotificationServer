@@ -593,16 +593,41 @@ public class Config {
 	 * @throws UnsupportedEncodingException if any encoding errors
 	 * @throws IllegalBlockSizeException if block size is invalid
 	 * @throws BadPaddingException if padding is invalid
+	 * @throws IllegalArgumentException if any invalid arguments
 	 */
-	public static boolean loadInternalConfig(String configPath) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException
+	public static boolean loadInternalConfig(String configPath) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException, NumberFormatException, IllegalArgumentException, JSONException
 	{
 		 Properties properties = Config.getConfiguration(configPath);
-		 return Config.init(properties);
+		 boolean result = false;
+		 try
+		 {
+			 result = Config.init(properties);
+		 }
+		 catch(NullPointerException e)
+		 {
+			 if(Config.isPrintStackTrace())
+			 {
+				 e.printStackTrace();
+			 }
+		 }
+		 return result;
 	}
-	public static boolean loadExternalConfig(String configPath) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException
+	public static boolean loadExternalConfig(String configPath) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException, NumberFormatException, IllegalArgumentException, JSONException
 	{
 		 Properties properties = Config.getConfigurationExternal(configPath);
-		 return Config.init(properties);
+		 boolean result = false;
+		 try
+		 {
+			 result = Config.init(properties);
+		 }
+		 catch(NullPointerException e)
+		 {
+			 if(Config.isPrintStackTrace())
+			 {
+				 e.printStackTrace();
+			 }
+		 }
+		 return result;
 	}
 	/**
 	 * Load configuration form internal file
@@ -610,7 +635,7 @@ public class Config {
 	 * @return Properties if success and null if failed
 	 */
 	private static Properties getConfiguration(String configPath)
-	{
+	{	
 		Properties prop = new Properties();
 		InputStream inputStream; 
 		inputStream = Application.class.getClassLoader().getResourceAsStream(configPath);
@@ -644,10 +669,11 @@ public class Config {
 	private static Properties getConfigurationExternal(String configPath) throws IOException 
 	{
 		Properties propertis = new Properties();
-	    InputStream input = null; 
-	    try 
+	    try(
+	    
+	    	InputStream input = new FileInputStream(configPath);
+	    ) 
 	    {
-	        input = new FileInputStream(configPath);
 	        propertis.load(input);
 	        logger.info("Load configuration from {}", configPath);
 	    } 
@@ -655,20 +681,6 @@ public class Config {
 	    {
 	        e.printStackTrace();
 	        logger.info("Unable to load configuration from {}", configPath);
-	    } 
-	    finally 
-	    {
-	        if(input != null) 
-	        {
-	            try 
-	            {
-	                input.close();
-	            } 
-	            catch (IOException e) 
-	            {
-	                e.printStackTrace();
-	            }
-	        }
 	    }
         return propertis;
     }
@@ -685,8 +697,9 @@ public class Config {
 	 * @throws IllegalBlockSizeException if block size is invalid
 	 * @throws BadPaddingException if padding is invalid
 	 * @throws UnsupportedEncodingException if encoding is not supported
+	 * @throws IllegalArgumentException 
 	 */
-	private static boolean init(Properties properties) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException
+	private static boolean init(Properties properties) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException, NumberFormatException, IllegalArgumentException, JSONException
 	{
 		Config.properties = properties;
 	

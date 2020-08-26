@@ -202,230 +202,42 @@ public final class Database {
 	 * @throws SQLException if any SQL errors 
 	 * @throws DatabaseTypeException if database type not supported 
 	 */
-	public boolean connect() throws ClassNotFoundException, SQLException, DatabaseTypeException
+	public boolean connect() throws DatabaseTypeException, ClassNotFoundException, SQLException 
 	{
-		if(this.databaseUsed)
+		String uri = "";
+		try
 		{
 			if(this.databaseType.equals("postgresql"))
-			{				
-				Class.forName("org.postgresql.Driver");
-				this.databaseConnection = DriverManager.getConnection(
-					"jdbc:postgresql"
-					+"://"+this.databaseHostName+":"
-					+this.databasePortNumber+"/"
-					+this.databaseName, 
-					this.databaseUserName, 
-					this.databaseUserPassword
-					);
-				if(this.databaseConnection == null)
-				{
-					this.connected = false;
-				}
+			{
+				Class.forName("org.postgresql.Driver").newInstance();
+				uri = "jdbc:postgresql"+"://"+this.databaseHostName+":"+this.databasePortNumber+"/"+this.databaseName;
+				this.databaseConnection = DriverManager.getConnection(uri, this.databaseUserName, this.databaseUserPassword);
+				this.connected = true;
 			}		
-			else if(this.databaseType.equals("mysql"))
-			{		
-			    Class.forName("com.mysql.jdbc.Driver");
-			    this.databaseConnection = DriverManager.getConnection(
-					"jdbc:mysql"
-					+"://"+this.databaseHostName+":"
-					+this.databasePortNumber+"/"
-					+this.databaseName, 
-					this.databaseUserName, 
-					this.databaseUserPassword
-					);	
-				if(this.databaseConnection == null)
-				{
-					this.connected = false;				
-				}
+			else if(this.databaseType.equals("mysql") || this.databaseType.equals("mariadb"))
+			{
+				Class.forName("com.mysql.jdbc.Driver").newInstance();
+				uri = "jdbc:mysql"+"://"+this.databaseHostName+":"+this.databasePortNumber+"/"+this.databaseName;
+				this.databaseConnection = DriverManager.getConnection(uri, this.databaseUserName, this.databaseUserPassword);
+				this.connected = true;
 			}
 			else
 			{
 				this.connected = false;		
 				throw new DatabaseTypeException("Unsupported database type ("+this.databaseType+")");
 			}
-			return true;
 		}
-		else
+		catch(InstantiationException | IllegalAccessException e)
 		{
-			return false;
-		}
-	}
-	/**
-	 * Reconnect database after delay
-	 * @param wait Delay
-	 * @return true if success and false if failed
-	 * @throws ClassNotFoundException if class not found
-	 * @throws SQLException if any SQL errors
-	 * @throws DatabaseTypeException if database type not supported 
-	 */
-	public boolean reconnect(long wait) throws ClassNotFoundException, SQLException, DatabaseTypeException
-	{
-		boolean coonected = false;
-		if(this.databaseUsed)
-		{
-			try 
+			this.connected = false;
+			if(Config.isPrintStackTrace())
 			{
-				Thread.sleep(wait);
-				coonected = this.connect();
-			} 
-			catch (InterruptedException e) 
-			{
-				if(Config.isPrintStackTrace())
-				{
-					e.printStackTrace();
-				}
+				e.printStackTrace();
 			}
 		}
-		return coonected;
+		return true;
 	}
-	/**
-	 * Connect database without throws exception 
-	 * @return true if success and false if failed
-	 * @throws DatabaseTypeException if database type not supported 
-	 */
-	public boolean justConnect() throws DatabaseTypeException
-	{
-		if(this.databaseUsed)
-		{
-			if(this.databaseType.equals("postgresql"))
-			{				
-				try 
-				{
-					Class.forName("org.postgresql.Driver");
-					this.databaseConnection = DriverManager.getConnection(
-							"jdbc:postgresql"
-							+"://"+this.databaseHostName+":"
-							+this.databasePortNumber+"/"
-							+this.databaseName, 
-							this.databaseUserName, 
-							this.databaseUserPassword
-							);
-				} 
-				catch (ClassNotFoundException | SQLException e) 
-				{
-					if(Config.isPrintStackTrace())
-					{
-						e.printStackTrace();
-					}
-					return false;
-				}
-				if(this.databaseConnection == null)
-				{
-					this.connected = false;
-				}
-			}	
-			else if(this.databaseType.equals("mysql"))
-			{		
-				try 
-				{
-				    Class.forName("com.mysql.jdbc.Driver");
-				    this.databaseConnection = DriverManager.getConnection(
-						"jdbc:mysql"
-						+"://"+this.databaseHostName+":"
-						+this.databasePortNumber+"/"
-						+this.databaseName, 
-						this.databaseUserName, 
-						this.databaseUserPassword
-						);	
-				}
-				catch (ClassNotFoundException | SQLException e) 
-				{
-					if(Config.isPrintStackTrace())
-					{
-						e.printStackTrace();
-					}
-					return false;
-				}
-				if(this.databaseConnection == null)
-				{
-					this.connected = false;				
-				}
-			}
-			else
-			{
-				throw new DatabaseTypeException("Unsupported database type ("+this.databaseType+")");
-			}
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-	/**
-	 * Reconnect database without throws exception 
-	 * @return true if success and false if failed
-	 */
-	public boolean justReconnect()
-	{
-		if(this.databaseUsed)
-		{
-			if(this.databaseType.equals("postgresql"))
-			{				
-				try 
-				{
-					Class.forName("org.postgresql.Driver");
-					this.databaseConnection = DriverManager.getConnection(
-						"jdbc:postgresql"
-						+"://"+this.databaseHostName+":"
-						+this.databasePortNumber+"/"
-						+this.databaseName, 
-						this.databaseUserName, 
-						this.databaseUserPassword
-						);
-				} 
-				catch (ClassNotFoundException | SQLException e) 
-				{
-					if(Config.isPrintStackTrace())
-					{
-						e.printStackTrace();
-					}
-					return false;
-				}
-				if(this.databaseConnection != null)
-				{
-					this.connected = true;
-				}
-			}	
-			else if(this.databaseType.equals("mysql"))
-			{		
-				try 
-				{
-				    Class.forName("com.mysql.jdbc.Driver");
-				    this.databaseConnection = DriverManager.getConnection(
-						"jdbc:mysql"
-						+"://"+this.databaseHostName+":"
-						+this.databasePortNumber+"/"
-						+this.databaseName, 
-						this.databaseUserName, 
-						this.databaseUserPassword
-						);	
-				}
-				catch (ClassNotFoundException | SQLException e) 
-				{
-					if(Config.isPrintStackTrace())
-					{
-						e.printStackTrace();
-					}
-					return false;
-				}
-				if(this.databaseConnection != null)
-				{
-					this.connected = true;				
-				}
-			}	
-			else
-			{
-				this.connected = true;
-				return false;
-			}
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
+	
 	/**
 	 * Disconnect from the database threads
 	 * @return true if success and false if failed
@@ -548,44 +360,41 @@ public final class Database {
 		Encryption decryptor = new Encryption(Config.getEncryptionPassword());
 		String plainConfiguration = decryptor.decrypt(decryptor.base64Decode(configuration), true);
 		JSONObject json;
-		if(plainConfiguration != null)
+		if(plainConfiguration == null)
 		{
-			if(plainConfiguration.length() > 10)
+			plainConfiguration = "";
+		}
+		if(plainConfiguration.length() > 10)
+		{
+			if(plainConfiguration.trim().substring(0, 1).equals("{"))
 			{
-				if(plainConfiguration.trim().substring(0, 1).equals("{"))
+				try 
 				{
-					try 
+					json = new JSONObject(plainConfiguration);
+					String lDatabaseType = json.optString(ConstantString.DATABASE_TYPE, "");
+					String lDatabaseHostName = json.optString(ConstantString.DATABASE_HOST_NAME, "");
+					String lDatabasePortNumber = json.optString(ConstantString.DATABASE_PORT_NUMBER, "0");
+					String lDatabaseUserName = json.optString(ConstantString.DATABASE_USER_NAME, "");
+					String lDatabaseUserPassword = json.optString(ConstantString.DATABASE_USER_PASSWORD, "");
+					String lDatabaseName = json.optString(ConstantString.DATABASE_NAME, "");
+					if(lDatabasePortNumber.equals(""))
 					{
-						json = new JSONObject(plainConfiguration);
-						String lDatabaseType = json.optString(ConstantString.DATABASE_TYPE, "");
-						String lDatabaseHostName = json.optString(ConstantString.DATABASE_HOST_NAME, "");
-						String lDatabasePortNumber = json.optString(ConstantString.DATABASE_PORT_NUMBER, "0");
-						String lDatabaseUserName = json.optString(ConstantString.DATABASE_USER_NAME, "");
-						String lDatabaseUserPassword = json.optString(ConstantString.DATABASE_USER_PASSWORD, "");
-						String lDatabaseName = json.optString(ConstantString.DATABASE_NAME, "");
-						if(lDatabasePortNumber.equals(""))
-						{
-							lDatabasePortNumber = "0";
-						}			
-						this.databaseType = lDatabaseType.trim();
-						this.databaseHostName = lDatabaseHostName.trim();
-						this.databasePortNumber = Integer.parseInt(lDatabasePortNumber.trim());
-						this.databaseUserName = lDatabaseUserName.trim();
-						this.databaseUserPassword = lDatabaseUserPassword.trim();
-						this.databaseName = lDatabaseName.trim();
-						return true;
-					} 
-					catch (Exception e) 
+						lDatabasePortNumber = "0";
+					}			
+					this.databaseType = lDatabaseType.trim();
+					this.databaseHostName = lDatabaseHostName.trim();
+					this.databasePortNumber = Integer.parseInt(lDatabasePortNumber.trim());
+					this.databaseUserName = lDatabaseUserName.trim();
+					this.databaseUserPassword = lDatabaseUserPassword.trim();
+					this.databaseName = lDatabaseName.trim();
+					return true;
+				} 
+				catch (Exception e) 
+				{
+					if(Config.isPrintStackTrace()) 
 					{
-						if(Config.isPrintStackTrace()) 
-						{
-							e.printStackTrace();
-						}
-						return false;
+						e.printStackTrace();
 					}
-				}
-				else
-				{
 					return false;
 				}
 			}
@@ -597,7 +406,7 @@ public final class Database {
 		else
 		{
 			return false;
-		}		
+		}
 	}
 	/**
 	 * Get encrypted database configuration
@@ -611,7 +420,7 @@ public final class Database {
 	 * @throws NoSuchAlgorithmException if algorithm is not found
 	 * @throws InvalidKeyException if key is invalid
 	 */
-	public String getEncryptedConfiguration() throws UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException
+	public String getEncryptedConfiguration() throws UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, JSONException
 	{
 		Encryption encryptor = new Encryption(Config.getEncryptionPassword());
 		JSONObject json = new JSONObject();
@@ -667,8 +476,9 @@ public final class Database {
 	 * @throws UnsupportedEncodingException if encoding is not supported
 	 * @throws BadPaddingException if padding is invalid
 	 * @throws IllegalBlockSizeException if block size is invalid
+	 * @throws JSONException if any JSON errors
 	 */
-	public DatabaseConfiguration decryptConfigurationNative(String configuration) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, IllegalArgumentException, BadPaddingException, UnsupportedEncodingException 
+	public DatabaseConfiguration decryptConfigurationNative(String configuration) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, IllegalArgumentException, BadPaddingException, UnsupportedEncodingException, JSONException 
 	{
 		DatabaseConfiguration lDatabaseConfig = new DatabaseConfiguration();
 		Encryption decryptor = new Encryption(Config.getEncryptionPassword());
@@ -719,7 +529,7 @@ public final class Database {
 	 * @throws IllegalBlockSizeException if block size is invalid
 	 * @throws UnsupportedEncodingException id encoding is not supported
 	 */
-	public String encryptConfiguration(String databaseType, String databaseHostName, int databasePortNumber, String databaseUserName, String databaseUserPassword, String databaseName) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, UnsupportedEncodingException, IllegalArgumentException, IllegalBlockSizeException, BadPaddingException
+	public String encryptConfiguration(String databaseType, String databaseHostName, int databasePortNumber, String databaseUserName, String databaseUserPassword, String databaseName) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, UnsupportedEncodingException, IllegalArgumentException, IllegalBlockSizeException, BadPaddingException, JSONException
 	{
 		Encryption encryptor = new Encryption(Config.getEncryptionPassword());
 		JSONObject json = new JSONObject();

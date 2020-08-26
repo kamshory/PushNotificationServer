@@ -10,8 +10,6 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
-import org.json.JSONException;
-
 import com.planetbiru.pushserver.config.Config;
 import com.planetbiru.pushserver.database.DatabaseTypeException;
 
@@ -61,7 +59,7 @@ public class NotificationChecker extends Thread
 				this.notificationHandler.downloadLastDeleteLog();
 				Thread.sleep(this.interval);
 			} 
-			catch (IOException | SQLException | DatabaseTypeException | InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | JSONException e) 
+			catch (IOException | SQLException | DatabaseTypeException | InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException e) 
 			{
 				if(Config.isPrintStackTrace()) 
 				{

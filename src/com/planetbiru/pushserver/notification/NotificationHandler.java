@@ -264,7 +264,7 @@ public class NotificationHandler extends Thread
 				}
 			}
 		} 
-		catch (IOException e1) 
+		catch (IOException | JSONException e1) 
 		{
 			try 
 			{
@@ -324,7 +324,6 @@ public class NotificationHandler extends Thread
 	/**
 	 * Download notification that sent while PushClient is offline
 	 * @throws IllegalArgumentException if parameter is invalid 
-	 * @throws JSONException if any JSON errors
 	 * @throws SQLException if any SQL errors
 	 * @throws IOException if any IO errors
 	 * @throws DatabaseTypeException if database type not supported 
@@ -468,8 +467,9 @@ public class NotificationHandler extends Thread
 	 * @return true if client is valid and false if client is invalid
 	 * @throws DatabaseTypeException if database type not supported 
 	 * @throws NoSuchAlgorithmException if algorithm is not found
+	 * @throws JSONException 
 	 */
-	private boolean validatingClient(String data) throws DatabaseTypeException, NoSuchAlgorithmException
+	private boolean validatingClient(String data) throws DatabaseTypeException, NoSuchAlgorithmException, JSONException
 	{
 		JSONObject jo = new JSONObject();
 		boolean sendToken = false;
@@ -610,8 +610,11 @@ public class NotificationHandler extends Thread
 	 * @throws IOException if any IO errors
 	 * @throws DatabaseTypeException if database type not supported 
 	 * @throws NoSuchAlgorithmException if algorithm is not found
+	 * @throws JSONException 
+	 * @throws IllegalArgumentException 
+	 * @throws NullPointerException 
 	 */
-	private boolean validatingClient() throws IOException, DatabaseTypeException, NoSuchAlgorithmException
+	private boolean validatingClient() throws IOException, DatabaseTypeException, NoSuchAlgorithmException, NullPointerException, IllegalArgumentException, JSONException
 	{
 		String data = "";
 		this.sendQuestion();
@@ -625,8 +628,9 @@ public class NotificationHandler extends Thread
 	 * @throws NoSuchAlgorithmException if algorithm is not found
 	 * @throws NullPointerException if any NULL pointer
 	 * @throws IllegalArgumentException if any illegal arguments
+	 * @throws JSONException 
 	 */
-	private void sendKey(String key) throws IOException, NoSuchAlgorithmException, NullPointerException, IllegalArgumentException 
+	private void sendKey(String key) throws IOException, NoSuchAlgorithmException, NullPointerException, IllegalArgumentException, JSONException 
 	{
 		this.buildRandomQuestion();
 		SocketIO socketIO = new SocketIO(this.getSocket());	
@@ -643,6 +647,7 @@ public class NotificationHandler extends Thread
 	 * @throws IllegalArgumentException if any illegal argument
 	 * @throws NullPointerException if any null pointer
 	 * @throws NoSuchAlgorithmException if algorithm not found
+	 * @throws JSONException if any JSON errors
 	 */
 	public void sendQuestion() throws IOException, JSONException, NoSuchAlgorithmException, NullPointerException, IllegalArgumentException 
 	{

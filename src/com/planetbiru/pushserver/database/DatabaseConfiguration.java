@@ -9,6 +9,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.planetbiru.pushserver.config.Config;
@@ -81,8 +82,9 @@ public class DatabaseConfiguration {
 	 * @throws NoSuchPaddingException if padding is invalid
 	 * @throws NoSuchAlgorithmException if algorithm is not found
 	 * @throws InvalidKeyException if key is invalid
+	 * @throws JSONException if any JSON errors
 	 */
-	public DatabaseConfiguration decryptConfigurationNative(String configuration) throws IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException
+	public DatabaseConfiguration decryptConfigurationNative(String configuration) throws IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, JSONException
 	{
 		DatabaseConfiguration databaseConfig = new DatabaseConfiguration();
 		Encryption decryptor = new Encryption(Config.getEncryptionPassword());
@@ -120,31 +122,37 @@ public class DatabaseConfiguration {
 	/**
 	 * Overrides <strong>toString</strong> method to convert object to JSON String. This method is useful to debug or show value of each properties of the object.
 	 */
+	@Override
 	public String toString()
 	{
-		JSONObject result = new JSONObject();
-		Field[] fields = this.getClass().getDeclaredFields();
-		int i;
-		int max = fields.length;
-		String fieldName = "";
-		String fieldType = "";
-		for(i = 0; i < max; i++)
+		String resultStr = "";
+		try
 		{
-			fieldName = fields[i].getName();
-			fieldType = fields[i].getType().toString();
-			if(fieldType.equals("int") || fieldType.equals("long") || fieldType.equals("float") || fieldType.equals("double") || fieldType.equals("boolean") || fieldType.contains("String"))
+			JSONObject result = new JSONObject();
+			Field[] fields = this.getClass().getDeclaredFields();
+			int i;
+			int max = fields.length;
+			String fieldName = "";
+			String fieldType = "";
+			for(i = 0; i < max; i++)
 			{
-				try 
+				fieldName = fields[i].getName();
+				fieldType = fields[i].getType().toString();
+				if(fieldType.equals("int") || fieldType.equals("long") || fieldType.equals("float") || fieldType.equals("double") || fieldType.equals("boolean") || fieldType.contains("String"))
 				{
 					result.put(fieldName, fields[i].get(this).toString());
-				}  
-				catch (Exception e) 
-				{
-					result.put(fieldName, "");
 				}
 			}
+			resultStr = result.toString(4);
 		}
-		return result.toString(4);
+		catch(JSONException | IllegalArgumentException | IllegalAccessException e)
+		{
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
+		}
+		return resultStr;
 	}
 	public String getDatabaseHostName() {
 		return databaseHostName;

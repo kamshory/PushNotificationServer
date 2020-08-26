@@ -18,10 +18,11 @@ public class NotificationServer extends Thread
 	@Override
 	public void run()
 	{
-		ServerSocket serverSocket = null;
-		try 
+		try(
+				ServerSocket serverSocket = new ServerSocket(Config.getNotificationPort());	
+		) 
 		{
-		    serverSocket = new ServerSocket(Config.getNotificationPort());		    
+		    	    
 	        do 
 	        {
 	        	NotificationHandler handler;
@@ -37,23 +38,6 @@ public class NotificationServer extends Thread
 			if(Config.isPrintStackTrace()) 
 			{
 				e.printStackTrace();
-			}
-		}
-		finally 
-		{
-			if(serverSocket != null)
-			{
-				try 
-				{
-					serverSocket.close();
-				} 
-				catch (IOException e) 
-				{
-					if(Config.isPrintStackTrace()) 
-					{
-						e.printStackTrace();
-					}
-				}
 			}
 		}
 	}
