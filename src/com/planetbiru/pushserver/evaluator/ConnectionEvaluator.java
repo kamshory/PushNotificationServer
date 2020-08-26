@@ -42,21 +42,12 @@ public class ConnectionEvaluator extends Thread
 	/**
 	 * Override run method
 	 */
+	@Override
 	public void run()
 	{
 		try 
 		{
 			Thread.sleep(this.timeout);
-		} 
-		catch (InterruptedException e) 
-		{
-			if(Config.isPrintStackTrace())
-			{
-				e.printStackTrace();
-			}
-		}
-		try 
-		{
 			this.notificationHandler.sendQuestion();
 		} 
 		catch (IOException | JSONException | NoSuchAlgorithmException | NullPointerException | IllegalArgumentException e) 
@@ -65,6 +56,14 @@ public class ConnectionEvaluator extends Thread
 			{
 				e.printStackTrace();
 			}
+		} 
+		catch (InterruptedException e) 
+		{
+			if(Config.isPrintStackTrace()) 
+			{
+				e.printStackTrace();
+			}
+			Thread.currentThread().interrupt();
 		}
 	}
 	

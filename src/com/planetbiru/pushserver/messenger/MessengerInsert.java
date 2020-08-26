@@ -23,6 +23,7 @@ import com.planetbiru.pushserver.database.QueryBuilder;
 import com.planetbiru.pushserver.database.DatabaseTypeException;
 import com.planetbiru.pushserver.utility.Encryption;
 import com.planetbiru.pushserver.utility.SocketIO;
+import com.planetbiru.pushserver.utility.Utility;
 
 /**
  * MessagngerInsert is class to deliver the notification to its destination device. It will search the device from the Device object. If the device is found, it will send notification to its socket and mark it as "sent". If the device not found, it will not mark the notification as "sent". 
@@ -47,17 +48,6 @@ public class MessengerInsert extends Thread
 	 * Notification
 	 */
 	private long notificationID = 0;
-	/**
-	 * Command
-	 */
-	private String command = "";
-	
-	public String getData() {
-		return data;
-	}
-	public void setData(String data) {
-		this.data = data;
-	}
 	public long getApiID() {
 		return apiID;
 	}
@@ -75,18 +65,6 @@ public class MessengerInsert extends Thread
 	}
 	public void setNotificationID(long notificationID) {
 		this.notificationID = notificationID;
-	}
-	public String getCommand() {
-		return command;
-	}
-	public void setCommand(String command) {
-		this.command = command;
-	}
-	public List<Device> getDeviceList() {
-		return deviceList;
-	}
-	public void setDeviceList(List<Device> deviceList) {
-		this.deviceList = deviceList;
 	}
 	private List<Device> deviceList = new ArrayList<>();
 	/**
@@ -110,7 +88,6 @@ public class MessengerInsert extends Thread
 		{
 			command = "message";
 		}
-		this.command  = command;
 	}
 	/**
 	 * Override run method
@@ -236,7 +213,7 @@ public class MessengerInsert extends Thread
 			}
 		}
 		finally {
-			Database.closeStatement(stmt);
+			Utility.closeResource(stmt);
 			database1.disconnect();
 		}
 

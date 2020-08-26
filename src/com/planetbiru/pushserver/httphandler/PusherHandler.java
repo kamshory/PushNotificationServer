@@ -2,11 +2,7 @@ package com.planetbiru.pushserver.httphandler;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
-
-import javax.mail.MessagingException;
-import javax.mail.internet.AddressException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -103,7 +99,7 @@ public class PusherHandler implements HttpHandler
 					HTTPIO.sendHTTPResponse(httpExchange, responseHeaders, HttpURLConnection.HTTP_NOT_AUTHORITATIVE);
 				}
 			}
-			catch (NoSuchAlgorithmException | SQLException | DatabaseTypeException | ClassCastException e) 
+			catch (SQLException | DatabaseTypeException | ClassCastException e) 
 			{
 				if(Config.isPrintStackTrace())
 				{
@@ -111,7 +107,7 @@ public class PusherHandler implements HttpHandler
 				}
 				HTTPIO.sendHTTPResponse(httpExchange, responseHeaders, HttpURLConnection.HTTP_INTERNAL_ERROR);
 			}
-			catch (JSONException | MessagingException e) 
+			catch (JSONException e) 
 			{
 				if(Config.isPrintStackTrace())
 				{
@@ -141,10 +137,9 @@ public class PusherHandler implements HttpHandler
 	 * @param body String contains data sent by the application
 	 * @return JSONArray contains notification ID and destination device ID
 	 * @throws SQLException if any SQL errors
-	 * @throws JSONException if any JSON errors
 	 * @throws DatabaseTypeException if database type not supported 
 	 */
-	private JSONObject insert(Notification notification, String body) throws JSONException, SQLException, DatabaseTypeException
+	private JSONObject insert(Notification notification, String body) throws SQLException, DatabaseTypeException
 	{
 		return notification.insert(body);
 	}
@@ -187,15 +182,8 @@ public class PusherHandler implements HttpHandler
 	 * @param applicationVersion Application name of the pusher
 	 * @param userAgent User agent of the pusher
 	 * @return JSONObject contains group creation information
-	 * @throws SQLException if any SQL errors
-	 * @throws DatabaseTypeException if database type is not found
-	 * @throws AddressException if any invalid address
-	 * @throws NullPointerException if any NULL pointer
-	 * @throws IllegalArgumentException if any illegal arguments
-	 * @throws MessagingException if any errors occurred while send message
-	 * @throws NoSuchAlgorithmException if algorithm is not found
 	 */
-	private JSONObject createGroup(Notification notification, String body, String remoteAddress, String applicationName, String applicationVersion, String userAgent) throws SQLException, DatabaseTypeException, AddressException, NullPointerException, IllegalArgumentException, MessagingException, NoSuchAlgorithmException
+	private JSONObject createGroup(Notification notification, String body, String remoteAddress, String applicationName, String applicationVersion, String userAgent)
 	{
 		return notification.createGroup(body, remoteAddress, applicationName, applicationVersion, userAgent);
 	}

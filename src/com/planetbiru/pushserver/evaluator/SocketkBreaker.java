@@ -47,18 +47,8 @@ public class SocketkBreaker extends Thread
 			Thread.sleep(this.timeout);
 			if(!this.notificationHandler.isConnected())
 			{
-				try 
-				{
-					this.notificationHandler.setRunning(false);
-					this.notificationHandler.getSocket().close();
-				} 
-				catch (IOException e) 
-				{
-					if(Config.isPrintStackTrace()) 
-					{
-						e.printStackTrace();
-					}
-				}
+				this.notificationHandler.setRunning(false);
+				this.notificationHandler.getSocket().close();
 			}
 		} 
 		catch (InterruptedException e) 
@@ -67,6 +57,15 @@ public class SocketkBreaker extends Thread
 			{
 				e.printStackTrace();
 			}
+			Thread.currentThread().interrupt();
+		} 
+		catch (IOException e) 
+		{
+			if(Config.isPrintStackTrace()) 
+			{
+				e.printStackTrace();
+			}
+			e.printStackTrace();
 		}
 	}
 }
