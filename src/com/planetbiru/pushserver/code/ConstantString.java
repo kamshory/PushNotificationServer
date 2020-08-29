@@ -31,4 +31,6 @@ public class ConstantString {
 	public static final String APPLICATION_JSON             = "application/json";
 	public static final String AES                          = "AES";
 	public static final String AES_GCM_NO_PADDING           = "AES/GCM/NoPadding";
+	public static final Object MARIADB                      = "mariadb";
+	public static final Object MYSQL                        = "mysql";
 }

@@ -639,9 +639,9 @@ public class NotificationHandler extends Thread
 		SocketIO socketIO = new SocketIO(this.getSocket());	
 		socketIO.resetRequestHeader();
 		socketIO.addRequestHeader(ConstantString.CONTENT_TYPE, ConstantString.APPLICATION_JSON);
-		socketIO.addRequestHeader(NotificationHandler.COMMAND, "key");
+		socketIO.addRequestHeader(NotificationHandler.COMMAND, JsonKey.KEY);
 		JSONObject jo = new JSONObject();
-		jo.put("key", key);
+		jo.put(JsonKey.KEY, key);
 		socketIO.write(jo.toString());
 	}
 	/**

@@ -484,7 +484,7 @@ public class Notification
 			if(rs.isBeforeFirst())
 			{
 				rs.next();
-				lGroupID = rs.getLong("client_group_id");
+				lGroupID = rs.getLong(DatabaseField.CLIENT_GROUP_ID);
 			}
 		}
 		catch(SQLException | DatabaseTypeException | ClassNotFoundException e)
@@ -536,7 +536,7 @@ public class Notification
 			if(rs.isBeforeFirst())
 			{
 				rs.next();
-				lGroupID = rs.getLong("client_group_id");
+				lGroupID = rs.getLong(DatabaseField.CLIENT_GROUP_ID);
 			}
 		}
 		catch(SQLException | DatabaseTypeException | ClassNotFoundException e)
@@ -686,12 +686,12 @@ public class Notification
 			{
 				while(rs.next())
 				{
-					recipient = rs.getString("email").trim();
-					userFullName = rs.getString("name").trim();
+					recipient = rs.getString(DatabaseField.EMAIL).trim();
+					userFullName = rs.getString(DatabaseField.NAME).trim();
 					Mail mail = new Mail();				
 					if(recipient.length() > 3 && mail.isValidMailAddress(recipient))
 					{
-						api = rs.getString("api");						
+						api = rs.getString(DatabaseField.API);						
 						mail.setFrom(Config.getMailSender());		
 						mail.setTo(recipient);	
 						message = template;
@@ -730,13 +730,12 @@ public class Notification
 	 */
 	public String loadMailTemplate(String path)
 	{
-		FileReader fileReader = null;
-		BufferedReader bufferedReader = null;
 		StringBuilder data = new StringBuilder();
-		try
+		try(
+				FileReader fileReader = new FileReader(path);
+				BufferedReader bufferedReader = new BufferedReader(fileReader);		
+		)
 		{
-			fileReader = new FileReader(path);
-			bufferedReader = new BufferedReader(fileReader);
 			String line;
 			int i = 0;
 			while((line = bufferedReader.readLine()) != null) 
@@ -755,10 +754,6 @@ public class Notification
 			{
 				e.printStackTrace();
 			}
-		}
-		finally {
-			Utility.closeResource(fileReader);
-			Utility.closeResource(bufferedReader);
 		}
 		return data.toString();
 	}
@@ -972,7 +967,7 @@ public class Notification
 			database1.connect();
 			QueryBuilder query1 = new QueryBuilder(database1.getDatabaseType());
 			int i;
-			JSONArray ja = requestData.optJSONArray("deviceIDs");
+			JSONArray ja = requestData.optJSONArray(JsonKey.DEVICE_IDS);
 			JSONArray ja1 = new JSONArray();
 			JSONObject jo1;	
 			JSONObject dataToSent;
@@ -996,7 +991,7 @@ public class Notification
 				String timeCreate = "";
 				String timeGMT = "";
 				
-				if(database1.getDatabaseType().equals("mariadb") || database1.getDatabaseType().equals("mysql"))
+				if(database1.getDatabaseType().equals(ConstantString.MARIADB) || database1.getDatabaseType().equals(ConstantString.MYSQL))
 				{
 					timeCreate = Utility.now(ConstantString.DATE_TIME_FORMAT_SQL_MICROS);
 					timeGMT = Utility.now(ConstantString.DATE_TIME_FORMAT_SQL_MICROS, ConstantString.UTC);
@@ -1007,7 +1002,7 @@ public class Notification
 					timeGMT = Utility.now(ConstantString.DATE_TIME_FORMAT_SQL_MILS, ConstantString.UTC);					
 				}
 				
-				String clientGroupID = notificationData.optString("client_group_id", "");			
+				String clientGroupID = notificationData.optString(DatabaseField.CLIENT_GROUP_ID, "");			
 				
 				vibrate = vibrate.replaceAll("[^\\d.]", " ");
 				vibrate = vibrate.replaceAll("\\s+", " ").trim();
@@ -1172,6 +1167,7 @@ public class Notification
 		this.apiID = apiID;
 		this.deviceID = deviceID;
 		this.offlineID = new ArrayList<>();
+		long notificationID;
 		JSONArray ja = new JSONArray();
 		Database database1 = new Database(Config.getDatabaseConfig1());
 		ResultSet rs = null;
@@ -1194,7 +1190,6 @@ public class Notification
 			stmt = database1.getDatabaseConnection().createStatement();
 			rs = stmt.executeQuery(sqlCommand);
 			JSONObject jo;			
-			long notificationID;
 			String type = "";
 			String title = "";
 			String subtitle = "";
