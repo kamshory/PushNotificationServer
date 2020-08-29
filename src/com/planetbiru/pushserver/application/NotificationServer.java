@@ -2,26 +2,29 @@ package com.planetbiru.pushserver.application;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-
 import com.planetbiru.pushserver.config.Config;
 import com.planetbiru.pushserver.notification.NotificationHandler;
 
 public class NotificationServer extends Thread
 {
-	public NotificationServer()
+	private int port = 96;
+
+	public NotificationServer(int port)
 	{
 		/**
 		 * Constructor
 		 */
+		this.port = port;
 	}
 	
 	@Override
 	public void run()
 	{
-		ServerSocket serverSocket = null;
-		try 
+		try(
+				ServerSocket serverSocket = new ServerSocket(this.port);	
+		) 
 		{
-		    serverSocket = new ServerSocket(Config.getNotificationPort());		    
+		    	    
 	        do 
 	        {
 	        	NotificationHandler handler;
@@ -37,23 +40,6 @@ public class NotificationServer extends Thread
 			if(Config.isPrintStackTrace()) 
 			{
 				e.printStackTrace();
-			}
-		}
-		finally 
-		{
-			if(serverSocket != null)
-			{
-				try 
-				{
-					serverSocket.close();
-				} 
-				catch (IOException e) 
-				{
-					if(Config.isPrintStackTrace()) 
-					{
-						e.printStackTrace();
-					}
-				}
 			}
 		}
 	}

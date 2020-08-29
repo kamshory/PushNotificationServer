@@ -21,6 +21,8 @@ import org.json.JSONObject;
 
 import com.planetbiru.pushserver.client.Client;
 import com.planetbiru.pushserver.client.Device;
+import com.planetbiru.pushserver.code.ConstantString;
+import com.planetbiru.pushserver.code.JsonKey;
 import com.planetbiru.pushserver.code.ResponseCode;
 import com.planetbiru.pushserver.config.Config;
 import com.planetbiru.pushserver.database.Database;
@@ -39,6 +41,8 @@ import com.planetbiru.pushserver.utility.Utility;
  */
 public class NotificationHandler extends Thread
 {
+	private static final String COMMAND = "Command";
+	private static final String BEARER = "Bearer ";
 	/**
 	 * Client socket
 	 */
@@ -75,10 +79,6 @@ public class NotificationHandler extends Thread
 	 * Token for PushClien when request is valid
 	 */
 	private String token = "";
-	/**
-	 * ClientEvaluator to evaluate the connection on the future
-	 */
-	private ConnectionEvaluator connectionEvaluator = new ConnectionEvaluator();
 	/**
 	 * Flag that client is still connected
 	 */
@@ -163,7 +163,7 @@ public class NotificationHandler extends Thread
 			socketIO.read();
 			String message = socketIO.getBody();
 			String[] headers = socketIO.getHeaders();
-			firstCommand = Utility.getFirst(headers, "Command").toLowerCase().trim();
+			firstCommand = Utility.getFirst(headers, NotificationHandler.COMMAND).toLowerCase().trim();
 			if(firstCommand.equals("ping"))
 			{
 				this.replyPing();
@@ -177,9 +177,9 @@ public class NotificationHandler extends Thread
 					notification = new Notification(this.requestID);
 					String authorization = "";
 					authorization = socketIO.getFirst(headers, "Authorization");
-					if(authorization.startsWith("Bearer "))
+					if(authorization.startsWith(NotificationHandler.BEARER))
 					{
-						authorization = authorization.substring("Bearer ".length());
+						authorization = authorization.substring(NotificationHandler.BEARER.length());
 					}
 					try 
 					{
@@ -264,7 +264,7 @@ public class NotificationHandler extends Thread
 				}
 			}
 		} 
-		catch (IOException e1) 
+		catch (IOException | JSONException e1) 
 		{
 			try 
 			{
@@ -303,11 +303,11 @@ public class NotificationHandler extends Thread
 	{
 		SocketIO socketIO = new SocketIO(this.getSocket());
 		socketIO.resetRequestHeader();
-		socketIO.addRequestHeader("Command", "ping-reply");
-		socketIO.addRequestHeader("Content-Type", "application/json");
+		socketIO.addRequestHeader(NotificationHandler.COMMAND, "ping-reply");
+		socketIO.addRequestHeader(ConstantString.CONTENT_TYPE, ConstantString.APPLICATION_JSON);
 		JSONObject jo = new JSONObject();
-		jo.put("service", "alive");
-		jo.put("database", "connected");
+		jo.put(JsonKey.SERVICE, "alive");
+		jo.put(JsonKey.DATABASE, "connected");
 		socketIO.write(jo.toString());
 	}
 	/**
@@ -319,12 +319,11 @@ public class NotificationHandler extends Thread
 	{
 		JSONObject jo;
 		jo = new JSONObject(message);
-		return jo.optString("deviceID", "").trim();
+		return jo.optString(JsonKey.DEVICE_ID, "").trim();
 	}
 	/**
 	 * Download notification that sent while PushClient is offline
 	 * @throws IllegalArgumentException if parameter is invalid 
-	 * @throws JSONException if any JSON errors
 	 * @throws SQLException if any SQL errors
 	 * @throws IOException if any IO errors
 	 * @throws DatabaseTypeException if database type not supported 
@@ -344,8 +343,8 @@ public class NotificationHandler extends Thread
 		{
 			offileNotification = notification.select(this.apiID, this.deviceID, this.groupID, Config.getLimitNotification()).toString();
 			socketIO.resetRequestHeader();
-			socketIO.addRequestHeader("Content-Type", "application/json");
-			socketIO.addRequestHeader("Command", "notification");
+			socketIO.addRequestHeader(ConstantString.CONTENT_TYPE, ConstantString.APPLICATION_JSON);
+			socketIO.addRequestHeader(NotificationHandler.COMMAND, "notification");
 			if(Config.isContentSecure())
 			{
 				String tmp = offileNotification;
@@ -382,8 +381,8 @@ public class NotificationHandler extends Thread
 			trash = notification.selectDeletionLog(this.apiID, this.deviceID, this.groupID, Config.getLimitTrash());
 			offileNotification = trash.toString();
 			socketIO.resetRequestHeader();
-			socketIO.addRequestHeader("Content-Type", "application/json");
-			socketIO.addRequestHeader("Command", "delete-notification");
+			socketIO.addRequestHeader(ConstantString.CONTENT_TYPE, ConstantString.APPLICATION_JSON);
+			socketIO.addRequestHeader(NotificationHandler.COMMAND, "delete-notification");
 			if(Config.isContentSecure())
 			{
 				String tmp = offileNotification;
@@ -406,15 +405,15 @@ public class NotificationHandler extends Thread
 	{
 		byte[] buf;
 		buf = new byte[1];
-		String data = "";
+		StringBuilder buff = new StringBuilder();
 		boolean read = true;
 		try 
 		{
 			do
 			{
 				this.getSocket().getInputStream().read(buf);
-				data += new String(buf);
-				if(data.contains("\r\n\r\n"))
+				buff.append(new String(buf));
+				if(buff.toString().contains("\r\n\r\n"))
 				{
 					read = false;
 				}
@@ -425,7 +424,7 @@ public class NotificationHandler extends Thread
 		{
 			this.getSocket().close();
 		}
-		return data;
+		return buff.toString();
 	}
 	/**
 	 * Get the body of the request
@@ -441,7 +440,7 @@ public class NotificationHandler extends Thread
 		{
 			contentLength = "0";
 		}
-		String data = "";
+		StringBuilder buff = new StringBuilder();
 		long length = Long.parseLong(contentLength);
 		if(length > 0)
 		{
@@ -452,7 +451,7 @@ public class NotificationHandler extends Thread
 				for(i = 0; i < length; i++)
 				{
 					buf = this.getSocket().getInputStream().read();
-					data += String.format("%c", buf);
+					buff.append(String.format("%c", buf));
 				}
 			} 
 			catch (IOException e) 
@@ -460,7 +459,7 @@ public class NotificationHandler extends Thread
 				this.getSocket().close();
 			}
 		}
-		return data;
+		return buff.toString();
 	}
 	/**
 	 * Validating client
@@ -468,22 +467,23 @@ public class NotificationHandler extends Thread
 	 * @return true if client is valid and false if client is invalid
 	 * @throws DatabaseTypeException if database type not supported 
 	 * @throws NoSuchAlgorithmException if algorithm is not found
+	 * @throws JSONException 
 	 */
-	private boolean validatingClient(String data) throws DatabaseTypeException, NoSuchAlgorithmException
+	private boolean validatingClient(String data) throws DatabaseTypeException, NoSuchAlgorithmException, JSONException
 	{
-		JSONObject jo = new JSONObject();
+		JSONObject jo;
 		boolean sendToken = false;
 		jo = new JSONObject(data);
-		String clientAnswer = jo.optString("answer", "");
-		String lQuestion = jo.optString("question", "");
+		String clientAnswer = jo.optString(JsonKey.ANSWER, "");
+		String lQuestion = jo.optString(JsonKey.QUESTION, "");
 		String serverAnswer = this.buildAnswer(this.hashPasswordClient, lQuestion, this.deviceID);
 		if(serverAnswer.equals(clientAnswer))
 		{
 			this.token = Utility.sha1(this.deviceID+this.answer+(Math.random()*1000000));
 			SocketIO socketIO = new SocketIO(this.getSocket());
 			socketIO.resetRequestHeader();
-			socketIO.addRequestHeader("Command", "token");
-			socketIO.addRequestHeader("Content-Type", "application/json");				
+			socketIO.addRequestHeader(NotificationHandler.COMMAND, "token");
+			socketIO.addRequestHeader(ConstantString.CONTENT_TYPE, ConstantString.APPLICATION_JSON);				
 			TimeZone timeZone = TimeZone.getDefault();
 			timeZone.getID();
 			long timeZoneOffset = (timeZone.getRawOffset() / 60000);
@@ -494,7 +494,7 @@ public class NotificationHandler extends Thread
 			 * The server promises no later than waitToNext milliseconds to send a new token
 			 */
 			jo2.put("waitToNext", waitToNext);
-			jo2.put("deviceID", this.deviceID);
+			jo2.put(JsonKey.DEVICE_ID, this.deviceID);
 			jo2.put("token", this.token);
 			jo2.put("time", time);
 			jo2.put("timeZone", timeZoneOffset);
@@ -506,8 +506,8 @@ public class NotificationHandler extends Thread
 				{
 					this.setConnected(true);
 					this.updateDeviceToken(this.apiID, this.deviceID, this.groupID, this.token, address, time);
-					this.connectionEvaluator = new ConnectionEvaluator(this, Config.getInspectionInterval());
-					this.connectionEvaluator.start();
+					ConnectionEvaluator connectionEvaluator = new ConnectionEvaluator(this, Config.getInspectionInterval());
+					connectionEvaluator.start();
 				}
 				return sendToken;
 			} 
@@ -596,7 +596,10 @@ public class NotificationHandler extends Thread
 		}
 		catch(SQLException | ClassNotFoundException | DatabaseTypeException | NullPointerException | IllegalArgumentException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
 			Utility.closeResource(stmt);
@@ -610,8 +613,11 @@ public class NotificationHandler extends Thread
 	 * @throws IOException if any IO errors
 	 * @throws DatabaseTypeException if database type not supported 
 	 * @throws NoSuchAlgorithmException if algorithm is not found
+	 * @throws JSONException 
+	 * @throws IllegalArgumentException 
+	 * @throws NullPointerException 
 	 */
-	private boolean validatingClient() throws IOException, DatabaseTypeException, NoSuchAlgorithmException
+	private boolean validatingClient() throws IOException, DatabaseTypeException, NoSuchAlgorithmException, NullPointerException, IllegalArgumentException, JSONException
 	{
 		String data = "";
 		this.sendQuestion();
@@ -625,14 +631,15 @@ public class NotificationHandler extends Thread
 	 * @throws NoSuchAlgorithmException if algorithm is not found
 	 * @throws NullPointerException if any NULL pointer
 	 * @throws IllegalArgumentException if any illegal arguments
+	 * @throws JSONException 
 	 */
-	private void sendKey(String key) throws IOException, NoSuchAlgorithmException, NullPointerException, IllegalArgumentException 
+	private void sendKey(String key) throws IOException, NoSuchAlgorithmException, NullPointerException, IllegalArgumentException, JSONException 
 	{
 		this.buildRandomQuestion();
 		SocketIO socketIO = new SocketIO(this.getSocket());	
 		socketIO.resetRequestHeader();
-		socketIO.addRequestHeader("Content-Type", "application/json");
-		socketIO.addRequestHeader("Command", "key");
+		socketIO.addRequestHeader(ConstantString.CONTENT_TYPE, ConstantString.APPLICATION_JSON);
+		socketIO.addRequestHeader(NotificationHandler.COMMAND, "key");
 		JSONObject jo = new JSONObject();
 		jo.put("key", key);
 		socketIO.write(jo.toString());
@@ -643,17 +650,18 @@ public class NotificationHandler extends Thread
 	 * @throws IllegalArgumentException if any illegal argument
 	 * @throws NullPointerException if any null pointer
 	 * @throws NoSuchAlgorithmException if algorithm not found
+	 * @throws JSONException if any JSON errors
 	 */
 	public void sendQuestion() throws IOException, JSONException, NoSuchAlgorithmException, NullPointerException, IllegalArgumentException 
 	{
 		this.buildRandomQuestion();
 		SocketIO socketIO = new SocketIO(this.getSocket());	
 		socketIO.resetRequestHeader();
-		socketIO.addRequestHeader("Content-Type", "application/json");
-		socketIO.addRequestHeader("Command", "question");
+		socketIO.addRequestHeader(ConstantString.CONTENT_TYPE, ConstantString.APPLICATION_JSON);
+		socketIO.addRequestHeader(NotificationHandler.COMMAND, JsonKey.QUESTION);
 		JSONObject jo = new JSONObject();
-		jo.put("question", this.question);
-		jo.put("deviceID", this.deviceID);
+		jo.put(JsonKey.QUESTION, this.question);
+		jo.put(JsonKey.DEVICE_ID, this.deviceID);
 		socketIO.write(jo.toString());
 	}
 	/**
@@ -705,8 +713,8 @@ public class NotificationHandler extends Thread
 	{
 		JSONObject jo;
 		jo = new JSONObject(body);
-		String lDeviceID = jo.optString("deviceID", "");
-		String command = Utility.getFirst(headers, "Command");
+		String lDeviceID = jo.optString(JsonKey.DEVICE_ID, "");
+		String command = Utility.getFirst(headers, NotificationHandler.COMMAND);
 		boolean success = false;
 		if(command.compareToIgnoreCase("register-device") == 0)
 		{
@@ -719,12 +727,12 @@ public class NotificationHandler extends Thread
 				}
 				else
 				{
-					this.onRegisterDeviceError(lDeviceID, ResponseCode.DEVICE_ALREADY_EXISTS, "Failed", "Fail to register device");
+					this.onRegisterDeviceError(lDeviceID, ResponseCode.DEVICE_ALREADY_EXISTS, ConstantString.FAILED, "Fail to register device");
 				}
 			}
 			catch(NotificationException e1)
 			{
-				this.onRegisterDeviceError(lDeviceID, ResponseCode.INTERNAL_SERVER_ERROR, "Failed", e1.getMessage());
+				this.onRegisterDeviceError(lDeviceID, ResponseCode.INTERNAL_SERVER_ERROR, ConstantString.FAILED, e1.getMessage());
 			}
 		}
 		else if(command.compareToIgnoreCase("unregister-device") == 0)
@@ -738,15 +746,15 @@ public class NotificationHandler extends Thread
 				}
 				else
 				{
-					this.onUnregisterDeviceError(lDeviceID, ResponseCode.DEVICE_NOT_EXISTS, "Failed", "Fail to unregister device");
+					this.onUnregisterDeviceError(lDeviceID, ResponseCode.DEVICE_NOT_EXISTS, ConstantString.FAILED, "Fail to unregister device");
 				}
 			}
 			catch(NotificationException e1)
 			{
-				this.onUnregisterDeviceError(lDeviceID, ResponseCode.INTERNAL_SERVER_ERROR, "Failed", e1.getMessage());
+				this.onUnregisterDeviceError(lDeviceID, ResponseCode.INTERNAL_SERVER_ERROR, ConstantString.FAILED, e1.getMessage());
 			}
 		}
-		else if(command.compareToIgnoreCase("answer") == 0)
+		else if(command.compareToIgnoreCase(JsonKey.ANSWER) == 0)
 		{
 			this.validatingClient(body);
 		}
@@ -763,12 +771,12 @@ public class NotificationHandler extends Thread
 	{
 		SocketIO socketIO = new SocketIO(this.getSocket());
 		socketIO.resetRequestHeader();
-		socketIO.addRequestHeader("Content-Type", "application/json");
-		socketIO.addRequestHeader("Command", "unregister-device-error");
+		socketIO.addRequestHeader(ConstantString.CONTENT_TYPE, ConstantString.APPLICATION_JSON);
+		socketIO.addRequestHeader(NotificationHandler.COMMAND, "unregister-device-error");
 		JSONObject jo = new JSONObject();
-		jo.put("responseCode", responseCode);
-		jo.put("deviceID", deviceID);
-		jo.put("message", message);
+		jo.put(JsonKey.RESPONSE_CODE, responseCode);
+		jo.put(JsonKey.DEVICE_ID, deviceID);
+		jo.put(JsonKey.MESSAGE, message);
 		jo.put("cause", cause);
 		socketIO.write(jo.toString());
 	}
@@ -783,12 +791,12 @@ public class NotificationHandler extends Thread
 	{
 		SocketIO socketIO = new SocketIO(this.getSocket());
 		socketIO.resetRequestHeader();
-		socketIO.addRequestHeader("Content-Type", "application/json");
-		socketIO.addRequestHeader("Command", "unregister-device-success");
+		socketIO.addRequestHeader(ConstantString.CONTENT_TYPE, ConstantString.APPLICATION_JSON);
+		socketIO.addRequestHeader(NotificationHandler.COMMAND, "unregister-device-success");
 		JSONObject jo = new JSONObject();
-		jo.put("responseCode", responseCode);
-		jo.put("deviceID", deviceID);
-		jo.put("message", message);
+		jo.put(JsonKey.RESPONSE_CODE, responseCode);
+		jo.put(JsonKey.DEVICE_ID, deviceID);
+		jo.put(JsonKey.MESSAGE, message);
 		socketIO.write(jo.toString());
 	}
 	/**
@@ -803,12 +811,12 @@ public class NotificationHandler extends Thread
 	{
 		SocketIO socketIO = new SocketIO(this.getSocket());
 		socketIO.resetRequestHeader();
-		socketIO.addRequestHeader("Content-Type", "application/json");
-		socketIO.addRequestHeader("Command", "register-device-error");
+		socketIO.addRequestHeader(ConstantString.CONTENT_TYPE, ConstantString.APPLICATION_JSON);
+		socketIO.addRequestHeader(NotificationHandler.COMMAND, "register-device-error");
 		JSONObject jo = new JSONObject();
-		jo.put("responseCode", responseCode);
-		jo.put("deviceID", deviceID);
-		jo.put("message", message);
+		jo.put(JsonKey.RESPONSE_CODE, responseCode);
+		jo.put(JsonKey.DEVICE_ID, deviceID);
+		jo.put(JsonKey.MESSAGE, message);
 		jo.put("cause", cause);
 		socketIO.write(jo.toString());
 	}
@@ -823,12 +831,12 @@ public class NotificationHandler extends Thread
 	{
 		SocketIO socketIO = new SocketIO(this.getSocket());
 		socketIO.resetRequestHeader();
-		socketIO.addRequestHeader("Content-Type", "application/json");
-		socketIO.addRequestHeader("Command", "register-device-success");
+		socketIO.addRequestHeader(ConstantString.CONTENT_TYPE, ConstantString.APPLICATION_JSON);
+		socketIO.addRequestHeader(NotificationHandler.COMMAND, "register-device-success");
 		JSONObject jo = new JSONObject();
-		jo.put("responseCode", responseCode);
-		jo.put("deviceID", deviceID);
-		jo.put("message", message);
+		jo.put(JsonKey.RESPONSE_CODE, responseCode);
+		jo.put(JsonKey.DEVICE_ID, deviceID);
+		jo.put(JsonKey.MESSAGE, message);
 		socketIO.write(jo.toString());
 	}
 	/**
@@ -853,7 +861,7 @@ public class NotificationHandler extends Thread
 		{
 			database1.connect();
 			QueryBuilder query1 = new QueryBuilder(database1.getDatabaseType());
-			String address = this.getSocket().getInetAddress().getHostAddress().toString().replace("/", "").trim();
+			String address = this.getSocket().getInetAddress().getHostAddress().replace("/", "").trim();
 			deviceID = query1.escapeSQL(deviceID);
 			String lToken = query1.escapeSQL(this.token);
 			address = query1.escapeSQL(address);
@@ -885,7 +893,10 @@ public class NotificationHandler extends Thread
 		}
 		catch(SQLException | ClassNotFoundException | DatabaseTypeException | NoSuchAlgorithmException | NullPointerException | IllegalArgumentException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
 			Utility.closeResource(rs);
@@ -939,7 +950,10 @@ public class NotificationHandler extends Thread
 		}
 		catch(SQLException | ClassNotFoundException | DatabaseTypeException | NullPointerException | IllegalArgumentException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
 			Utility.closeResource(rs);
@@ -986,7 +1000,10 @@ public class NotificationHandler extends Thread
 		}
 		catch(SQLException | ClassNotFoundException | DatabaseTypeException | NullPointerException | IllegalArgumentException e)
 		{
-			
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
 		}
 		finally {
 			Utility.closeResource(stmt);

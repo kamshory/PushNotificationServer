@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import com.planetbiru.pushserver.config.Config;
 import com.planetbiru.pushserver.database.Database;
-import com.planetbiru.pushserver.database.DatabaseFunctionFoundException;
+import com.planetbiru.pushserver.database.DatabaseFunctionException;
 import com.planetbiru.pushserver.database.DatabaseTypeException;
 import com.planetbiru.pushserver.database.QueryBuilder;
 import com.planetbiru.pushserver.database.TableNotFoundException;
@@ -117,12 +117,20 @@ public class Application
         		{
 					Thread.sleep(Config.getWaitFreeUpPort());
 				}
-        		catch(IllegalArgumentException | InterruptedException e)
+        		catch(IllegalArgumentException e)
         		{
         			if(Config.isPrintStackTrace())
 					{
 						e.printStackTrace();
 					}
+        		}
+        		catch(InterruptedException e)
+        		{
+        			if(Config.isPrintStackTrace())
+					{
+						e.printStackTrace();
+					}
+        			Thread.currentThread().interrupt();
         		}
         	}
 	    	
@@ -170,7 +178,7 @@ public class Application
 			} catch (TableNotFoundException e2) {
 				logger.error("Database exists but there is missing table.");
 				e2.printStackTrace();
-			} catch (DatabaseFunctionFoundException e2) {
+			} catch (DatabaseFunctionException e2) {
 				logger.error("Database exists but there is missing function.");
 				e2.printStackTrace();
 			}
@@ -194,7 +202,7 @@ public class Application
 							{
 								keyStore = KeyStore.getInstance("JKS");
 								fileInputStream = new FileInputStream (Config.getKeystoreFile());
-								SSLContext sslContext = SSLContext.getInstance("TLS");
+								SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
 								keyStore.load (fileInputStream, password);
 							    KeyManagerFactory keyManagementFactory = KeyManagerFactory.getInstance("SunX509");
 							    keyManagementFactory.init (keyStore, password);
@@ -259,14 +267,14 @@ public class Application
 					
 					if(Config.isNotificationSSLEnabled())
 					{
-						Application.notificationServerSSL = new NotificationServerSSL();
+						Application.notificationServerSSL = new NotificationServerSSL(Config.getNotificationPortSSL());
 						Application.notificationServerSSL.start();
-						logger.info("SSL Service for notification is started");
+						logger.info("SSL Service for notification is started at port {}", Config.getNotificationPortSSL());
 					}
 					
-					Application.notificationServer = new NotificationServer();
+					Application.notificationServer = new NotificationServer(Config.getNotificationPort());
 					Application.notificationServer.start();
-					logger.info("Service for notification is started");
+					logger.info("Service for notification is started at port {}", Config.getNotificationPort());
 					
 				} 
 				catch(IndexOutOfBoundsException e1)
@@ -294,9 +302,6 @@ public class Application
 			{
 				path = path.substring(1);
 			}
-		}
-		else
-		{
 		}
 		return path;
 	}
@@ -396,9 +401,9 @@ public class Application
 	/**
 	 * Function validation
 	 * @return true if valid and false if invalid
-	 * @throws DatabaseFunctionFoundException if function is not exists
+	 * @throws DatabaseFunctionException if function is not exists
 	 */
-	public static boolean checkFunctions() throws DatabaseFunctionFoundException
+	public static boolean checkFunctions() throws DatabaseFunctionException
 	{		
 		boolean valid = false;
 		Database database1 = new Database(Config.getDatabaseConfig1());
@@ -422,7 +427,7 @@ public class Application
 			}
 			else
 			{
-				throw new DatabaseFunctionFoundException("Function sha1 not found");
+				throw new DatabaseFunctionException("Function sha1 not found");
 			}
 		}
 		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
@@ -446,9 +451,9 @@ public class Application
 	 * @throws SQLException if any SQL errors
 	 * @throws IndexOutOfBoundsException if out of bound
 	 * @throws TableNotFoundException if required table is not exists
-	 * @throws DatabaseFunctionFoundException if function is not exists
+	 * @throws DatabaseFunctionException if function is not exists
 	 */
-	public static boolean checkDatabases() throws DatabaseTypeException, SQLException, TableNotFoundException, DatabaseFunctionFoundException
+	public static boolean checkDatabases() throws DatabaseTypeException, SQLException, TableNotFoundException, DatabaseFunctionException
 	{
 		boolean valid2 = Application.checkFunctions();
 		boolean valid1 = Application.checkTables();

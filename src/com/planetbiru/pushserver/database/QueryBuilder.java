@@ -100,8 +100,8 @@ public class QueryBuilder
 		if(this.databaseType.equals(DB_TYPE_MYSQL) || this.databaseType.equals(DB_TYPE_MARIADB))
 		{
 			s = s.replaceAll("\\u005c", "\\\\\\\\");
-			s = s.replaceAll("\\n", "\\\\n");
-		    s = s.replaceAll("\\r", "\\\\r");
+			s = s.replace("\n", "\\n");
+		    s = s.replace("\r", "\\r");
 		    s = s.replaceAll("\\00", "\\\\0");
 		    s = s.replace("'", "\\'");
 		    s = s.replace("\"", "\\\"");
@@ -130,8 +130,8 @@ public class QueryBuilder
 		String s = input;
 		if(this.databaseType.equals(DB_TYPE_MYSQL) || this.databaseType.equals(DB_TYPE_MARIADB))
 		{
-			s = s.replaceAll("\\\\n", "\\n");
-			s = s.replaceAll("\\\\r", "\\r");
+			s = s.replace("\\n", "\n");
+			s = s.replace("\\r", "\r");
 			s = s.replaceAll("\\\\00", "\\0");
 			s = s.replace("\\'", "'");	
 		    s = s.replace("\\\"", "\"");
@@ -726,8 +726,7 @@ public class QueryBuilder
 	public String toString()
 	{
 		try 
-		{
-			
+		{			
 			return this.buildQueryString();
 		} 
 		catch (DatabaseTypeException e) 

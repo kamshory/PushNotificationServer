@@ -2,7 +2,10 @@ package com.planetbiru.pushserver.client;
 
 import java.net.Socket;
 
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.planetbiru.pushserver.config.Config;
 
 /**
  * <strong>Device</strong> is object contains client socket, device ID, request ID, and active flag.
@@ -117,14 +120,24 @@ public class Device {
 	/**
 	 * Overrides <strong>toString</strong> method to convert object to JSON String. This method is useful to debug or show value of each properties of the object.
 	 */
+	@Override
 	public String toString()
 	{
+		String result = "";
 		JSONObject res = new JSONObject();
-		res.put("socket", socket.toString());
-		res.put("deviceID", deviceID);
-		res.put("requestID", socket.toString());
-		res.put("active", active);
+		try {
+			res.put("socket", socket.toString());
+			res.put("deviceID", deviceID);
+			res.put("requestID", socket.toString());
+			res.put("active", active);
+			result = res.toString(4);
+		} catch (JSONException e) {
+			if(Config.isPrintStackTrace())
+			{
+				e.printStackTrace();
+			}
+		}
 		
-		return res.toString(4);
+		return result;
 	}
 }

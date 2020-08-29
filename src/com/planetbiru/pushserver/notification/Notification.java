@@ -263,8 +263,7 @@ public class Notification
 					groupKey = query1.escapeSQL(groupKey);
 					serverAddress = query1.escapeSQL(serverAddress).trim();				
 					this.groupID = this.getGroupID(key, groupKey);				
-					String sqlCommand = "";				
-					sqlCommand = query1.newQuery()
+					String sqlCommand = query1.newQuery()
 							.select(Config.getTablePrefix()+"api.api_id, coalesce("+Config.getTablePrefix()+"api.hash_password_pusher, '') as hash_password_pusher, coalesce("+Config.getTablePrefix()+"pusher_address.address, '') as address")
 							.from(Config.getTablePrefix()+DatabaseTable.API)
 							.leftJoin(Config.getTablePrefix()+DatabaseTable.PUSHER_ADDRESS)
@@ -319,8 +318,9 @@ public class Notification
 	 * @param applicationVersion Application name of the pusher
 	 * @param userAgent User agent of the pusher
 	 * @return JSONObject contains group creation information
+	 * @throws JSONException if any JSON errors
 	 */
-	public JSONObject createGroup(String body, String remoteAddress, String applicationName, String applicationVersion, String userAgent)
+	public JSONObject createGroup(String body, String remoteAddress, String applicationName, String applicationVersion, String userAgent) throws JSONException
 	{
 		JSONObject requestJSON = new JSONObject(body);
 		JSONObject requestData = requestJSON.optJSONObject(JsonKey.DATA);
@@ -406,7 +406,6 @@ public class Notification
 						Utility.closeResource(stmt);
 						stmt = database1.getDatabaseConnection().createStatement();	
 						stmt.execute(sqlCommand);
-						
 
 						sqlCommand = query1.newQuery().lastID().alias(ConstantString.LAST_ID).toString();
 
@@ -414,6 +413,7 @@ public class Notification
 						Utility.closeResource(stmt);
 						stmt = database1.getDatabaseConnection().createStatement();				
 						rs = stmt.executeQuery(sqlCommand);
+						rs.next();
 						
 						long lGroupID = rs.getLong(ConstantString.LAST_ID);				
 						
@@ -437,7 +437,7 @@ public class Notification
 				jo.put(JsonKey.MESSAGE, ConstantString.INVALID_API);
 			}
 		}
-		catch(SQLException | DatabaseTypeException | ClassNotFoundException e)
+		catch(SQLException | DatabaseTypeException | ClassNotFoundException | JSONException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -451,6 +451,7 @@ public class Notification
 		}
 		return jo;
 	}
+	
 	/**
 	 * Get group ID
 	 * @param apiID API ID
@@ -613,12 +614,13 @@ public class Notification
 				Utility.closeResource(stmt);
 				stmt = database1.getDatabaseConnection().createStatement();				
 				rs = stmt.executeQuery(sqlCommand);
+				rs.next();
 				
 				long pusherAddressID = rs.getLong(ConstantString.LAST_ID);				
 
 				if(needConfirmation && !active)
 				{
-					this.sendMail(pusherAddressID, auth, serverAddress, applicationName, applicationVersion, userAgent, Utility.now(ConstantString.FORMAT_DATE_MYSQL));
+					this.sendMail(pusherAddressID, auth, serverAddress, applicationName, applicationVersion, userAgent, Utility.now(ConstantString.DATE_TIME_FORMAT_SQL));
 				}
 			}
 		}
@@ -808,8 +810,9 @@ public class Notification
 	 * Register device
 	 * @param body Request body
 	 * @return Response to client
+	 * @throws JSONException if any JSON errors
 	 */
-	public JSONObject registerDevice(String body)
+	public JSONObject registerDevice(String body) throws JSONException
 	{
 		return this.registerDevice(new JSONObject(body));
 	}
@@ -846,7 +849,7 @@ public class Notification
 			
 			if(!rs.isBeforeFirst())
 			{
-				String time = Utility.now(ConstantString.FORMAT_DATE_MYSQL);
+				String time = Utility.now(ConstantString.DATE_TIME_FORMAT_SQL);
 				String sqlInsert = query1.newQuery()
 						.insert()
 						.into(Config.getTablePrefix()+DatabaseTable.CLIENT)
@@ -863,7 +866,7 @@ public class Notification
 			response.put(JsonKey.COMMAND, "register-device");
 			response.put(JsonKey.DATA, data);
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException | JSONException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -881,8 +884,9 @@ public class Notification
 	 * Unregister device
 	 * @param body Request body
 	 * @return Response to client
+	 * @throws JSONException if any JSON errors
 	 */
-	public JSONObject unregisterDevice(String body)
+	public JSONObject unregisterDevice(String body) throws JSONException
 	{
 		JSONObject jo;
 		jo = new JSONObject(body);
@@ -921,7 +925,7 @@ public class Notification
 			response.put(JsonKey.COMMAND, "register-device");
 			response.put(JsonKey.DATA, data);
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException | JSONException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -1071,7 +1075,7 @@ public class Notification
 						Utility.closeResource(stmt);
 						stmt = database1.getDatabaseConnection().createStatement();				
 						rs = stmt.executeQuery(sqlCommand);
-						
+						rs.next();
 						long notificationID = rs.getLong(ConstantString.LAST_ID);
 	
 						Utility.closeResource(rs);
@@ -1099,7 +1103,7 @@ public class Notification
 			response.put(JsonKey.COMMAND, "push-notification");
 			response.put(JsonKey.DATA, responseData);
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException | JSONException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -1227,8 +1231,7 @@ public class Notification
 					miscData = rs.getString("misc_data");
 					time = rs.getString("time_create");
 					timeGMT = rs.getString("time_gmt");
-					notificationID = rs.getLong("notification_id");	
-					
+					notificationID = rs.getLong("notification_id");					
 					time = time.replace(".000", ".");
 					if(time.endsWith("."))
 					{
@@ -1258,7 +1261,7 @@ public class Notification
 				}
 			}
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException | JSONException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -1334,8 +1337,9 @@ public class Notification
 	 * Delete notification stored in the database
 	 * @param body String contains JSONArray of pairs of notification ID and device ID. Pusher must send notification ID and device that will be deleted. PushServer only will delete the notification if notification ID, device ID and API ID is match
 	 * @return JSONArray contains notification ID and device ID of the deletion
+	 * @throws JSONException if any JSON errors
 	 */
-	public JSONObject delete(String body)
+	public JSONObject delete(String body) throws JSONException
 	{
 		JSONArray data;
 		JSONObject jo;
@@ -1426,7 +1430,7 @@ public class Notification
 				broadcastCloseLoop.start();
 			}
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException | JSONException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -1476,7 +1480,7 @@ public class Notification
 				Utility.closeResource(stmt);
 			}
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException | JSONException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -1545,7 +1549,7 @@ public class Notification
 				}
 			}
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException | JSONException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -1689,5 +1693,8 @@ public class Notification
 			Utility.closeResource(stmt);
 			database1.disconnect();
 		}
+	}
+	public JSONObject createAPI(String body, String remoteAddress, String applicationName, String applicationVersion, String userAgent) {
+		return new JSONObject();
 	}
 }

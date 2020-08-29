@@ -10,4 +10,3 @@ com.planetbiru.pushserver.messenger
 com.planetbiru.pushserver.notification
 com.planetbiru.pushserver.utility
 org.apache
-org.json

@@ -9,11 +9,13 @@ import com.planetbiru.pushserver.config.Config;
 import com.planetbiru.pushserver.notification.NotificationHandler;
 
 public class NotificationServerSSL extends Thread{
-	public NotificationServerSSL()
+	private int port = 97;
+	public NotificationServerSSL(int port)
 	{
 		/**
 		 * Constructor
 		 */
+		this.port = port;
 	}
 	@Override
 	public void run()
@@ -24,7 +26,7 @@ public class NotificationServerSSL extends Thread{
 			System.setProperty("javax.net.ssl.keyStore", Config.getKeystoreFile());
 		    System.setProperty("javax.net.ssl.keyStorePassword", Config.getKeystorePassword());
 		    SSLServerSocketFactory ssf = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-		    serverSocketSSL = ssf.createServerSocket(Config.getNotificationPortSSL());		    
+		    serverSocketSSL = ssf.createServerSocket(this.port);		    
 	        do 
 	        {
 	        	NotificationHandler handler;
