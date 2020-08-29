@@ -344,7 +344,7 @@ public class Notification
 	 */
 	public JSONObject createGroup(long apiID, String groupKey, String groupName, String description, String remoteAddress, String applicationName, String applicationVersion, String userAgent)
 	{
-		
+		long userCreate = 0;
 		JSONObject jo = new JSONObject();
 		Database database1 = new Database(Config.getDatabaseConfig1());
 		ResultSet rs = null;
@@ -362,7 +362,6 @@ public class Notification
 			groupName = query1.escapeSQL(groupName);
 			description = query1.escapeSQL(description);
 			remoteAddress = query1.escapeSQL(remoteAddress);
-			long userCreate = 0;
 			String sqlCommand = "";
 			sqlCommand = query1.newQuery()
 					.select("*")
@@ -1466,7 +1465,7 @@ public class Notification
 				lDeviceID = query1.escapeSQL(lDeviceID);
 				sqlCommand = query1.newQuery()
 						.insert()
-						.into(Config.getTablePrefix()+"trash")
+						.into(Config.getTablePrefix()+DatabaseTable.TRASH)
 						.fields("(api_id, device_id, notification_id, time_delete)")
 						.values("("+apiID+", '"+lDeviceID+"', "+notificationID+", "+query1.now(6)+")")
 						.toString();
@@ -1523,7 +1522,7 @@ public class Notification
 			deviceID = query1.escapeSQL(deviceID);
 			query1.newQuery()
 					.select("coalesce(device_id, '') as device_id, coalesce(notification_id, 0) as notification_id")
-					.from(Config.getTablePrefix()+"trash")
+					.from(Config.getTablePrefix()+DatabaseTable.TRASH)
 					.where("api_id = '"+apiID+"' and device_id = '"+deviceID+"' and client_group_id = '"+groupID+"' ");
 			if(limit > 0)
 			{
@@ -1580,7 +1579,7 @@ public class Notification
 			QueryBuilder query1 = new QueryBuilder(database1.getDatabaseType());	
 			String sqlCommand = query1.newQuery() 
 					.select("count(trash_id) as numrows")
-					.from(Config.getTablePrefix()+"trash")
+					.from(Config.getTablePrefix()+DatabaseTable.TRASH)
 					.where("api_id = '"+this.apiID+"' and device_id = '"+this.deviceID+"' and client_group_id = '"+groupID+"'")
 					.toString();
 			stmt = database1.getDatabaseConnection().createStatement();
@@ -1623,7 +1622,7 @@ public class Notification
 			String sqlCommand = "";
 			sqlCommand = query1.newQuery()
 					.delete()
-					.from(Config.getTablePrefix()+"trash")
+					.from(Config.getTablePrefix()+DatabaseTable.TRASH)
 					.where("api_id = '"+apiID+"' and device_id = '"+deviceID+"' and notification_id = '"+notificationID+"'")
 					.toString();
 			stmt = database1.getDatabaseConnection().createStatement();
@@ -1669,7 +1668,7 @@ public class Notification
 				notificationID = jo.optLong(JsonKey.ID, 0);
 				sqlCommand = query1.newQuery()
 						.delete()
-						.from(Config.getTablePrefix()+"trash")
+						.from(Config.getTablePrefix()+DatabaseTable.TRASH)
 						.where("api_id = '"+this.apiID+"' and device_id = '"+lDeviceID+"' and notification_id = '"+notificationID+"'")
 						.toString();
 				stmt = database1.getDatabaseConnection().createStatement();

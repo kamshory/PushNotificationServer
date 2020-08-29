@@ -12,5 +12,6 @@ public class DatabaseTable {
 	public static final String USER           = "user";
 	public static final String CLIENT         = "client";
 	public static final String NOTIFICATION   = "notification";
+	public static final String TRASH          = "trash";
 
 }
