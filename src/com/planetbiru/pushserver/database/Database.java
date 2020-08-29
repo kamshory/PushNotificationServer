@@ -364,49 +364,38 @@ public final class Database {
 		{
 			plainConfiguration = "";
 		}
-		if(plainConfiguration.length() > 10)
+		if(plainConfiguration.length() > 10 && plainConfiguration.trim().substring(0, 1).equals("{"))
 		{
-			if(plainConfiguration.trim().substring(0, 1).equals("{"))
+			try 
 			{
-				try 
+				json = new JSONObject(plainConfiguration);
+				String lDatabaseType = json.optString(ConstantString.DATABASE_TYPE, "");
+				String lDatabaseHostName = json.optString(ConstantString.DATABASE_HOST_NAME, "");
+				String lDatabasePortNumber = json.optString(ConstantString.DATABASE_PORT_NUMBER, "0");
+				String lDatabaseUserName = json.optString(ConstantString.DATABASE_USER_NAME, "");
+				String lDatabaseUserPassword = json.optString(ConstantString.DATABASE_USER_PASSWORD, "");
+				String lDatabaseName = json.optString(ConstantString.DATABASE_NAME, "");
+				if(lDatabasePortNumber.equals(""))
 				{
-					json = new JSONObject(plainConfiguration);
-					String lDatabaseType = json.optString(ConstantString.DATABASE_TYPE, "");
-					String lDatabaseHostName = json.optString(ConstantString.DATABASE_HOST_NAME, "");
-					String lDatabasePortNumber = json.optString(ConstantString.DATABASE_PORT_NUMBER, "0");
-					String lDatabaseUserName = json.optString(ConstantString.DATABASE_USER_NAME, "");
-					String lDatabaseUserPassword = json.optString(ConstantString.DATABASE_USER_PASSWORD, "");
-					String lDatabaseName = json.optString(ConstantString.DATABASE_NAME, "");
-					if(lDatabasePortNumber.equals(""))
-					{
-						lDatabasePortNumber = "0";
-					}			
-					this.databaseType = lDatabaseType.trim();
-					this.databaseHostName = lDatabaseHostName.trim();
-					this.databasePortNumber = Integer.parseInt(lDatabasePortNumber.trim());
-					this.databaseUserName = lDatabaseUserName.trim();
-					this.databaseUserPassword = lDatabaseUserPassword.trim();
-					this.databaseName = lDatabaseName.trim();
-					return true;
-				} 
-				catch (Exception e) 
+					lDatabasePortNumber = "0";
+				}			
+				this.databaseType = lDatabaseType.trim();
+				this.databaseHostName = lDatabaseHostName.trim();
+				this.databasePortNumber = Integer.parseInt(lDatabasePortNumber.trim());
+				this.databaseUserName = lDatabaseUserName.trim();
+				this.databaseUserPassword = lDatabaseUserPassword.trim();
+				this.databaseName = lDatabaseName.trim();
+				return true;
+			} 
+			catch (Exception e) 
+			{
+				if(Config.isPrintStackTrace()) 
 				{
-					if(Config.isPrintStackTrace()) 
-					{
-						e.printStackTrace();
-					}
-					return false;
+					e.printStackTrace();
 				}
 			}
-			else
-			{
-				return false;
-			}
 		}
-		else
-		{
-			return false;
-		}
+		return false;
 	}
 	/**
 	 * Get encrypted database configuration
@@ -450,18 +439,19 @@ public final class Database {
 		Encryption decryptor = new com.planetbiru.pushserver.utility.Encryption(Config.getEncryptionPassword());
 		String plainConfiguration = decryptor.decrypt(configuration, true);
 		JSONObject json = new JSONObject();
-		if(plainConfiguration != null)
+		if(plainConfiguration == null)
 		{
-			if(plainConfiguration.length() > 10 && plainConfiguration.trim().substring(0, 1).equals("{"))
+			plainConfiguration = "";
+		}
+		if(plainConfiguration.length() > 10 && plainConfiguration.trim().substring(0, 1).equals("{"))
+		{
+			try 
 			{
-				try 
-				{
-					json = new JSONObject(plainConfiguration);
-				} 
-				catch (Exception e) 
-				{
-					throw new IllegalArgumentException("Invalid database key");
-				}
+				json = new JSONObject(plainConfiguration);
+			} 
+			catch (Exception e) 
+			{
+				throw new IllegalArgumentException("Invalid database key");
 			}
 		}
 		return json;		
@@ -541,14 +531,6 @@ public final class Database {
 		json.put(ConstantString.DATABASE_NAME, databaseName);
 		String plainConfiguration = json.toString();
 		return encryptor.encrypt(plainConfiguration, true);
-	}
-	/**
-	 * Set the driver type of the database
-	 * @param driver Database driver type
-	 */
-	public void setDriverType(String driver)
-	{
-		this.databaseType = driver;
 	}
 	/**
 	 * Set the driver type of the database

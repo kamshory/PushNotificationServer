@@ -406,7 +406,6 @@ public class Notification
 						Utility.closeResource(stmt);
 						stmt = database1.getDatabaseConnection().createStatement();	
 						stmt.execute(sqlCommand);
-						
 
 						sqlCommand = query1.newQuery().lastID().alias(ConstantString.LAST_ID).toString();
 
@@ -414,6 +413,7 @@ public class Notification
 						Utility.closeResource(stmt);
 						stmt = database1.getDatabaseConnection().createStatement();				
 						rs = stmt.executeQuery(sqlCommand);
+						rs.next();
 						
 						long lGroupID = rs.getLong(ConstantString.LAST_ID);				
 						
@@ -614,6 +614,7 @@ public class Notification
 				Utility.closeResource(stmt);
 				stmt = database1.getDatabaseConnection().createStatement();				
 				rs = stmt.executeQuery(sqlCommand);
+				rs.next();
 				
 				long pusherAddressID = rs.getLong(ConstantString.LAST_ID);				
 
@@ -1074,7 +1075,7 @@ public class Notification
 						Utility.closeResource(stmt);
 						stmt = database1.getDatabaseConnection().createStatement();				
 						rs = stmt.executeQuery(sqlCommand);
-						
+						rs.next();
 						long notificationID = rs.getLong(ConstantString.LAST_ID);
 	
 						Utility.closeResource(rs);
@@ -1230,8 +1231,7 @@ public class Notification
 					miscData = rs.getString("misc_data");
 					time = rs.getString("time_create");
 					timeGMT = rs.getString("time_gmt");
-					notificationID = rs.getLong("notification_id");	
-					
+					notificationID = rs.getLong("notification_id");					
 					time = time.replace(".000", ".");
 					if(time.endsWith("."))
 					{

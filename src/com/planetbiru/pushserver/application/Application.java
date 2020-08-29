@@ -267,14 +267,14 @@ public class Application
 					
 					if(Config.isNotificationSSLEnabled())
 					{
-						Application.notificationServerSSL = new NotificationServerSSL();
+						Application.notificationServerSSL = new NotificationServerSSL(Config.getNotificationPortSSL());
 						Application.notificationServerSSL.start();
-						logger.info("SSL Service for notification is started");
+						logger.info("SSL Service for notification is started at port {}", Config.getNotificationPortSSL());
 					}
 					
-					Application.notificationServer = new NotificationServer();
+					Application.notificationServer = new NotificationServer(Config.getNotificationPort());
 					Application.notificationServer.start();
-					logger.info("Service for notification is started");
+					logger.info("Service for notification is started at port {}", Config.getNotificationPort());
 					
 				} 
 				catch(IndexOutOfBoundsException e1)

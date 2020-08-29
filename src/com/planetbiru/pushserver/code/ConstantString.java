@@ -26,4 +26,9 @@ public class ConstantString {
 	public static final String DATABASE_NAME                = "DATABASE_NAME";
 	public static final String UTC                          = "UTC";
 	public static final String LAST_ID                      = "last_id";
+	public static final String CONTENT_TYPE                 = "Content-Type";
+	public static final String FAILED                       = "Failed";
+	public static final String APPLICATION_JSON             = "application/json";
+	public static final String AES                          = "AES";
+	public static final String AES_GCM_NO_PADDING           = "AES/GCM/NoPadding";
 }

@@ -31,5 +31,10 @@ public class JsonKey {
 	public static final String COMMAND           = "command";
 	public static final String CHANNEL_ID        = "channelID";
 	public static final String DEVICE_ON         = "deviceOn";
+	public static final String QUESTION          = "question";
+	public static final String RESPONSE_CODE     = "responseCode";
+	public static final String ANSWER            = "answer";
+	public static final String SERVICE           = "service";
+	public static final String DATABASE          = "database";
 	
 }

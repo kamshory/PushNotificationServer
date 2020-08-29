@@ -68,6 +68,7 @@ public class PusherHandler implements HttpHandler
 				String applicationName = requestHeaders.getFirst("X-Application-Name");
 				String applicationVersion = requestHeaders.getFirst("X-Application-Version");
 				String userAgent = requestHeaders.getFirst("User-Agent");
+				
 				if(notification.authentication(authorization, remoteAddress, applicationName, applicationVersion, userAgent))
 				{
 					JSONObject responseJSON = new JSONObject();
