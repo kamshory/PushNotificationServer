@@ -85,7 +85,7 @@ public class Encryption
     		bld.append("&");
     		key = bld.toString();
     	}  	
-    	byte[] bkey = (key).getBytes();
+    	byte[] bkey = key.getBytes();
     	bkey = Arrays.copyOf(bkey, 16); // use only first 128 bit
     	SecretKeySpec skey2 = new SecretKeySpec(bkey, ConstantString.AES);
         this.ecipher = Cipher.getInstance(ConstantString.AES_GCM_NO_PADDING);

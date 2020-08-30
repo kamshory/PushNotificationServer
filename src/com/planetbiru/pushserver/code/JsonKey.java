@@ -36,5 +36,7 @@ public class JsonKey {
 	public static final String ANSWER            = "answer";
 	public static final String SERVICE           = "service";
 	public static final String DATABASE          = "database";
+	public static final String DEVICE_IDS        = "deviceIDs";
+	public static final String KEY               = "key";
 	
 }

@@ -1,6 +1,7 @@
 package com.planetbiru.pushserver.utility;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ public class ProcessKiller {
 	/**
 	 * Image name of this application
 	 */
-	public String path = "";
+	private String path = "";
 	private boolean exceptThis = false;	
 	
 	/**
@@ -102,14 +103,11 @@ public class ProcessKiller {
  					if(line.toLowerCase().contains("java") && line.toLowerCase().contains(basename ))
 	            	{
 	            		String[] arr = line.split(",");
-	            		if(arr.length > 4)
+	            		if(arr.length > 4 && arr[1].toLowerCase().contains("java") && arr[1].toLowerCase().contains(basename) && arr[3].toLowerCase().contains("java.exe"))
 	            		{
-	            			if(arr[1].toLowerCase().contains("java") && arr[1].toLowerCase().contains(basename) && arr[3].toLowerCase().contains("java.exe"))
-	            			{
-	            				datetime = arr[2];
-		            			pid = arr[4];
-		            			processListWindows.add(datetime+","+pid);	  
-	            			}
+            				datetime = arr[2];
+	            			pid = arr[4];
+	            			processListWindows.add(datetime+","+pid);	  
 	            		}
 	            	}
 	            }
@@ -144,9 +142,9 @@ public class ProcessKiller {
 			        logger.info("Killing PID {}", pid);
 	        	}
 	        } 
-			catch (Throwable t)
+			catch (IOException e)
 	        {
-	            t.printStackTrace();
+	            e.printStackTrace();
 	        }
 		}
 		else
@@ -154,63 +152,61 @@ public class ProcessKiller {
 			try 
 			{
 				commandLine = "ps -ef --sort=start_time";
-				try
-		        {            
-					Runtime rt = Runtime.getRuntime();
-			        Process proc = rt.exec(commandLine);
-			        proc.waitFor();
-		            InputStream simpuStream = proc.getInputStream();
-		            InputStreamReader simpuStreamReader = new InputStreamReader(simpuStream);
-		            BufferedReader bufferedReader = new BufferedReader(simpuStreamReader);
-					String line = null;
-					String lineLower = "";
-		            while ((line = bufferedReader.readLine()) != null)
-		            {
-		            	if(line.toLowerCase().contains("java ") && line.toLowerCase().contains("-jar ") && line.toLowerCase().contains(this.baseName(this.path).toLowerCase()))
-		            	{
-		            		line = line.replace("\t", " ");
-		            		line = line.replace("  ", " ").trim();
-		            		line = line.replace("  ", " ").trim();
-		            		line = line.replace("  ", " ").trim();
-		            		line = line.replace("  ", " ").trim();
-		            		line = line.replace("  ", " ").trim();
-		            		String[] arr = line.split(" ");
-		            		if(arr.length > 1)
-		            		{
-		            			lineLower = line;
-		            			lineLower = lineLower.toLowerCase();
-		            			pid = arr[1];
-		            			processList.add(pid.trim());	            				            			
+				Runtime rt = Runtime.getRuntime();
+		        Process proc = rt.exec(commandLine);
+		        proc.waitFor();
+	            InputStream simpuStream = proc.getInputStream();
+	            InputStreamReader simpuStreamReader = new InputStreamReader(simpuStream);
+	            BufferedReader bufferedReader = new BufferedReader(simpuStreamReader);
+				String line = null;
+				while ((line = bufferedReader.readLine()) != null)
+	            {
+	            	if(line.toLowerCase().contains("java ") && line.toLowerCase().contains("-jar ") && line.toLowerCase().contains(this.baseName(this.path).toLowerCase()))
+	            	{
+	            		line = line.replace("\t", " ");
+	            		line = line.replace("  ", " ").trim();
+	            		line = line.replace("  ", " ").trim();
+	            		line = line.replace("  ", " ").trim();
+	            		line = line.replace("  ", " ").trim();
+	            		line = line.replace("  ", " ").trim();
+	            		String[] arr = line.split(" ");
+	            		if(arr.length > 1)
+	            		{
+	            			pid = arr[1];
+	            			processList.add(pid.trim());	            				            			
 
-		            		}
-		            	}
-		            }
-		            bufferedReader.close();
-			        prcosessCount = processList.size();
-			        if(this.exceptThis)
-			        {
-			        	processToKill = prcosessCount - 1;
-			        }
-			        else
-			        {
-			        	processToKill = prcosessCount;
-			        }
-		        	for(i = 0; i < processToKill; i++)
-		        	{
-		        		pid = processList.get(i);
-	        			String commandLine2 = "kill -9 "+pid+"";
-	        			Runtime rt2 = Runtime.getRuntime();
-	    		        rt2.exec(commandLine2);
-	    		        logger.info("Killing PID {}", pid);
-		        	}
-		        } 
-				catch (Throwable t)
+	            		}
+	            	}
+	            }
+	            bufferedReader.close();
+		        prcosessCount = processList.size();
+		        if(this.exceptThis)
 		        {
-		            t.printStackTrace();
+		        	processToKill = prcosessCount - 1;
 		        }
+		        else
+		        {
+		        	processToKill = prcosessCount;
+		        }
+	        	for(i = 0; i < processToKill; i++)
+	        	{
+	        		pid = processList.get(i);
+        			String commandLine2 = "kill -9 "+pid+"";
+        			Runtime rt2 = Runtime.getRuntime();
+    		        rt2.exec(commandLine2);
+    		        logger.info("Killing PID {}", pid);
+	        	}
 			} 
-			catch (Exception e) 
+			catch (IOException e) 
 			{
+				if(Config.isPrintStackTrace())
+			    {
+					e.printStackTrace();
+			    }
+			}
+			catch(InterruptedException e)
+			{
+				Thread.currentThread().interrupt();
 				if(Config.isPrintStackTrace())
 			    {
 					e.printStackTrace();

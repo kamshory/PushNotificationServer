@@ -239,340 +239,347 @@ public class Config {
 	
 	private static String databaseType = "mariadb";
 	
-
-	
+	/**
+	 * @return the logger
+	 */
+	public static Logger getLogger() {
+		return logger;
+	}
+	/**
+	 * @return the applicationName
+	 */
+	public static String getApplicationName() {
+		return applicationName;
+	}
+	/**
+	 * @return the createConfiguration
+	 */
 	public static boolean isCreateConfiguration() {
 		return createConfiguration;
 	}
-	public static void setCreateConfiguration(boolean createConfiguration) {
-		Config.createConfiguration = createConfiguration;
-	}
+	/**
+	 * @return the developmentMode
+	 */
 	public static boolean isDevelopmentMode() {
 		return developmentMode;
 	}
-	public static void setDevelopmentMode(boolean developmentMode) {
-		Config.developmentMode = developmentMode;
-	}
+	/**
+	 * @return the debugMode
+	 */
 	public static boolean isDebugMode() {
 		return debugMode;
 	}
-	public static void setDebugMode(boolean debugMode) {
-		Config.debugMode = debugMode;
-	}
+	/**
+	 * @return the printStackTrace
+	 */
 	public static boolean isPrintStackTrace() {
 		return printStackTrace;
 	}
-	public static void setPrintStackTrace(boolean printStackTrace) {
-		Config.printStackTrace = printStackTrace;
-	}
+	/**
+	 * @return the readConfigSuccess
+	 */
 	public static boolean isReadConfigSuccess() {
 		return readConfigSuccess;
 	}
-	public static void setReadConfigSuccess(boolean readConfigSuccess) {
-		Config.readConfigSuccess = readConfigSuccess;
-	}
+	/**
+	 * @return the apiDocumentRoot
+	 */
 	public static String getApiDocumentRoot() {
 		return apiDocumentRoot;
 	}
-	public static void setApiDocumentRoot(String apiDocumentRoot) {
-		Config.apiDocumentRoot = apiDocumentRoot;
-	}
+	/**
+	 * @return the pusherContextPusher
+	 */
 	public static String getPusherContextPusher() {
 		return pusherContextPusher;
 	}
-	public static void setPusherContextPusher(String pusherContextPusher) {
-		Config.pusherContextPusher = pusherContextPusher;
-	}
+	/**
+	 * @return the pusherContextRemover
+	 */
 	public static String getPusherContextRemover() {
 		return pusherContextRemover;
 	}
-	public static void setPusherContextRemover(String pusherContextRemover) {
-		Config.pusherContextRemover = pusherContextRemover;
-	}
+	/**
+	 * @return the pusherContextCreateGroup
+	 */
 	public static String getPusherContextCreateGroup() {
 		return pusherContextCreateGroup;
 	}
-	public static void setPusherContextCreateGroup(String pusherContextCreateGroup) {
-		Config.pusherContextCreateGroup = pusherContextCreateGroup;
-	}
+	/**
+	 * @return the pusherContextRegisterDevice
+	 */
 	public static String getPusherContextRegisterDevice() {
 		return pusherContextRegisterDevice;
 	}
-	public static void setPusherContextRegisterDevice(String pusherContextRegisterDevice) {
-		Config.pusherContextRegisterDevice = pusherContextRegisterDevice;
-	}
+	/**
+	 * @return the pusherContextUnregisterDevice
+	 */
 	public static String getPusherContextUnregisterDevice() {
 		return pusherContextUnregisterDevice;
 	}
-	public static void setPusherContextUnregisterDevice(String pusherContextUnregisterDevice) {
-		Config.pusherContextUnregisterDevice = pusherContextUnregisterDevice;
-	}
+	/**
+	 * @return the version
+	 */
 	public static String getVersion() {
 		return version;
 	}
-	public static void setVersion(String version) {
-		Config.version = version;
-	}
-	public static boolean isHTTPProxyEnabled() {
+	/**
+	 * @return the httpProxyEnabled
+	 */
+	public static boolean isHttpProxyEnabled() {
 		return httpProxyEnabled;
 	}
-	public static void setHTTPProxyEnabled(boolean hTTPProxyEnabled) {
-		httpProxyEnabled = hTTPProxyEnabled;
-	}
-	public static String getHTTPAddressForwarder() {
+	/**
+	 * @return the httpAddressForwarder
+	 */
+	public static String getHttpAddressForwarder() {
 		return httpAddressForwarder;
 	}
-	public static void setHTTPAddressForwarder(String hTTPAddressForwarder) {
-		httpAddressForwarder = hTTPAddressForwarder;
-	}
+	/**
+	 * @return the connectionPerPush
+	 */
 	public static boolean isConnectionPerPush() {
 		return connectionPerPush;
 	}
-	public static void setConnectionPerPush(boolean connectionPerPush) {
-		Config.connectionPerPush = connectionPerPush;
-	}
+	/**
+	 * @return the databaseConfig1
+	 */
 	public static DatabaseConfiguration getDatabaseConfig1() {
 		return databaseConfig1;
 	}
-	public static void setDatabaseConfig1(DatabaseConfiguration databaseConfig1) {
-		Config.databaseConfig1 = databaseConfig1;
-	}
+	/**
+	 * @return the databaseConfig2
+	 */
 	public static DatabaseConfiguration getDatabaseConfig2() {
 		return databaseConfig2;
 	}
-	public static void setDatabaseConfig2(DatabaseConfiguration databaseConfig2) {
-		Config.databaseConfig2 = databaseConfig2;
-	}
+	/**
+	 * @return the databaseConfig3
+	 */
 	public static DatabaseConfiguration getDatabaseConfig3() {
 		return databaseConfig3;
 	}
-	public static void setDatabaseConfig3(DatabaseConfiguration databaseConfig3) {
-		Config.databaseConfig3 = databaseConfig3;
-	}
+	/**
+	 * @return the properties
+	 */
 	public static Properties getProperties() {
 		return properties;
 	}
-	public static void setProperties(Properties properties) {
-		Config.properties = properties;
-	}
+	/**
+	 * @return the pusherPort
+	 */
 	public static int getPusherPort() {
 		return pusherPort;
 	}
-	public static void setPusherPort(int pusherPort) {
-		Config.pusherPort = pusherPort;
-	}
+	/**
+	 * @return the pusherPortSSL
+	 */
 	public static int getPusherPortSSL() {
 		return pusherPortSSL;
 	}
-	public static void setPusherPortSSL(int pusherPortSSL) {
-		Config.pusherPortSSL = pusherPortSSL;
-	}
+	/**
+	 * @return the notificationPort
+	 */
 	public static int getNotificationPort() {
 		return notificationPort;
 	}
-	public static void setNotificationPort(int notificationPort) {
-		Config.notificationPort = notificationPort;
-	}
+	/**
+	 * @return the notificationPortSSL
+	 */
 	public static int getNotificationPortSSL() {
 		return notificationPortSSL;
 	}
-	public static void setNotificationPortSSL(int notificationPortSSL) {
-		Config.notificationPortSSL = notificationPortSSL;
-	}
+	/**
+	 * @return the inspectionInterval
+	 */
 	public static long getInspectionInterval() {
 		return inspectionInterval;
 	}
-	public static void setInspectionInterval(long inspectionInterval) {
-		Config.inspectionInterval = inspectionInterval;
-	}
+	/**
+	 * @return the waitForAnswer
+	 */
 	public static long getWaitForAnswer() {
 		return waitForAnswer;
 	}
-	public static void setWaitForAnswer(long waitForAnswer) {
-		Config.waitForAnswer = waitForAnswer;
-	}
+	/**
+	 * @return the filterSource
+	 */
 	public static boolean isFilterSource() {
 		return filterSource;
 	}
-	public static void setFilterSource(boolean filterSource) {
-		Config.filterSource = filterSource;
-	}
+	/**
+	 * @return the groupCreationApproval
+	 */
 	public static boolean isGroupCreationApproval() {
 		return groupCreationApproval;
 	}
-	public static void setGroupCreationApproval(boolean groupCreationApproval) {
-		Config.groupCreationApproval = groupCreationApproval;
-	}
+	/**
+	 * @return the limitNotification
+	 */
 	public static long getLimitNotification() {
 		return limitNotification;
 	}
-	public static void setLimitNotification(long limitNotification) {
-		Config.limitNotification = limitNotification;
-	}
+	/**
+	 * @return the limitTrash
+	 */
 	public static long getLimitTrash() {
 		return limitTrash;
 	}
-	public static void setLimitTrash(long limitTrash) {
-		Config.limitTrash = limitTrash;
-	}
+	/**
+	 * @return the waitDatabaseReconnect
+	 */
 	public static long getWaitDatabaseReconnect() {
 		return waitDatabaseReconnect;
 	}
-	public static void setWaitDatabaseReconnect(long waitDatabaseReconnect) {
-		Config.waitDatabaseReconnect = waitDatabaseReconnect;
-	}
+	/**
+	 * @return the tablePrefix
+	 */
 	public static String getTablePrefix() {
 		return tablePrefix;
 	}
-	public static void setTablePrefix(String tablePrefix) {
-		Config.tablePrefix = tablePrefix;
-	}
+	/**
+	 * @return the cleanUpTime
+	 */
 	public static String getCleanUpTime() {
 		return cleanUpTime;
 	}
-	public static void setCleanUpTime(String cleanUpTime) {
-		Config.cleanUpTime = cleanUpTime;
-	}
+	/**
+	 * @return the keystoreFile
+	 */
 	public static String getKeystoreFile() {
 		return keystoreFile;
 	}
-	public static void setKeystoreFile(String keystoreFile) {
-		Config.keystoreFile = keystoreFile;
-	}
+	/**
+	 * @return the keystorePassword
+	 */
 	public static String getKeystorePassword() {
 		return keystorePassword;
 	}
-	public static void setKeystorePassword(String keystorePassword) {
-		Config.keystorePassword = keystorePassword;
-	}
+	/**
+	 * @return the keystorePasswordEncrypted
+	 */
 	public static String getKeystorePasswordEncrypted() {
 		return keystorePasswordEncrypted;
 	}
-	public static void setKeystorePasswordEncrypted(String keystorePasswordEncrypted) {
-		Config.keystorePasswordEncrypted = keystorePasswordEncrypted;
-	}
+	/**
+	 * @return the pusherSSLEnabled
+	 */
 	public static boolean isPusherSSLEnabled() {
 		return pusherSSLEnabled;
 	}
-	public static void setPusherSSLEnabled(boolean pusherSSLEnabled) {
-		Config.pusherSSLEnabled = pusherSSLEnabled;
-	}
+	/**
+	 * @return the gcInterval
+	 */
 	public static long getGcInterval() {
 		return gcInterval;
 	}
-	public static void setGcInterval(long gcInterval) {
-		Config.gcInterval = gcInterval;
-	}
+	/**
+	 * @return the deleteNotifSent
+	 */
 	public static long getDeleteNotifSent() {
 		return deleteNotifSent;
 	}
-	public static void setDeleteNotifSent(long deleteNotifSent) {
-		Config.deleteNotifSent = deleteNotifSent;
-	}
+	/**
+	 * @return the deleteNotifNotSent
+	 */
 	public static long getDeleteNotifNotSent() {
 		return deleteNotifNotSent;
 	}
-	public static void setDeleteNotifNotSent(long deleteNotifNotSent) {
-		Config.deleteNotifNotSent = deleteNotifNotSent;
-	}
+	/**
+	 * @return the encryptionPassword
+	 */
 	public static String getEncryptionPassword() {
 		return encryptionPassword;
 	}
-	public static void setEncryptionPassword(String encryptionPassword) {
-		Config.encryptionPassword = encryptionPassword;
-	}
+	/**
+	 * @return the contentSecure
+	 */
 	public static boolean isContentSecure() {
 		return contentSecure;
 	}
-	public static void setContentSecure(boolean contentSecure) {
-		Config.contentSecure = contentSecure;
-	}
+	/**
+	 * @return the redirectHome
+	 */
 	public static String getRedirectHome() {
 		return redirectHome;
 	}
-	public static void setRedirectHome(String redirectHome) {
-		Config.redirectHome = redirectHome;
-	}
+	/**
+	 * @return the mailHost
+	 */
 	public static String getMailHost() {
 		return mailHost;
 	}
-	public static void setMailHost(String mailHost) {
-		Config.mailHost = mailHost;
-	}
+	/**
+	 * @return the mailPort
+	 */
 	public static int getMailPort() {
 		return mailPort;
 	}
-	public static void setMailPort(int mailPort) {
-		Config.mailPort = mailPort;
-	}
+	/**
+	 * @return the mailSender
+	 */
 	public static String getMailSender() {
 		return mailSender;
 	}
-	public static void setMailSender(String mailSender) {
-		Config.mailSender = mailSender;
-	}
+	/**
+	 * @return the mailTemplate
+	 */
 	public static String getMailTemplate() {
 		return mailTemplate;
 	}
-	public static void setMailTemplate(String mailTemplate) {
-		Config.mailTemplate = mailTemplate;
-	}
+	/**
+	 * @return the mailSubject
+	 */
 	public static String getMailSubject() {
 		return mailSubject;
 	}
-	public static void setMailSubject(String mailSubject) {
-		Config.mailSubject = mailSubject;
-	}
+	/**
+	 * @return the approvalURLTemplate
+	 */
 	public static String getApprovalURLTemplate() {
 		return approvalURLTemplate;
 	}
-	public static void setApprovalURLTemplate(String approvalURLTemplate) {
-		Config.approvalURLTemplate = approvalURLTemplate;
-	}
+	/**
+	 * @return the mailUseAuth
+	 */
 	public static boolean isMailUseAuth() {
 		return mailUseAuth;
 	}
-	public static void setMailUseAuth(boolean mailUseAuth) {
-		Config.mailUseAuth = mailUseAuth;
-	}
+	/**
+	 * @return the mailUsername
+	 */
 	public static String getMailUsername() {
 		return mailUsername;
 	}
-	public static void setMailUsername(String mailUsername) {
-		Config.mailUsername = mailUsername;
-	}
+	/**
+	 * @return the mailPassword
+	 */
 	public static String getMailPassword() {
 		return mailPassword;
 	}
-	public static void setMailPassword(String mailPassword) {
-		Config.mailPassword = mailPassword;
-	}
+	/**
+	 * @return the mailPasswordEncrypted
+	 */
 	public static String getMailPasswordEncrypted() {
 		return mailPasswordEncrypted;
 	}
-	public static void setMailPasswordEncrypted(String mailPasswordEncrypted) {
-		Config.mailPasswordEncrypted = mailPasswordEncrypted;
-	}
+	/**
+	 * @return the waitFreeUpPort
+	 */
 	public static long getWaitFreeUpPort() {
 		return waitFreeUpPort;
 	}
-	public static void setWaitFreeUpPort(long waitFreeUpPort) {
-		Config.waitFreeUpPort = waitFreeUpPort;
-	}
+	/**
+	 * @return the notificationSSLEnabled
+	 */
 	public static boolean isNotificationSSLEnabled() {
 		return notificationSSLEnabled;
 	}
-	public static void setNotificationSSLEnabled(boolean notificationSSLEnabled) {
-		Config.notificationSSLEnabled = notificationSSLEnabled;
-	}
+	/**
+	 * @return the databaseType
+	 */
 	public static String getDatabaseType() {
 		return databaseType;
-	}
-	public static void setDatabaseType(String databaseType) {
-		Config.databaseType = databaseType;
-	}
-	public static String getApplicationname() {
-		return applicationName;
 	}
 	/**
 	 * Constructor
@@ -861,4 +868,9 @@ public class Config {
 		Config.readConfigSuccess         = true;			
 		return Config.readConfigSuccess;		
 	}
+	public static void setDebugMode(boolean debugMode) {
+		Config.debugMode = debugMode;
+		
+	}
+	
 }

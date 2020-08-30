@@ -45,7 +45,7 @@ public class PusherHandler implements HttpHandler
 			authorization = authorization.substring("Bearer ".length());
 		}
 		Headers responseHeaders = new Headers();
-		responseHeaders.set("Server", Config.getApplicationname());
+		responseHeaders.set("Server", Config.getApplicationName());
 		if("POST,PUT".contains(httpExchange.getRequestMethod())) 
 		{
 			try 
@@ -53,9 +53,9 @@ public class PusherHandler implements HttpHandler
 				String body = HTTPIO.getHTTPRequestBody(httpExchange);	
 				Notification notification = new Notification();			
 				String remoteAddress = httpExchange.getRemoteAddress().getAddress().getHostAddress();
-				if(Config.isHTTPProxyEnabled())
+				if(Config.isHttpProxyEnabled())
 		    	{
-		    		String ra = requestHeaders.getFirst(Config.getHTTPAddressForwarder());
+		    		String ra = requestHeaders.getFirst(Config.getHttpAddressForwarder());
 		    		if(ra == null)
 		    		{
 		    			ra = "";

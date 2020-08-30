@@ -10,6 +10,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -43,7 +44,7 @@ public final class Database {
 	/**
 	 * Database connection
 	 */
-	private Connection databaseConnection;
+	private java.sql.Connection databaseConnection;
 	/**
 	 * Database host name
 	 */
@@ -198,42 +199,37 @@ public final class Database {
 	/**
 	 * Connect to the database threads
 	 * @return true if success and false is failed.
-	 * @throws ClassNotFoundException if class not found
 	 * @throws SQLException if any SQL errors 
 	 * @throws DatabaseTypeException if database type not supported 
 	 */
-	public boolean connect() throws DatabaseTypeException, ClassNotFoundException, SQLException 
+	public boolean connect() throws DatabaseTypeException, SQLException 
 	{
 		String uri = "";
 		try
 		{
-			if(this.databaseType.equals("postgresql"))
-			{
-				Class.forName("org.postgresql.Driver").newInstance();
-				uri = "jdbc:postgresql"+"://"+this.databaseHostName+":"+this.databasePortNumber+"/"+this.databaseName;
-				this.databaseConnection = DriverManager.getConnection(uri, this.databaseUserName, this.databaseUserPassword);
-				this.connected = true;
-			}		
-			else if(this.databaseType.equals("mysql") || this.databaseType.equals("mariadb"))
-			{
-				Class.forName("com.mysql.jdbc.Driver").newInstance();
-				uri = "jdbc:mysql"+"://"+this.databaseHostName+":"+this.databasePortNumber+"/"+this.databaseName;
-				this.databaseConnection = DriverManager.getConnection(uri, this.databaseUserName, this.databaseUserPassword);
-				this.connected = true;
-			}
-			else
-			{
-				this.connected = false;		
-				throw new DatabaseTypeException("Unsupported database type ("+this.databaseType+")");
-			}
-		}
-		catch(InstantiationException | IllegalAccessException e)
+		if(this.databaseType.equals("postgresql"))
 		{
-			this.connected = false;
-			if(Config.isPrintStackTrace())
-			{
-				e.printStackTrace();
-			}
+			Class.forName("org.postgresql.Driver").newInstance();
+			uri = "jdbc:postgresql"+"://"+this.databaseHostName+":"+this.databasePortNumber+"/"+this.databaseName;
+			this.databaseConnection = DriverManager.getConnection(uri, this.databaseUserName, this.databaseUserPassword);
+			this.connected = true;
+		}		
+		else if(this.databaseType.equals("mysql") || this.databaseType.equals("mariadb"))
+		{
+			Class.forName("com.mysql.jdbc.Driver").newInstance();
+			uri = "jdbc:mysql"+"://"+this.databaseHostName+":"+this.databasePortNumber+"/"+this.databaseName;
+			this.databaseConnection = DriverManager.getConnection(uri, this.databaseUserName, this.databaseUserPassword);
+			this.connected = true;
+		}
+		else
+		{
+			this.connected = false;		
+			throw new DatabaseTypeException("Unsupported database type ("+this.databaseType+")");
+		}
+		}
+		catch(IllegalAccessException | InstantiationException | ClassNotFoundException e)
+		{
+			throw new DatabaseTypeException("Unsupported database type ("+this.databaseType+")");			
 		}
 		return true;
 	}

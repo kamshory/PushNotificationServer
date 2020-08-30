@@ -119,6 +119,51 @@ public class DatabaseConfiguration {
 		}
 		return databaseConfig;
 	}
+	
+	
+	
+	public String getDatabaseType() {
+		return databaseType;
+	}
+	public void setDatabaseType(String databaseType) {
+		this.databaseType = databaseType;
+	}
+	public String getDatabaseHostName() {
+		return databaseHostName;
+	}
+	public void setDatabaseHostName(String databaseHostName) {
+		this.databaseHostName = databaseHostName;
+	}
+	public int getDatabasePortNumber() {
+		return databasePortNumber;
+	}
+	public void setDatabasePortNumber(int databasePortNumber) {
+		this.databasePortNumber = databasePortNumber;
+	}
+	public String getDatabaseUserName() {
+		return databaseUserName;
+	}
+	public void setDatabaseUserName(String databaseUserName) {
+		this.databaseUserName = databaseUserName;
+	}
+	public String getDatabaseUserPassword() {
+		return databaseUserPassword;
+	}
+	public void setDatabaseUserPassword(String databaseUserPassword) {
+		this.databaseUserPassword = databaseUserPassword;
+	}
+	public String getDatabaseName() {
+		return databaseName;
+	}
+	public void setDatabaseName(String databaseName) {
+		this.databaseName = databaseName;
+	}
+	public boolean isDatabaseUsed() {
+		return databaseUsed;
+	}
+	public void setDatabaseUsed(boolean databaseUsed) {
+		this.databaseUsed = databaseUsed;
+	}
 	/**
 	 * Overrides <strong>toString</strong> method to convert object to JSON String. This method is useful to debug or show value of each properties of the object.
 	 */
@@ -154,46 +199,5 @@ public class DatabaseConfiguration {
 		}
 		return resultStr;
 	}
-	public String getDatabaseHostName() {
-		return databaseHostName;
-	}
-	public void setDatabaseHostName(String databaseHostName) {
-		this.databaseHostName = databaseHostName;
-	}
-	public int getDatabasePortNumber() {
-		return databasePortNumber;
-	}
-	public void setDatabasePortNumber(int databasePortNumber) {
-		this.databasePortNumber = databasePortNumber;
-	}
-	public String getDatabaseType() {
-		return databaseType;
-	}
-	public void setDatabaseType(String databaseType) {
-		this.databaseType = databaseType;
-	}
-	public String getDatabaseUserName() {
-		return databaseUserName;
-	}
-	public void setDatabaseUserName(String databaseUserName) {
-		this.databaseUserName = databaseUserName;
-	}
-	public String getDatabaseUserPassword() {
-		return databaseUserPassword;
-	}
-	public void setDatabaseUserPassword(String databaseUserPassword) {
-		this.databaseUserPassword = databaseUserPassword;
-	}
-	public String getDatabaseName() {
-		return databaseName;
-	}
-	public void setDatabaseName(String databaseName) {
-		this.databaseName = databaseName;
-	}
-	public boolean isDatabaseUsed() {
-		return databaseUsed;
-	}
-	public void setDatabaseUsed(boolean databaseUsed) {
-		this.databaseUsed = databaseUsed;
-	}
+	
 }
