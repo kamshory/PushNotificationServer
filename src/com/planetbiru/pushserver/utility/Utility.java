@@ -81,7 +81,7 @@ public class Utility {
 		{
 			spliter = "\\:";
 		}
-		for(i = 0; i<headers.length; i++)
+		for(i = 0; i < headers.length; i++)
 		{
 			line = headers[i].trim();
 			if(line.contains(delimiter))
@@ -187,7 +187,7 @@ public class Utility {
     			args = new String[1];
     			args[0] = query;
     		}
-    		for(i = 0; i<args.length; i++)
+    		for(i = 0; i < args.length; i++)
     		{
     			arg = args[i];
     			if(arg.contains("="))
@@ -230,9 +230,10 @@ public class Utility {
 				}
 			} 
 			catch (JSONException e) {
-				if(Config.isPrintStackTrace())
-				
+				if(Config.isPrintStackTrace())		
+				{
 					e.printStackTrace();
+				}
 			}
 			i++;
     	}
@@ -659,7 +660,7 @@ public class Utility {
 	 */
 	public static int random(int min, int max)
 	{
-		int rand = random.nextInt(max);
+		int rand = Utility.random.nextInt(max);
 		if(rand < min)
 		{
 			rand = min;
