@@ -67,7 +67,7 @@ public class GC extends Thread
 			stmt = database1.getDatabaseConnection().createStatement();
 			stmt.execute(sqlCommand);
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | SQLException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -104,7 +104,7 @@ public class GC extends Thread
 			stmt = database1.getDatabaseConnection().createStatement();
 			stmt.execute(sqlCommand);
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | SQLException e)
 		{
 			if(Config.isPrintStackTrace())
 			{

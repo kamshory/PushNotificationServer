@@ -219,7 +219,7 @@ public class Application
 								requestHandlerHTTPS.createContext("/", new WelcomeHandler("welcome"));
 								requestHandlerHTTPS.createContext("/ping", new WelcomeHandler("ping"));
 								requestHandlerHTTPS.start();
-								logger.info("SSL Service for pusher is started");
+								logger.info("SSL Service for pusher is started at port {}", Config.getPusherPortSSL());
 							} 
 						    catch (NoSuchAlgorithmException | CertificateException | UnrecoverableKeyException | KeyManagementException | KeyStoreException e) 
 						    {
@@ -255,7 +255,7 @@ public class Application
 						requestHandlerHTTP.createContext("/", new WelcomeHandler("welcome"));
 						requestHandlerHTTP.createContext("/ping", new WelcomeHandler("ping"));
 						requestHandlerHTTP.start();
-						logger.info("Service for pusher is started");
+						logger.info("Service for pusher is started at port {}", Config.getPusherPort());
 					} 
 					catch (IOException e) 
 					{
@@ -346,13 +346,10 @@ public class Application
 						.toString();
 				stmt  = database1.getDatabaseConnection().createStatement();
 				rs = stmt.executeQuery(sqlCommand);
-				if(rs.isBeforeFirst())
+				while(rs.next())
 				{
-					while(rs.next())
-					{
-						tableName = rs.getString("tablename");
-						tables.add(tableName);
-					}
+					tableName = rs.getString("tablename");
+					tables.add(tableName);
 				}
 			}
 			else if(Config.getDatabaseConfig1().getDatabaseType().equals("mysql") || Config.getDatabaseConfig1().getDatabaseType().equals("mariadb"))
@@ -362,29 +359,23 @@ public class Application
 				
 				stmt = database1.getDatabaseConnection().createStatement();
 				rs = stmt.executeQuery(sqlCommand);
-				if(rs.isBeforeFirst())
+				while(rs.next())
 				{
-					while(rs.next())
-					{
-						tableName = rs.getString(1);
-						tables.add(tableName);
-					}
+					tableName = rs.getString(1);
+					tables.add(tableName);
 				}
 			}
 			int i;
 			for(i = 0; i < list.size(); i++)
 			{
-				if(tables.contains(list.get(i)))
-				{
-					valid = true;
-				}
-				else
+				if(!tables.contains(list.get(i)))
 				{
 					throw new TableNotFoundException("Table "+list.get(i)+" not found.");
 				}
 			}
+			valid = true;
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | SQLException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -430,7 +421,7 @@ public class Application
 				throw new DatabaseFunctionException("Function sha1 not found");
 			}
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | SQLException e)
 		{
 			if(Config.isPrintStackTrace())
 			{

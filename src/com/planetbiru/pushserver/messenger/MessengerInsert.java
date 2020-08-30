@@ -206,7 +206,7 @@ public class MessengerInsert extends Thread
 			stmt = database1.getDatabaseConnection().createStatement();
 			stmt.execute(sqlCommand);
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException e)
 		{
 			if(Config.isPrintStackTrace())
 			{

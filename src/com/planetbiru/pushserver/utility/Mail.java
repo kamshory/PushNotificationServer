@@ -168,9 +168,9 @@ public class Mail
     {
         private String username = "";
         private String password = "";
-    	public SMTPAuthenticator(String user, String password)
+    	public SMTPAuthenticator(String username, String password)
     	{
-    		this.username = user;
+    		this.username = username;
     		this.password = password;
     	}
     	

@@ -202,7 +202,7 @@ public class Notification
 				}
 			}
 		}
-		catch(SQLException | ClassNotFoundException | DatabaseTypeException | NoSuchAlgorithmException | NullPointerException e)
+		catch(SQLException | DatabaseTypeException | NoSuchAlgorithmException | NullPointerException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -296,7 +296,7 @@ public class Notification
 				}
 			}
 		}
-		catch(SQLException | QueryParserException | ClassNotFoundException | DatabaseTypeException | NoSuchAlgorithmException | NullPointerException | IllegalArgumentException e)
+		catch(SQLException | QueryParserException | DatabaseTypeException | NoSuchAlgorithmException | NullPointerException | IllegalArgumentException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -436,7 +436,7 @@ public class Notification
 				jo.put(JsonKey.MESSAGE, ConstantString.INVALID_API);
 			}
 		}
-		catch(SQLException | DatabaseTypeException | ClassNotFoundException | JSONException e)
+		catch(SQLException | DatabaseTypeException | JSONException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -486,7 +486,7 @@ public class Notification
 				lGroupID = rs.getLong(DatabaseField.CLIENT_GROUP_ID);
 			}
 		}
-		catch(SQLException | DatabaseTypeException | ClassNotFoundException e)
+		catch(SQLException | DatabaseTypeException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -538,7 +538,7 @@ public class Notification
 				lGroupID = rs.getLong(DatabaseField.CLIENT_GROUP_ID);
 			}
 		}
-		catch(SQLException | DatabaseTypeException | ClassNotFoundException e)
+		catch(SQLException | DatabaseTypeException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -623,7 +623,7 @@ public class Notification
 				}
 			}
 		}
-		catch(SQLException | DatabaseTypeException | NoSuchAlgorithmException | NullPointerException | IllegalArgumentException | ClassNotFoundException e)
+		catch(SQLException | DatabaseTypeException | NoSuchAlgorithmException | NullPointerException | IllegalArgumentException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -709,7 +709,7 @@ public class Notification
 				}
 			}
 		}
-		catch(SQLException | DatabaseTypeException | NullPointerException | IllegalArgumentException | MessagingException | ClassNotFoundException e)
+		catch(SQLException | DatabaseTypeException | NullPointerException | IllegalArgumentException | MessagingException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -786,7 +786,7 @@ public class Notification
 				inactiveSource = true;
 			}
 		}
-		catch(SQLException | DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException e)
+		catch(SQLException | DatabaseTypeException | NullPointerException | IllegalArgumentException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -860,7 +860,7 @@ public class Notification
 			response.put(JsonKey.COMMAND, "register-device");
 			response.put(JsonKey.DATA, data);
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException | JSONException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | SQLException | JSONException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -919,7 +919,7 @@ public class Notification
 			response.put(JsonKey.COMMAND, "register-device");
 			response.put(JsonKey.DATA, data);
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException | JSONException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | SQLException | JSONException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -1097,7 +1097,7 @@ public class Notification
 			response.put(JsonKey.COMMAND, "push-notification");
 			response.put(JsonKey.DATA, responseData);
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException | JSONException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | SQLException | JSONException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -1139,7 +1139,7 @@ public class Notification
 				deviceExist = true;
 			}
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | SQLException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -1255,7 +1255,7 @@ public class Notification
 				}
 			}
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException | JSONException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | SQLException | JSONException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -1313,7 +1313,7 @@ public class Notification
 				clount = rs.getLong("numrows");
 			}
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | SQLException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -1424,7 +1424,7 @@ public class Notification
 				broadcastCloseLoop.start();
 			}
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException | JSONException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | SQLException | JSONException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -1474,7 +1474,7 @@ public class Notification
 				Utility.closeResource(stmt);
 			}
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException | JSONException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | SQLException | JSONException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -1543,7 +1543,7 @@ public class Notification
 				}
 			}
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException | JSONException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | SQLException | JSONException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -1590,7 +1590,7 @@ public class Notification
 				count = rs.getLong("numrows");
 			}
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | SQLException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -1628,7 +1628,7 @@ public class Notification
 			stmt = database1.getDatabaseConnection().createStatement();
 			stmt.execute(sqlCommand);	
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | SQLException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -1676,7 +1676,7 @@ public class Notification
 				Utility.closeResource(stmt);
 			}		
 		}
-		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | ClassNotFoundException | SQLException e)
+		catch(DatabaseTypeException | NullPointerException | IllegalArgumentException | SQLException e)
 		{
 			if(Config.isPrintStackTrace())
 			{

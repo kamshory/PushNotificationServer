@@ -594,7 +594,7 @@ public class NotificationHandler extends Thread
 			stmt = database1.getDatabaseConnection().createStatement();
 			stmt.execute(sqlUpdate);
 		}
-		catch(SQLException | ClassNotFoundException | DatabaseTypeException | NullPointerException | IllegalArgumentException e)
+		catch(SQLException | DatabaseTypeException | NullPointerException | IllegalArgumentException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -891,7 +891,7 @@ public class NotificationHandler extends Thread
 				throw new NotificationException("Device already exists");
 			}
 		}
-		catch(SQLException | ClassNotFoundException | DatabaseTypeException | NoSuchAlgorithmException | NullPointerException | IllegalArgumentException e)
+		catch(SQLException | DatabaseTypeException | NoSuchAlgorithmException | NullPointerException | IllegalArgumentException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -948,7 +948,7 @@ public class NotificationHandler extends Thread
 				throw new NotificationException("Device not exists");
 			}
 		}
-		catch(SQLException | ClassNotFoundException | DatabaseTypeException | NullPointerException | IllegalArgumentException e)
+		catch(SQLException | DatabaseTypeException | NullPointerException | IllegalArgumentException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
@@ -998,7 +998,7 @@ public class NotificationHandler extends Thread
 				stmt.execute(sqlCommand);
 			}		
 		}
-		catch(SQLException | ClassNotFoundException | DatabaseTypeException | NullPointerException | IllegalArgumentException e)
+		catch(SQLException | DatabaseTypeException | NullPointerException | IllegalArgumentException e)
 		{
 			if(Config.isPrintStackTrace())
 			{
