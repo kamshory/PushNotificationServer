@@ -1213,19 +1213,19 @@ public class Notification
 					title = rs.getString(DatabaseField.TITLE);
 					subtitle = rs.getString(DatabaseField.SUBTITLE);
 					message = rs.getString(DatabaseField.MESSAGE);
-					tickerText = rs.getString("ticker_text");
+					tickerText = rs.getString(DatabaseField.TICKER_TEXT);
 					uri = rs.getString(DatabaseField.URI);
-					clickAction = rs.getString("click_action");
+					clickAction = rs.getString(DatabaseField.CLICK_ACTION);
 					color = rs.getString(JsonKey.COLOR);
 					vibrate = rs.getString(DatabaseField.VIBRATE);
 					sound = rs.getString(DatabaseField.SOUND);
 					badge = rs.getString(DatabaseField.BADGE);
-					largeIcon = rs.getString("large_icon");
-					smallIcon = rs.getString("small_icon");
-					miscData = rs.getString("misc_data");
-					time = rs.getString("time_create");
-					timeGMT = rs.getString("time_gmt");
-					notificationID = rs.getLong("notification_id");					
+					largeIcon = rs.getString(DatabaseField.LARGE_ICON);
+					smallIcon = rs.getString(DatabaseField.SMALL_ICON);
+					miscData = rs.getString(DatabaseField.MISC_DATA);
+					time = rs.getString(DatabaseField.TIME_CREATE);
+					timeGMT = rs.getString(DatabaseField.TIME_GMT);
+					notificationID = rs.getLong(DatabaseField.NOTIFICATION_ID);					
 					time = time.replace(".000", ".");
 					if(time.endsWith("."))
 					{
@@ -1537,8 +1537,8 @@ public class Notification
 				while(rs.next())
 				{
 					jo = new JSONObject();
-					jo.put(JsonKey.DEVICE_ID, rs.getString("device_id"));
-					jo.put(JsonKey.ID, rs.getString("notification_id"));
+					jo.put(JsonKey.DEVICE_ID, rs.getString(DatabaseField.DEVICE_ID));
+					jo.put(JsonKey.ID, rs.getString(DatabaseField.NOTIFICATION_ID));
 					ja.put(jo);
 				}
 			}

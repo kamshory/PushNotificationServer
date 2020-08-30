@@ -51,9 +51,10 @@ public class MessengerDelete extends Thread
 	 * Command
 	 */
 	private String command = "";
-	private long requestID = 0;
-	
-	
+	/**
+	 * Request ID
+	 */
+	private long requestID = 0;	
 	
 	public JSONArray getData() {
 		return data;

@@ -22,6 +22,7 @@ import org.json.JSONObject;
 import com.planetbiru.pushserver.client.Client;
 import com.planetbiru.pushserver.client.Device;
 import com.planetbiru.pushserver.code.ConstantString;
+import com.planetbiru.pushserver.code.DatabaseTable;
 import com.planetbiru.pushserver.code.JsonKey;
 import com.planetbiru.pushserver.code.ResponseCode;
 import com.planetbiru.pushserver.config.Config;
@@ -151,7 +152,7 @@ public class NotificationHandler extends Thread
 	 */
 	private void acceptRequest() throws NoSuchAlgorithmException, NotificationException
 	{
-		SocketIO socketIO = new SocketIO(this.getSocket());
+		SocketIO socketIO = new SocketIO(this.socket);
 		SocketkBreaker socketkBreaker = new SocketkBreaker(this, Config.getWaitForAnswer());
 		socketkBreaker.start();
 		boolean validClient = false;
@@ -167,7 +168,7 @@ public class NotificationHandler extends Thread
 			if(firstCommand.equals("ping"))
 			{
 				this.replyPing();
-				this.getSocket().close();
+				this.socket.close();
 			}
 			else
 			{
@@ -199,18 +200,18 @@ public class NotificationHandler extends Thread
 									 */
 									this.key  = this.generateSecureKey(this.deviceID, this.hashPasswordClient);
 									this.sendKey(this.key);
-									device = new Device(this.deviceID, this.requestID, this.getSocket(), this.key, this.hashPasswordClient);
+									device = new Device(this.deviceID, this.requestID, this.socket, this.key, this.hashPasswordClient);
 								}
 								else
 								{
-									device = new Device(this.deviceID, this.requestID, this.getSocket());
+									device = new Device(this.deviceID, this.requestID, this.socket);
 								}
 								Client.add(this.deviceID, this.apiID, this.groupID, device, this.requestID);									
-								NotificationChecker notificationChecker = new NotificationChecker(this.getSocket(), this, Config.getInspectionInterval());
+								NotificationChecker notificationChecker = new NotificationChecker(this.socket, this, Config.getInspectionInterval());
 								notificationChecker.start();					
 								String[] heads;
 								String body = "";
-								while(this.getSocket().isConnected() && !this.getSocket().isClosed() && this.isRunning())
+								while(this.socket.isConnected() && !this.socket.isClosed() && this.isRunning())
 								{
 									try 
 									{
@@ -235,13 +236,13 @@ public class NotificationHandler extends Thread
 						}
 						else
 						{
-							this.getSocket().close();
+							this.socket.close();
 							Client.remove(this.deviceID, this.apiID, this.groupID, this.requestID);
 						}
 					} 
 					catch (UnsupportedOperationException | ClassCastException | NullPointerException | SQLException e) 
 					{
-						this.getSocket().close();
+						this.socket.close();
 						Client.remove(this.deviceID, this.apiID, this.groupID, this.requestID);
 						if(Config.isPrintStackTrace()) 
 						{
@@ -258,7 +259,7 @@ public class NotificationHandler extends Thread
 				}
 				else
 				{
-					this.getSocket().close();
+					this.socket.close();
 					Client.remove(this.deviceID, this.apiID, this.groupID, this.requestID);
 					throw new NotificationException("Request not contains device ID");
 				}
@@ -268,7 +269,7 @@ public class NotificationHandler extends Thread
 		{
 			try 
 			{
-				this.getSocket().close();
+				this.socket.close();
 			} 
 			catch (IOException e) 
 			{
@@ -301,7 +302,7 @@ public class NotificationHandler extends Thread
 	 */
 	private void replyPing() throws IOException, SocketException, JSONException 
 	{
-		SocketIO socketIO = new SocketIO(this.getSocket());
+		SocketIO socketIO = new SocketIO(this.socket);
 		socketIO.resetRequestHeader();
 		socketIO.addRequestHeader(NotificationHandler.COMMAND, "ping-reply");
 		socketIO.addRequestHeader(ConstantString.CONTENT_TYPE, ConstantString.APPLICATION_JSON);
@@ -336,7 +337,7 @@ public class NotificationHandler extends Thread
 	 */
 	public void downloadLastNotification() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalArgumentException, SocketException, IOException, SQLException, DatabaseTypeException, IllegalBlockSizeException, BadPaddingException
 	{
-		SocketIO socketIO = new SocketIO(this.getSocket());
+		SocketIO socketIO = new SocketIO(this.socket);
 		Notification notification = new Notification(this.requestID);
 		String offileNotification = "";
 		while(notification.countNotification(this.apiID, this.deviceID, this.groupID) > 0)
@@ -372,7 +373,7 @@ public class NotificationHandler extends Thread
 	 */
 	public void downloadLastDeleteLog() throws SQLException, IOException, SocketException, DatabaseTypeException, InvalidKeyException, IllegalArgumentException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException
 	{
-		SocketIO socketIO = new SocketIO(this.getSocket());
+		SocketIO socketIO = new SocketIO(this.socket);
 		Notification notification = new Notification(this.requestID);
 		JSONArray trash;
 		String offileNotification = "";
@@ -409,20 +410,21 @@ public class NotificationHandler extends Thread
 		boolean read = true;
 		try 
 		{
+			int nByte = 0;
 			do
 			{
-				this.getSocket().getInputStream().read(buf);
+				nByte = this.socket.getInputStream().read(buf);
 				buff.append(new String(buf));
 				if(buff.toString().contains("\r\n\r\n"))
 				{
 					read = false;
 				}
 			}
-			while(read);
+			while(read && nByte > 0);
 		} 
 		catch (IOException e) 
 		{
-			this.getSocket().close();
+			this.socket.close();
 		}
 		return buff.toString();
 	}
@@ -442,22 +444,19 @@ public class NotificationHandler extends Thread
 		}
 		StringBuilder buff = new StringBuilder();
 		long length = Long.parseLong(contentLength);
-		if(length > 0)
+		int buf;
+		long i;
+		try 
 		{
-			int buf;
-			long i;
-			try 
+			for(i = 0; i < length; i++)
 			{
-				for(i = 0; i < length; i++)
-				{
-					buf = this.getSocket().getInputStream().read();
-					buff.append(String.format("%c", buf));
-				}
-			} 
-			catch (IOException e) 
-			{
-				this.getSocket().close();
+				buf = this.socket.getInputStream().read();
+				buff.append(String.format("%c", buf));
 			}
+		} 
+		catch (IOException e) 
+		{
+			this.socket.close();
 		}
 		return buff.toString();
 	}
@@ -480,7 +479,7 @@ public class NotificationHandler extends Thread
 		if(serverAnswer.equals(clientAnswer))
 		{
 			this.token = Utility.sha1(this.deviceID+this.answer+(Math.random()*1000000));
-			SocketIO socketIO = new SocketIO(this.getSocket());
+			SocketIO socketIO = new SocketIO(this.socket);
 			socketIO.resetRequestHeader();
 			socketIO.addRequestHeader(NotificationHandler.COMMAND, "token");
 			socketIO.addRequestHeader(ConstantString.CONTENT_TYPE, ConstantString.APPLICATION_JSON);				
@@ -501,7 +500,7 @@ public class NotificationHandler extends Thread
 			try 
 			{
 				sendToken = socketIO.write(jo2.toString());	
-				String address = this.getSocket().getInetAddress().getHostAddress().replace("/", "").trim();
+				String address = this.socket.getInetAddress().getHostAddress().replace("/", "").trim();
 				if(sendToken)
 				{
 					this.setConnected(true);
@@ -519,7 +518,7 @@ public class NotificationHandler extends Thread
 				}
 				try 
 				{
-					this.getSocket().close();
+					this.socket.close();
 				} 
 				catch (IOException e2) 
 				{
@@ -534,7 +533,7 @@ public class NotificationHandler extends Thread
 		{
 			try 
 			{
-				this.getSocket().close();
+				this.socket.close();
 			} 
 			catch (IOException e) 
 			{
@@ -568,8 +567,7 @@ public class NotificationHandler extends Thread
 			deviceID = query1.escapeSQL(deviceID);
 			token = query1.escapeSQL(token);
 			address = query1.escapeSQL(address);
-			time = query1.escapeSQL(time);
-			
+			time = query1.escapeSQL(time);			
 		
 			int connection = 0;
 			List<Device> cons;
@@ -587,7 +585,7 @@ public class NotificationHandler extends Thread
 				connection = 1;
 			}
 			String sqlUpdate = query1.newQuery()
-					.update(Config.getTablePrefix()+"client")
+					.update(Config.getTablePrefix()+DatabaseTable.CLIENT)
 					.set("connection = '"+connection+"', last_token = '"+token+"', last_ip = '"+address+"', last_time = '"+time+"' ")
 					.where("device_id = '"+deviceID+"' and api_id = "+apiID+" ")
 					.toString();
@@ -636,7 +634,7 @@ public class NotificationHandler extends Thread
 	private void sendKey(String key) throws IOException, NoSuchAlgorithmException, NullPointerException, IllegalArgumentException, JSONException 
 	{
 		this.buildRandomQuestion();
-		SocketIO socketIO = new SocketIO(this.getSocket());	
+		SocketIO socketIO = new SocketIO(this.socket);	
 		socketIO.resetRequestHeader();
 		socketIO.addRequestHeader(ConstantString.CONTENT_TYPE, ConstantString.APPLICATION_JSON);
 		socketIO.addRequestHeader(NotificationHandler.COMMAND, JsonKey.KEY);
@@ -655,7 +653,7 @@ public class NotificationHandler extends Thread
 	public void sendQuestion() throws IOException, JSONException, NoSuchAlgorithmException, NullPointerException, IllegalArgumentException 
 	{
 		this.buildRandomQuestion();
-		SocketIO socketIO = new SocketIO(this.getSocket());	
+		SocketIO socketIO = new SocketIO(this.socket);	
 		socketIO.resetRequestHeader();
 		socketIO.addRequestHeader(ConstantString.CONTENT_TYPE, ConstantString.APPLICATION_JSON);
 		socketIO.addRequestHeader(NotificationHandler.COMMAND, JsonKey.QUESTION);
@@ -683,7 +681,7 @@ public class NotificationHandler extends Thread
 	 */
 	private String getClientAnswer() throws IOException
 	{
-		SocketIO socketIO = new SocketIO(this.getSocket());
+		SocketIO socketIO = new SocketIO(this.socket);
 		socketIO.read();
 		return socketIO.getBody();
 	}
@@ -769,7 +767,7 @@ public class NotificationHandler extends Thread
 	 */
 	private void onUnregisterDeviceError(String deviceID, int responseCode, String message, String cause) throws IOException, SocketException, JSONException 
 	{
-		SocketIO socketIO = new SocketIO(this.getSocket());
+		SocketIO socketIO = new SocketIO(this.socket);
 		socketIO.resetRequestHeader();
 		socketIO.addRequestHeader(ConstantString.CONTENT_TYPE, ConstantString.APPLICATION_JSON);
 		socketIO.addRequestHeader(NotificationHandler.COMMAND, "unregister-device-error");
@@ -789,7 +787,7 @@ public class NotificationHandler extends Thread
 	 */
 	private void onUnregisterDeviceSuccess(String deviceID, int responseCode, String message) throws IOException, SocketException, JSONException 
 	{
-		SocketIO socketIO = new SocketIO(this.getSocket());
+		SocketIO socketIO = new SocketIO(this.socket);
 		socketIO.resetRequestHeader();
 		socketIO.addRequestHeader(ConstantString.CONTENT_TYPE, ConstantString.APPLICATION_JSON);
 		socketIO.addRequestHeader(NotificationHandler.COMMAND, "unregister-device-success");
@@ -809,7 +807,7 @@ public class NotificationHandler extends Thread
 	 */
 	private void onRegisterDeviceError(String deviceID, int responseCode, String message, String cause) throws IOException, SocketException, JSONException 
 	{
-		SocketIO socketIO = new SocketIO(this.getSocket());
+		SocketIO socketIO = new SocketIO(this.socket);
 		socketIO.resetRequestHeader();
 		socketIO.addRequestHeader(ConstantString.CONTENT_TYPE, ConstantString.APPLICATION_JSON);
 		socketIO.addRequestHeader(NotificationHandler.COMMAND, "register-device-error");
@@ -829,7 +827,7 @@ public class NotificationHandler extends Thread
 	 */
 	private void onRegisterDeviceSuccess(String deviceID, int responseCode, String message) throws IOException, SocketException, JSONException 
 	{
-		SocketIO socketIO = new SocketIO(this.getSocket());
+		SocketIO socketIO = new SocketIO(this.socket);
 		socketIO.resetRequestHeader();
 		socketIO.addRequestHeader(ConstantString.CONTENT_TYPE, ConstantString.APPLICATION_JSON);
 		socketIO.addRequestHeader(NotificationHandler.COMMAND, "register-device-success");
@@ -861,13 +859,13 @@ public class NotificationHandler extends Thread
 		{
 			database1.connect();
 			QueryBuilder query1 = new QueryBuilder(database1.getDatabaseType());
-			String address = this.getSocket().getInetAddress().getHostAddress().replace("/", "").trim();
+			String address = this.socket.getInetAddress().getHostAddress().replace("/", "").trim();
 			deviceID = query1.escapeSQL(deviceID);
 			String lToken = query1.escapeSQL(this.token);
 			address = query1.escapeSQL(address);
 			String sqlSelect = query1.newQuery()
 					.select("device_id")
-					.from(Config.getTablePrefix()+"client")
+					.from(Config.getTablePrefix()+DatabaseTable.CLIENT)
 					.where("device_id = '"+deviceID+"' and api_id = "+this.apiID+" ")
 					.toString();
 			stmt = database1.getDatabaseConnection().createStatement();
@@ -876,7 +874,7 @@ public class NotificationHandler extends Thread
 			{
 				String slqInsert = query1.newQuery()
 						.insert()
-						.into(Config.getTablePrefix()+"client")
+						.into(Config.getTablePrefix()+DatabaseTable.CLIENT)
 						.fields("(device_id, api_id, last_token, last_time, last_ip, time_create)")
 						.values("('"+deviceID+"', "+this.apiID+", '"+lToken+"', now(), '"+address+"', now())")
 						.toString();
@@ -926,7 +924,7 @@ public class NotificationHandler extends Thread
 			deviceID = query1.escapeSQL(deviceID);
 			String sqlSelect = query1.newQuery()
 					.select("device_id")
-					.from(Config.getTablePrefix()+"client")
+					.from(Config.getTablePrefix()+DatabaseTable.CLIENT)
 					.where("device_id = '"+deviceID+"' and api_id = "+this.apiID+" ")
 					.toString();
 			stmt = database1.getDatabaseConnection().createStatement();
@@ -935,7 +933,7 @@ public class NotificationHandler extends Thread
 			{
 				String slqDelete = query1.newQuery()
 						.delete()
-						.from(Config.getTablePrefix()+"client")
+						.from(Config.getTablePrefix()+DatabaseTable.CLIENT)
 						.where("device_id = '"+deviceID+"' and api_id = "+this.apiID+" ")
 						.toString();
 				Utility.closeResource(stmt);
