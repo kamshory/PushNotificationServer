@@ -748,9 +748,7 @@ public class Config {
 		
 		Config.developmentMode = (properties.getProperty("DEVELOPMENT_MODE", ConstantString.FALSE).equals(ConstantString.TRUE));
 		Config.createConfiguration = (properties.getProperty("CREATE_CONFIGURATION", ConstantString.FALSE).equals(ConstantString.TRUE));
-		// Free version begin
 		Config.developmentMode = true;
-		// Free version end
 		if(Config.developmentMode)
 		{		
 			database1Type 			= properties.getProperty("DATABASE1_TYPE", "");

@@ -18,6 +18,8 @@ import javax.crypto.NoSuchPaddingException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.planetbiru.pushserver.client.Client;
 import com.planetbiru.pushserver.client.Device;
@@ -91,6 +93,8 @@ public class NotificationHandler extends Thread
 	/**
 	 * Encryption key
 	 */
+	
+	private Logger logger = LoggerFactory.getLogger(NotificationHandler.class);
 	private String key = "";
 	/**
 	 * Default constructor
