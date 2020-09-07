@@ -187,10 +187,6 @@ public class Config {
 	 */
 	private static String encryptionPassword = "1234567890";
 	/**
-	 * Flag secure content. If set as true, notification will be encrypted using combination of key sent from server and client hash password
-	 */
-	private static boolean contentSecure = false;
-	/**
 	 * Redirect user when access document root
 	 */
 	private static String redirectHome = "https://www.planetbiru.com";
@@ -490,12 +486,6 @@ public class Config {
 	 */
 	public static String getEncryptionPassword() {
 		return encryptionPassword;
-	}
-	/**
-	 * @return the contentSecure
-	 */
-	public static boolean isContentSecure() {
-		return contentSecure;
 	}
 	/**
 	 * @return the redirectHome
@@ -850,7 +840,6 @@ public class Config {
 		Config.waitForAnswer             = Integer.parseInt(properties.getOrDefault("WAIT_FOR_ANSWER", "30000").toString().trim());			
 		Config.deleteNotifSent           = Integer.parseInt(properties.getOrDefault("DELETE_NOTIF_SENT", "3").toString().trim());	
 		Config.deleteNotifNotSent        = Integer.parseInt(properties.getOrDefault("DELETE_NOTIF_NOT_SENT", "10").toString().trim());	
-		Config.contentSecure             = properties.getOrDefault("CONTENT_SECURE", ConstantString.FALSE).toString().trim().equalsIgnoreCase(ConstantString.TRUE);
 		Config.redirectHome              = properties.getOrDefault("REDIRECT_HOME", "https://www.planetbiru.com").toString().trim();		
 		
 		Config.mailHost                  = properties.getOrDefault("MAIL_HOST", "localhost").toString().trim();	

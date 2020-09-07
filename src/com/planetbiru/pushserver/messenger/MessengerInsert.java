@@ -3,17 +3,12 @@ package com.planetbiru.pushserver.messenger;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
+import java.util.NoSuchElementException;
 
 import com.planetbiru.pushserver.client.Client;
 import com.planetbiru.pushserver.client.Device;
@@ -21,7 +16,6 @@ import com.planetbiru.pushserver.config.Config;
 import com.planetbiru.pushserver.database.Database;
 import com.planetbiru.pushserver.database.QueryBuilder;
 import com.planetbiru.pushserver.database.DatabaseTypeException;
-import com.planetbiru.pushserver.utility.Encryption;
 import com.planetbiru.pushserver.utility.SocketIO;
 import com.planetbiru.pushserver.utility.Utility;
 
@@ -105,7 +99,7 @@ public class MessengerInsert extends Thread
 		String stringNotification = "";
 		while(iterator.hasNext())
 		{
-			if(iterator.hasNext())
+			try
 			{
 				device = iterator.next();
 				if(device != null)
@@ -121,24 +115,6 @@ public class MessengerInsert extends Thread
 							socketIO.addRequestHeader("Content-Type", "application/json");
 							socketIO.addRequestHeader("Command", "notification");
 							stringNotification = this.data;
-							if(Config.isContentSecure())
-							{
-								String tmp = stringNotification;
-								Encryption encryption;
-								try 
-								{
-									encryption = new Encryption(device.getKey()+device.getHashPasswordClient());
-									stringNotification = encryption.encrypt(tmp, true);
-									socketIO.addRequestHeader("Content-Secure", "yes");
-								} 
-								catch (InvalidKeyException | IllegalArgumentException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException e) 
-								{
-									if(Config.isPrintStackTrace())
-									{
-										e.printStackTrace();
-									}
-								} 
-							}
 							success = socketIO.write(stringNotification);
 							if(success && idx == 0 && this.notificationID != 0)
 							{
@@ -181,6 +157,12 @@ public class MessengerInsert extends Thread
 						Client.remove(deviceID, this.apiID, this.groupID, device.getRequestID());
 					}
 				}
+			}
+			catch(NoSuchElementException e)
+			{
+				/*
+				 * Do nothing
+				 */
 			}
 		}
 	}

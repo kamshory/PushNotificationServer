@@ -9,8 +9,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-import java.util.TimeZone;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -18,9 +16,6 @@ import javax.crypto.NoSuchPaddingException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.planetbiru.pushserver.client.Client;
 import com.planetbiru.pushserver.client.Device;
 import com.planetbiru.pushserver.code.ConstantString;
@@ -31,9 +26,7 @@ import com.planetbiru.pushserver.config.Config;
 import com.planetbiru.pushserver.database.Database;
 import com.planetbiru.pushserver.database.QueryBuilder;
 import com.planetbiru.pushserver.database.DatabaseTypeException;
-import com.planetbiru.pushserver.evaluator.ConnectionEvaluator;
 import com.planetbiru.pushserver.evaluator.SocketkBreaker;
-import com.planetbiru.pushserver.utility.Encryption;
 import com.planetbiru.pushserver.utility.SocketIO;
 import com.planetbiru.pushserver.utility.Utility;
 
@@ -67,18 +60,6 @@ public class NotificationHandler extends Thread
 	 */
 	private long groupID = 0;
 	/**
-	 * String contains question for second authentication
-	 */
-	private String question = "";
-	/**
-	 * String contains answer for second authentication
-	 */
-	private String answer = "";
-	/**
-	 * Hash password stored in the database
-	 */
-	private String hashPasswordClient = "";
-	/**
 	 * Token for PushClien when request is valid
 	 */
 	private String token = "";
@@ -90,12 +71,6 @@ public class NotificationHandler extends Thread
 	 * Flag that process is still running
 	 */
 	private boolean running = true;
-	/**
-	 * Encryption key
-	 */
-	
-	private Logger logger = LoggerFactory.getLogger(NotificationHandler.class);
-	private String key = "";
 	/**
 	 * Default constructor
 	 */
@@ -139,17 +114,6 @@ public class NotificationHandler extends Thread
 		}
 	}
 	/**
-	 * Generate secure key
-	 * @param deviceID Device ID
-	 * @param hashPassword Hash password
-	 * @return Key generated
-	 * @throws NoSuchAlgorithmException if algorithm is not found
-	 */
-	private String generateSecureKey(String deviceID, String hashPassword) throws NoSuchAlgorithmException
-	{
-		return Utility.sha1(deviceID+Utility.random(111111, 999999)+hashPassword);
-	}
-	/**
 	 * Process the request
 	 * @throws NoSuchAlgorithmException  if algorithm is not found
 	 * @throws NotificationException if notification data is invalid
@@ -159,7 +123,6 @@ public class NotificationHandler extends Thread
 		SocketIO socketIO = new SocketIO(this.socket);
 		SocketkBreaker socketkBreaker = new SocketkBreaker(this, Config.getWaitForAnswer());
 		socketkBreaker.start();
-		boolean validClient = false;
 		Notification notification;
 		this.token = Utility.sha1(Math.random()*1000000+"");
 		String firstCommand = "";
@@ -190,50 +153,33 @@ public class NotificationHandler extends Thread
 					{
 						if(notification.authentication(authorization))
 						{
-							this.hashPasswordClient = notification.getHashPasswordClient();
+							notification.getHashPasswordClient();
 							this.apiID = notification.getApiID();
 							this.groupID = notification.getGroupID();
-							validClient = this.validatingClient();
-							if(validClient)
+							Device device = new Device(this.deviceID, this.requestID, this.socket);
+							Client.add(this.deviceID, this.apiID, this.groupID, device, this.requestID);									
+							NotificationChecker notificationChecker = new NotificationChecker(this.socket, this, Config.getInspectionInterval());
+							notificationChecker.start();					
+							String[] heads;
+							String body = "";
+							while(this.socket.isConnected() && !this.socket.isClosed() && this.isRunning())
 							{
-								Device device;
-								if(Config.isContentSecure())
+								try 
 								{
-									/**
-									 * Add security here
-									 */
-									this.key  = this.generateSecureKey(this.deviceID, this.hashPasswordClient);
-									this.sendKey(this.key);
-									device = new Device(this.deviceID, this.requestID, this.socket, this.key, this.hashPasswordClient);
-								}
-								else
-								{
-									device = new Device(this.deviceID, this.requestID, this.socket);
-								}
-								Client.add(this.deviceID, this.apiID, this.groupID, device, this.requestID);									
-								NotificationChecker notificationChecker = new NotificationChecker(this.socket, this, Config.getInspectionInterval());
-								notificationChecker.start();					
-								String[] heads;
-								String body = "";
-								while(this.socket.isConnected() && !this.socket.isClosed() && this.isRunning())
-								{
-									try 
+									heads = this.head().split("\\r?\\n");
+									body = this.body(heads);
+									if(body.length() > 2)
 									{
-										heads = this.head().split("\\r?\\n");
-										body = this.body(heads);
-										if(body.length() > 2)
-										{
-											this.processRequest(heads, body);
-										}
-									} 
-									catch (IOException | JSONException e) 
-									{
-										if(Config.isPrintStackTrace()) 
-										{
-											e.printStackTrace();
-										}
-										break;
+										this.processRequest(heads, body);
 									}
+								} 
+								catch (IOException | JSONException e) 
+								{
+									if(Config.isPrintStackTrace()) 
+									{
+										e.printStackTrace();
+									}
+									break;
 								}
 							}
 							Client.remove(this.deviceID, this.apiID, this.groupID, this.requestID);
@@ -350,13 +296,6 @@ public class NotificationHandler extends Thread
 			socketIO.resetRequestHeader();
 			socketIO.addRequestHeader(ConstantString.CONTENT_TYPE, ConstantString.APPLICATION_JSON);
 			socketIO.addRequestHeader(NotificationHandler.COMMAND, "notification");
-			if(Config.isContentSecure())
-			{
-				String tmp = offileNotification;
-				socketIO.addRequestHeader("Content-Secure", "yes");
-				Encryption encryption = new Encryption(this.key+this.hashPasswordClient); 
-				offileNotification = encryption.encrypt(tmp, true);
-			}
 			if(socketIO.write(offileNotification))
 			{
 				this.markAsSent(notification.getOfflineID());
@@ -388,13 +327,6 @@ public class NotificationHandler extends Thread
 			socketIO.resetRequestHeader();
 			socketIO.addRequestHeader(ConstantString.CONTENT_TYPE, ConstantString.APPLICATION_JSON);
 			socketIO.addRequestHeader(NotificationHandler.COMMAND, "delete-notification");
-			if(Config.isContentSecure())
-			{
-				String tmp = offileNotification;
-				socketIO.addRequestHeader("Content-Secure", "yes");
-				Encryption encryption = new Encryption(this.key+this.hashPasswordClient); 
-				offileNotification = encryption.encrypt(tmp, false);
-			}
 			if(socketIO.write(offileNotification))
 			{
 				notification.clearDeleteLog(this.apiID, trash);
@@ -465,244 +397,6 @@ public class NotificationHandler extends Thread
 		return buff.toString();
 	}
 	/**
-	 * Validating client
-	 * @param data String contains client answer
-	 * @return true if client is valid and false if client is invalid
-	 * @throws DatabaseTypeException if database type not supported 
-	 * @throws NoSuchAlgorithmException if algorithm is not found
-	 * @throws JSONException 
-	 */
-	private boolean validatingClient(String data) throws DatabaseTypeException, NoSuchAlgorithmException, JSONException
-	{
-		JSONObject jo;
-		boolean sendToken = false;
-		jo = new JSONObject(data);
-		String clientAnswer = jo.optString(JsonKey.ANSWER, "");
-		String lQuestion = jo.optString(JsonKey.QUESTION, "");
-		String serverAnswer = this.buildAnswer(this.hashPasswordClient, lQuestion, this.deviceID);
-		if(serverAnswer.equals(clientAnswer))
-		{
-			this.token = Utility.sha1(this.deviceID+this.answer+(Math.random()*1000000));
-			SocketIO socketIO = new SocketIO(this.socket);
-			socketIO.resetRequestHeader();
-			socketIO.addRequestHeader(NotificationHandler.COMMAND, "token");
-			socketIO.addRequestHeader(ConstantString.CONTENT_TYPE, ConstantString.APPLICATION_JSON);				
-			TimeZone timeZone = TimeZone.getDefault();
-			timeZone.getID();
-			long timeZoneOffset = (timeZone.getRawOffset() / 60000);
-			String time = Utility.now("yyyy-MM-dd HH:mm:ss")+"."+(System.nanoTime()%1000000000/1000);
-			JSONObject jo2 = new JSONObject();
-			long waitToNext = Math.round(Config.getInspectionInterval() * 1.05);
-			/**
-			 * The server promises no later than waitToNext milliseconds to send a new token
-			 */
-			jo2.put("waitToNext", waitToNext);
-			jo2.put(JsonKey.DEVICE_ID, this.deviceID);
-			jo2.put("token", this.token);
-			jo2.put("time", time);
-			jo2.put("timeZone", timeZoneOffset);
-			try 
-			{
-				sendToken = socketIO.write(jo2.toString());	
-				String address = this.socket.getInetAddress().getHostAddress().replace("/", "").trim();
-				if(sendToken)
-				{
-					this.setConnected(true);
-					this.updateDeviceToken(this.apiID, this.deviceID, this.groupID, this.token, address, time);
-					ConnectionEvaluator connectionEvaluator = new ConnectionEvaluator(this, Config.getInspectionInterval());
-					connectionEvaluator.start();
-				}
-				return sendToken;
-			} 
-			catch (IOException e)
-			{
-				if(Config.isPrintStackTrace()) 
-				{
-					e.printStackTrace();
-				}
-				try 
-				{
-					this.socket.close();
-				} 
-				catch (IOException e2) 
-				{
-					if(Config.isPrintStackTrace())
-					{
-						e2.printStackTrace();
-					}
-				}
-			}
-		}
-		else
-		{
-			try 
-			{
-				this.socket.close();
-			} 
-			catch (IOException e) 
-			{
-				if(Config.isPrintStackTrace()) 
-				{
-					e.printStackTrace();
-				}
-			}
-		}
-		return false;
-	}
-	/**
-	 * Update device token
-	 * @param apiID API ID
-	 * @param deviceID Device ID
-	 * @param groupID Group ID
-	 * @param token Token
-	 * @param address IP Address
-	 * @param time Time
-	 * @throws SQLException if any SQL errors
-	 * @throws DatabaseTypeException if database type not supported 
-	 */
-	private void updateDeviceToken(long apiID, String deviceID, long groupID, String token, String address, String time)
-	{
-		Database database1 = new Database(Config.getDatabaseConfig1());
-		Statement stmt = null;
-		try
-		{		
-			database1.connect();
-			QueryBuilder query1 = new QueryBuilder(database1.getDatabaseType());
-			deviceID = query1.escapeSQL(deviceID);
-			token = query1.escapeSQL(token);
-			address = query1.escapeSQL(address);
-			time = query1.escapeSQL(time);			
-		
-			int connection = 0;
-			List<Device> cons;
-			cons = Client.get(deviceID, apiID, groupID);
-			if(cons != null)
-			{
-				connection = cons.size();			
-			}
-			else
-			{
-				connection = 1;
-			}
-			if(connection == 0)
-			{
-				connection = 1;
-			}
-			String sqlUpdate = query1.newQuery()
-					.update(Config.getTablePrefix()+DatabaseTable.CLIENT)
-					.set("connection = '"+connection+"', last_token = '"+token+"', last_ip = '"+address+"', last_time = '"+time+"' ")
-					.where("device_id = '"+deviceID+"' and api_id = "+apiID+" ")
-					.toString();
-			stmt = database1.getDatabaseConnection().createStatement();
-			stmt.execute(sqlUpdate);
-		}
-		catch(SQLException | DatabaseTypeException | NullPointerException | IllegalArgumentException e)
-		{
-			if(Config.isPrintStackTrace())
-			{
-				e.printStackTrace();
-			}
-		}
-		finally {
-			Utility.closeResource(stmt);
-			database1.disconnect();
-		}
-		
-	}
-	/**
-	 * Validating client
-	 * @return true if client is valid and false if client is invalid
-	 * @throws IOException if any IO errors
-	 * @throws DatabaseTypeException if database type not supported 
-	 * @throws NoSuchAlgorithmException if algorithm is not found
-	 * @throws JSONException 
-	 * @throws IllegalArgumentException 
-	 * @throws NullPointerException 
-	 */
-	private boolean validatingClient() throws IOException, DatabaseTypeException, NoSuchAlgorithmException, NullPointerException, IllegalArgumentException, JSONException
-	{
-		String data = "";
-		this.sendQuestion();
-		data = this.getClientAnswer();		
-		return this.validatingClient(data);
-	}
-	/**
-	 * Send key to the client
-	 * @param key Encryption key
-	 * @throws IOException if any IO errors
-	 * @throws NoSuchAlgorithmException if algorithm is not found
-	 * @throws NullPointerException if any NULL pointer
-	 * @throws IllegalArgumentException if any illegal arguments
-	 * @throws JSONException 
-	 */
-	private void sendKey(String key) throws IOException, NoSuchAlgorithmException, NullPointerException, IllegalArgumentException, JSONException 
-	{
-		this.buildRandomQuestion();
-		SocketIO socketIO = new SocketIO(this.socket);	
-		socketIO.resetRequestHeader();
-		socketIO.addRequestHeader(ConstantString.CONTENT_TYPE, ConstantString.APPLICATION_JSON);
-		socketIO.addRequestHeader(NotificationHandler.COMMAND, JsonKey.KEY);
-		JSONObject jo = new JSONObject();
-		jo.put(JsonKey.KEY, key);
-		socketIO.write(jo.toString());
-	}
-	/**
-	 * Send question
-	 * @throws IOException if any IO errors
-	 * @throws IllegalArgumentException if any illegal argument
-	 * @throws NullPointerException if any null pointer
-	 * @throws NoSuchAlgorithmException if algorithm not found
-	 * @throws JSONException if any JSON errors
-	 */
-	public void sendQuestion() throws IOException, JSONException, NoSuchAlgorithmException, NullPointerException, IllegalArgumentException 
-	{
-		this.buildRandomQuestion();
-		SocketIO socketIO = new SocketIO(this.socket);	
-		socketIO.resetRequestHeader();
-		socketIO.addRequestHeader(ConstantString.CONTENT_TYPE, ConstantString.APPLICATION_JSON);
-		socketIO.addRequestHeader(NotificationHandler.COMMAND, JsonKey.QUESTION);
-		JSONObject jo = new JSONObject();
-		jo.put(JsonKey.QUESTION, this.question);
-		jo.put(JsonKey.DEVICE_ID, this.deviceID);
-		socketIO.write(jo.toString());
-	}
-	/**
-	 * Build random question to be sent to the client
-	 * @return Random question
-	 * @throws IllegalArgumentException if any illegal arguments
-	 * @throws NullPointerException if any NULL pointer
-	 * @throws NoSuchAlgorithmException if algorithm is not found
-	 */
-	private String buildRandomQuestion() throws NoSuchAlgorithmException, NullPointerException, IllegalArgumentException
-	{
-		this.question = Utility.sha1(this.deviceID+Utility.now("yyyyMMddHHmmss.SSS")+(Math.random() * 1000000));
-		return this.question;
-	}
-	/**
-	 * Get client answer
-	 * @return Read answer from the client to be validate
-	 * @throws IOException if any IO errors
-	 */
-	private String getClientAnswer() throws IOException
-	{
-		SocketIO socketIO = new SocketIO(this.socket);
-		socketIO.read();
-		return socketIO.getBody();
-	}
-	/**
-	 * Build answer
-	 * @param hashPassword Hash password
-	 * @param question Question
-	 * @param deviceID Device ID
-	 * @return Answer
-	 * @throws NoSuchAlgorithmException if algorithm is not found
-	 */
-	private String buildAnswer(String hashPassword, String question, String deviceID) throws NoSuchAlgorithmException
-	{
-		this.answer = Utility.sha1((hashPassword+"-"+question+"-"+deviceID));		
-		return this.answer;
-	}
-	/**
 	 * Process request
 	 * @param headers Header
 	 * @param body Entity body
@@ -755,10 +449,6 @@ public class NotificationHandler extends Thread
 			{
 				this.onUnregisterDeviceError(lDeviceID, ResponseCode.INTERNAL_SERVER_ERROR, ConstantString.FAILED, e1.getMessage());
 			}
-		}
-		else if(command.compareToIgnoreCase(JsonKey.ANSWER) == 0)
-		{
-			this.validatingClient(body);
 		}
 	}
 	/**
@@ -886,14 +576,13 @@ public class NotificationHandler extends Thread
 				stmt = database1.getDatabaseConnection().createStatement();
 				stmt.execute(slqInsert);
 				success = true;
-				this.sendQuestion();
 			}
 			else
 			{
 				throw new NotificationException("Device already exists");
 			}
 		}
-		catch(SQLException | DatabaseTypeException | NoSuchAlgorithmException | NullPointerException | IllegalArgumentException e)
+		catch(SQLException | DatabaseTypeException | NullPointerException | IllegalArgumentException e)
 		{
 			if(Config.isPrintStackTrace())
 			{

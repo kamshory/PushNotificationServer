@@ -1,7 +1,7 @@
 package com.planetbiru.pushserver.utility;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -14,8 +14,6 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-import com.planetbiru.pushserver.code.ConstantString;
-
 /**
  * Encryption is class to encrypt and decrypt data.
  * @author Kamshory, MT
@@ -26,11 +24,11 @@ public class Encryption
 	/**
 	 * Encryptor
 	 */
-    private Cipher ecipher;
+    Cipher ecipher;
     /**
      * Decryptor
      */
-    private Cipher dcipher;
+    Cipher dcipher;
     /**
      * Constructor with key as String
      * @param key Key
@@ -63,8 +61,8 @@ public class Encryption
      */
     public boolean init(SecretKey key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException
     {
-        this.ecipher = Cipher.getInstance(ConstantString.AES_GCM_NO_PADDING);
-        this.dcipher = Cipher.getInstance(ConstantString.AES_GCM_NO_PADDING);
+        this.ecipher = Cipher.getInstance("AES");
+        this.dcipher = Cipher.getInstance("AES");
         this.ecipher.init(Cipher.ENCRYPT_MODE, key);
         this.dcipher.init(Cipher.DECRYPT_MODE, key);
         return true;
@@ -79,17 +77,15 @@ public class Encryption
      */
     public boolean init(String key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalArgumentException 
     {
-    	StringBuilder bld = new StringBuilder();
     	while( key.length() < 16)
     	{
-    		bld.append("&");
-    		key = bld.toString();
+    		 key += "&";
     	}  	
-    	byte[] bkey = key.getBytes();
+    	byte[] bkey = (key).getBytes();
     	bkey = Arrays.copyOf(bkey, 16); // use only first 128 bit
-    	SecretKeySpec skey2 = new SecretKeySpec(bkey, ConstantString.AES);
-        this.ecipher = Cipher.getInstance(ConstantString.AES_GCM_NO_PADDING);
-        this.dcipher = Cipher.getInstance(ConstantString.AES_GCM_NO_PADDING);
+    	SecretKeySpec skey2 = new SecretKeySpec(bkey, "AES");
+        this.ecipher = Cipher.getInstance("AES");
+        this.dcipher = Cipher.getInstance("AES");
         this.ecipher.init(Cipher.ENCRYPT_MODE, skey2);
         this.dcipher.init(Cipher.DECRYPT_MODE, skey2); 
         return true;   	
@@ -121,7 +117,7 @@ public class Encryption
     public String encrypt(String input, boolean encode) throws UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException 
     {
         // Encode the string into bytes using utf-8
-        byte[] utf8 = input.getBytes(StandardCharsets.UTF_8);  
+        byte[] utf8 = input.getBytes("UTF8");  
         // Encrypt
         byte[] enc = this.ecipher.doFinal(utf8);  
         // Encode bytes to base64 to get a string
@@ -169,7 +165,7 @@ public class Encryption
     public String base64Encode(String input) throws NullPointerException
     {
 		byte[] encodedBytes = Base64.getEncoder().encode(input.getBytes());
-    	return new String(encodedBytes, StandardCharsets.UTF_8);
+    	return new String(encodedBytes, Charset.forName("UTF-8"));
     }
     /**
      * Base64 decoding
@@ -179,6 +175,6 @@ public class Encryption
     public String base64Decode(String input) throws NullPointerException, IllegalArgumentException
     {
         byte[] decodedBytes = Base64.getDecoder().decode(input);
-        return new String(decodedBytes, StandardCharsets.UTF_8);
+        return new String(decodedBytes, Charset.forName("UTF-8"));
     }
 }

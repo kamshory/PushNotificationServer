@@ -2,14 +2,9 @@ package com.planetbiru.pushserver.messenger;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
+import java.util.NoSuchElementException;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -18,7 +13,6 @@ import com.planetbiru.pushserver.client.Client;
 import com.planetbiru.pushserver.client.Device;
 import com.planetbiru.pushserver.config.Config;
 import com.planetbiru.pushserver.notification.Notification;
-import com.planetbiru.pushserver.utility.Encryption;
 import com.planetbiru.pushserver.utility.SocketIO;
 /**
  * BroadcastDelete
@@ -161,58 +155,49 @@ public class MessengerDelete extends Thread
 				String stringNotification = "";
 				while(iterator.hasNext())
 				{
-					device = iterator.next();
-					if(device != null)
+					try
 					{
-						if(device.isActive())
+						device = iterator.next();
+						if(device != null)
 						{
-							socket = device.getSocket();
-							socketIO = new SocketIO(socket);
-							try
+							if(device.isActive())
 							{
-								socketIO.resetRequestHeader();
-								socketIO.addRequestHeader("Content-Type", "application/json");
-								socketIO.addRequestHeader("Command", this.command);
-								stringNotification = this.data.toString();
-								if(Config.isContentSecure())
+								socket = device.getSocket();
+								socketIO = new SocketIO(socket);
+								try
 								{
-									String tmp = stringNotification;
-									Encryption encryption;
-									try 
+									socketIO.resetRequestHeader();
+									socketIO.addRequestHeader("Content-Type", "application/json");
+									socketIO.addRequestHeader("Command", this.command);
+									stringNotification = this.data.toString();
+									success = socketIO.write(stringNotification);
+									if(success && i == 0)
 									{
-										encryption = new Encryption(device.getKey()+device.getHashPasswordClient());
-										stringNotification = encryption.encrypt(tmp, true);
-										socketIO.addRequestHeader("Content-Secure", "yes");
-									} 
-									catch (InvalidKeyException | IllegalArgumentException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException e) 
-									{
-										if(Config.isPrintStackTrace())
-										{
-											e.printStackTrace();
-										}
+										notification.clearDeleteLog(this.apiID, lDeviceID, lNotificationID);
+										i++;
 									}
 								}
-								success = socketIO.write(stringNotification);
-								if(success && i == 0)
+								catch(IOException e)
 								{
-									notification.clearDeleteLog(this.apiID, lDeviceID, lNotificationID);
-									i++;
+									device.setActive(false);
+									Client.remove(lDeviceID, this.apiID, this.groupID, this.requestID);
+									if(Config.isPrintStackTrace())
+									{
+										e.printStackTrace();
+									}
 								}
 							}
-							catch(IOException e)
+							else
 							{
-								device.setActive(false);
 								Client.remove(lDeviceID, this.apiID, this.groupID, this.requestID);
-								if(Config.isPrintStackTrace())
-								{
-									e.printStackTrace();
-								}
 							}
 						}
-						else
-						{
-							Client.remove(lDeviceID, this.apiID, this.groupID, this.requestID);
-						}
+					}
+					catch(NoSuchElementException e)
+					{
+						/*
+						 * Do nothing
+						 */
 					}
 				}
 			}			

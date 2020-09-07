@@ -1,11 +1,13 @@
 package com.planetbiru.pushserver.client;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.planetbiru.pushserver.code.ConstantString;
+import com.planetbiru.pushserver.config.Config;
 
 /**
  * <strong>Client</strong> is object contains Device
@@ -108,6 +110,14 @@ public class Client
 				device = deviceList.get(i);
 				if(device.getIndex() == requestID)
 				{
+					try {
+						device.getSocket().close();
+					} catch (IOException e) {
+						if(Config.isDebugMode())
+						{
+							e.printStackTrace();
+						}
+					}
 					deviceList.remove(i);
 					break;
 				}
